@@ -15,6 +15,8 @@ Sistema de comercio electrónico completo especializado en calzado deportivo, ca
 - 🔐 **Seguridad**: Encriptación de contraseñas, validación de datos, protección CSRF
 - 📱 **Diseño Responsive**: Compatible con dispositivos móviles y tablets
 - 🎨 **Interfaz Moderna**: Diseño atractivo con Bootstrap 5
+ - 🖱️ **UX Mejorada**: Las cards de productos (catálogo, categorías e inicio) son completamente clickeables
+ - 🖼️ **Branding**: Soporte de logo y favicon personalizados (ej. `public/imagenes/tacones-altos.png`)
 
 ## 🚀 Instalación Rápida con Instalador Automático
 

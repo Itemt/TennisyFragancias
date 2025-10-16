@@ -18,6 +18,9 @@
      - ✅ Verificación de requisitos
      - ⚙️ Configuración de base de datos
      - 🗄️ Instalación automática de la base de datos
+      - 📦 Elección de datos iniciales:
+        - 🎯 Con datos de prueba (20 productos, 5 categorías, usuarios admin/empleado/cliente)
+        - 🔲 Base limpia (solo estructura + usuarios admin/empleado/cliente)
 
 4. **¡Listo!** El sistema estará configurado automáticamente.
 
@@ -89,6 +92,7 @@ Asegúrate de que existan estas carpetas con permisos de escritura:
 ```
 public/imagenes/productos/
 public/imagenes/categorias/
+public/imagenes/
 ```
 
 Si no existen, créalas manualmente.
@@ -109,9 +113,14 @@ Si no existen, créalas manualmente.
 
 ## Paso 5: Iniciar Sesión como Administrador
 
-**Credenciales por defecto:**
+**Credenciales por defecto (siempre creadas por el instalador):**
 - **Email:** admin@tennisyfragancias.com
 - **Contraseña:** admin123
+
+Además, si eliges instalar con datos de prueba, también tendrás:
+
+- 👔 Empleado: `empleado@tennisyfragancias.com` / `empleado123`
+- 🛒 Cliente: `cliente@example.com` / `cliente123`
 
 ⚠️ **IMPORTANTE:** Cambia esta contraseña inmediatamente después del primer inicio de sesión.
 
@@ -159,6 +168,7 @@ https://www.mercadopago.com.co/developers/es/docs/credentials
 #### Las imágenes no se muestran
 - Verifica que las carpetas `public/imagenes/productos/` y `public/imagenes/categorias/` existan
 - Verifica los permisos de escritura
+ - Si cambiaste el logo, coloca el archivo en `public/imagenes/` y actualiza `app/vistas/layout/header.php`. Por defecto se usa `public/imagenes/tacones-altos.png` para logo y favicon.
 
 #### Página en blanco / Error 500
 - Activa el modo de depuración en `index.php`:

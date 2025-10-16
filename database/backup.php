@@ -96,6 +96,18 @@ class BackupDatabase {
         }
         
         try {
+            // Preparar base: deshabilitar FK y limpiar tablas actuales para evitar duplicados de PK
+            $this->pdo->exec('SET FOREIGN_KEY_CHECKS=0');
+            $tablasActuales = $this->obtenerTablas();
+            foreach ($tablasActuales as $tabla) {
+                try {
+                    $this->pdo->exec("TRUNCATE TABLE `{$tabla}`");
+                } catch (PDOException $e) {
+                    // Si la tabla no se puede truncar (vistas u otros objetos), continuar
+                }
+            }
+            $this->pdo->exec('SET FOREIGN_KEY_CHECKS=1');
+            
             $sql = file_get_contents($rutaArchivo);
             
             // Dividir en comandos
@@ -412,9 +424,10 @@ if (isset($_GET['accion'])) {
             let select = document.getElementById('archivoRestaurar');
             select.innerHTML = '<option value="">Seleccionar archivo...</option>';
             respaldos.forEach(respaldo => {
+                const fechaOption = new Date(respaldo.fecha).toLocaleString();
                 let option = document.createElement('option');
                 option.value = respaldo.nombre;
-                option.textContent = respaldo.nombre + ' (' + fecha + ')';
+                option.textContent = respaldo.nombre + ' (' + fechaOption + ')';
                 select.appendChild(option);
             });
         }
