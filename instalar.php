@@ -546,6 +546,11 @@ if (php_sapi_name() === 'cli') {
                     INDEX idx_fecha_pedido (fecha_pedido)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
                 $ejecutados++;
+
+                // Migraciones suaves para columnas nuevas usadas en el modelo
+                try { $pdo->exec("ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS tipo_pedido ENUM('online','presencial') DEFAULT 'online'"); } catch (PDOException $e) {}
+                try { $pdo->exec("ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS empleado_id INT NULL"); } catch (PDOException $e) {}
+                try { $pdo->exec("ALTER TABLE pedidos ADD INDEX IF NOT EXISTS idx_empleado (empleado_id)"); } catch (PDOException $e) {}
                 
                 // Tabla detalle_pedidos
                 $pdo->exec("CREATE TABLE IF NOT EXISTS detalle_pedidos (
@@ -568,6 +573,7 @@ if (php_sapi_name() === 'cli') {
                     usuario_id INT NOT NULL,
                     producto_id INT NOT NULL,
                     cantidad INT NOT NULL DEFAULT 1,
+                    precio_unitario DECIMAL(10,2) DEFAULT 0,
                     fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
                     FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
@@ -576,6 +582,9 @@ if (php_sapi_name() === 'cli') {
                     INDEX idx_producto (producto_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
                 $ejecutados++;
+                
+                // Asegurar columna precio_unitario para instalaciones previas
+                try { $pdo->exec("ALTER TABLE carrito ADD COLUMN IF NOT EXISTS precio_unitario DECIMAL(10,2) DEFAULT 0"); } catch (PDOException $e) {}
                 
                 // Tabla notificaciones
                 $pdo->exec("CREATE TABLE IF NOT EXISTS notificaciones (

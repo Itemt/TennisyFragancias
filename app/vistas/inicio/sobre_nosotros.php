@@ -124,15 +124,6 @@
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="<?= Vista::url('inicio/devoluciones') ?>" class="d-flex align-items-center p-3 bg-white rounded text-decoration-none text-dark hover-shadow">
-                        <i class="bi bi-arrow-left-right fs-3 text-primario me-3"></i>
-                        <div>
-                            <h5 class="mb-0 small">Cambios y Devoluciones</h5>
-                            <small class="text-muted">Política de devoluciones</small>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-4">
                     <a href="<?= Vista::url('inicio/envios') ?>" class="d-flex align-items-center p-3 bg-white rounded text-decoration-none text-dark hover-shadow">
                         <i class="bi bi-box-seam fs-3 text-primario me-3"></i>
                         <div>
