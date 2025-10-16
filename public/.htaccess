@@ -1,0 +1,4 @@
+# Permitir acceso a archivos estáticos
+Order allow,deny
+Allow from all
+
