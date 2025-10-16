@@ -4,8 +4,12 @@
     <div class="container">
         <!-- Hero Section -->
         <div class="row align-items-center g-4 mb-5">
-            <div class="col-lg-6">
-                <img class="img-fluid rounded shadow" src="<?= Vista::urlPublica('imagenes/about.jpg') ?>" onerror="this.src='https://via.placeholder.com/720x420?text=Tennis+y+Fragancias'" alt="Sobre Nosotros">
+            <div class="col-lg-6 text-center">
+                <img class="img-fluid rounded shadow d-block mx-auto" 
+                     src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=600&fit=crop" 
+                     onerror="this.src='<?= Vista::urlPublica('imagenes/tacones-altos.png') ?>'" 
+                     alt="Sobre Nosotros" 
+                     style="max-height: 360px; object-fit: cover;">
             </div>
             <div class="col-lg-6">
                 <h1 class="fw-bold mb-4">Sobre Tennis y Fragancias</h1>

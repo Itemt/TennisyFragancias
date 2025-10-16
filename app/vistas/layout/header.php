@@ -187,6 +187,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Vista::url('productos') ?>">Productos</a>
                     </li>
+                     <li class="nav-item">
+                         <a class="nav-link" href="<?= Vista::url('inicio/sobre_nosotros') ?>">Sobre Nosotros</a>
+                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Vista::url('inicio/contacto') ?>">Contacto</a>
                     </li>
