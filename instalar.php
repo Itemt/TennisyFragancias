@@ -345,34 +345,15 @@ if (php_sapi_name() === 'cli') {
                         $pdo = new PDO($dsn, $config['DB_USUARIO'], $config['DB_PASSWORD']);
                         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                         
-                        // Leer y ejecutar script SQL
+                        // Leer y ejecutar script SQL con soporte de DELIMITER (triggers)
                         $sqlFile = 'database/tennisyzapatos_db.sql';
                         if (!file_exists($sqlFile)) {
                             throw new Exception('Archivo SQL no encontrado: ' . $sqlFile);
                         }
                         
-                        $sql = file_get_contents($sqlFile);
-                        
-                        // Dividir en comandos individuales
-                        $commands = explode(';', $sql);
-                        
-                        $ejecutados = 0;
-                        $total = count($commands);
-                        
-                        foreach ($commands as $command) {
-                            $command = trim($command);
-                            if (!empty($command) && !preg_match('/^--/', $command)) {
-                                try {
-                                    $pdo->exec($command);
-                                    $ejecutados++;
-                                } catch (PDOException $e) {
-                                    // Ignorar errores de comandos que ya existen
-                                    if (strpos($e->getMessage(), 'already exists') === false) {
-                                        throw $e;
-                                    }
-                                }
-                            }
-                        }
+                        $resultado = ejecutarSqlConDelimiters($pdo, $sqlFile);
+                        $ejecutados = $resultado['ejecutados'];
+                        $total = $resultado['total'];
                         
                         echo '<div class="alert alert-success">';
                         echo "✅ Base de datos instalada exitosamente.<br>";
@@ -398,6 +379,86 @@ if (php_sapi_name() === 'cli') {
                     ?>
                 </div>
                 <?php
+            }
+            
+            /**
+             * Ejecuta un archivo SQL respetando cambios de DELIMITER
+             * y omitiendo comentarios de una línea que empiezan con '--'.
+             */
+            function ejecutarSqlConDelimiters(PDO $pdo, string $rutaArchivo): array {
+                $handle = fopen($rutaArchivo, 'r');
+                if (!$handle) {
+                    throw new Exception('No se pudo abrir el archivo SQL.');
+                }
+                $delimitador = ';';
+                $buffer = '';
+                $ejecutados = 0;
+                $total = 0;
+                while (($line = fgets($handle)) !== false) {
+                    $line = rtrim($line, "\r\n");
+                    $trim = ltrim($line);
+                    // Omitir comentarios '--' y líneas vacías
+                    if ($trim === '' || strpos($trim, '--') === 0) {
+                        continue;
+                    }
+                    // Manejar cambio de delimitador
+                    if (stripos($trim, 'DELIMITER ') === 0) {
+                        $delimitador = trim(substr($trim, 10));
+                        continue;
+                    }
+                    $buffer .= $line . "\n";
+                    // Si termina con el delimitador actual, ejecutar
+                    if (substr($buffer, -strlen($delimitador)) === $delimitador) {
+                        $statement = trim(substr($buffer, 0, -strlen($delimitador)));
+                        if ($statement !== '') {
+                            $total++;
+                            try {
+                                // Suavizar instalaciones repetidas: añadir IF NOT EXISTS donde aplique
+                                $stmtNorm = preg_replace('/^CREATE\s+DATABASE\s+(?!IF\s+NOT\s+EXISTS)/i', 'CREATE DATABASE IF NOT EXISTS ', $statement);
+                                $stmtNorm = preg_replace('/^CREATE\s+TABLE\s+(?!IF\s+NOT\s+EXISTS)/i', 'CREATE TABLE IF NOT EXISTS ', $stmtNorm);
+                                $stmtNorm = preg_replace('/^CREATE\s+VIEW\s+(?!IF\s+NOT\s+EXISTS)/i', 'CREATE VIEW IF NOT EXISTS ', $stmtNorm);
+                                // Los TRIGGER no soportan IF NOT EXISTS; se manejarán por catch
+                                $pdo->exec($stmtNorm);
+                                $ejecutados++;
+                            } catch (PDOException $e) {
+                                // Ignorar objetos ya existentes
+                                $msg = $e->getMessage();
+                                if (
+                                    stripos($msg, 'already exists') === false &&
+                                    stripos($msg, '42S01') === false && // base table or view already exists
+                                    stripos($msg, '1050') === false
+                                ) {
+                                    fclose($handle);
+                                    throw $e;
+                                }
+                            }
+                        }
+                        $buffer = '';
+                    }
+                }
+                fclose($handle);
+                // Ejecutar cualquier resto sin delimitador final
+                $statement = trim($buffer);
+                if ($statement !== '') {
+                    $total++;
+                    try {
+                        $stmtNorm = preg_replace('/^CREATE\s+DATABASE\s+(?!IF\s+NOT\s+EXISTS)/i', 'CREATE DATABASE IF NOT EXISTS ', $statement);
+                        $stmtNorm = preg_replace('/^CREATE\s+TABLE\s+(?!IF\s+NOT\s+EXISTS)/i', 'CREATE TABLE IF NOT EXISTS ', $stmtNorm);
+                        $stmtNorm = preg_replace('/^CREATE\s+VIEW\s+(?!IF\s+NOT\s+EXISTS)/i', 'CREATE VIEW IF NOT EXISTS ', $stmtNorm);
+                        $pdo->exec($stmtNorm);
+                        $ejecutados++;
+                    } catch (PDOException $e) {
+                        $msg = $e->getMessage();
+                        if (
+                            stripos($msg, 'already exists') === false &&
+                            stripos($msg, '42S01') === false &&
+                            stripos($msg, '1050') === false
+                        ) {
+                            throw $e;
+                        }
+                    }
+                }
+                return ['ejecutados' => $ejecutados, 'total' => $total];
             }
             
             function verificarRequisitos() {

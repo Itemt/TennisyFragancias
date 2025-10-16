@@ -44,6 +44,9 @@ class BaseDatos {
                     throw $e;
                 }
             }
+
+            // Verificar tablas críticas y auto-instalar esquema si faltan
+            $this->asegurarEsquemaInstalado();
         } catch (PDOException $e) {
             die("Error de conexión a la base de datos: " . $e->getMessage());
         }
@@ -58,6 +61,64 @@ class BaseDatos {
     
     public function obtenerConexion() {
         return $this->conexion;
+    }
+
+    /**
+     * Verifica la existencia de tablas críticas y ejecuta el script SQL
+     * para crear el esquema si no existen.
+     */
+    private function asegurarEsquemaInstalado() {
+        try {
+            // Comprobar existencia de tabla 'productos'
+            $stmt = $this->conexion->query("SHOW TABLES LIKE 'productos'");
+            $existeProductos = $stmt->fetchColumn();
+            
+            if (!$existeProductos) {
+                $this->importarEsquemaDesdeSql();
+            }
+        } catch (Throwable $t) {
+            // En caso de error silencioso, no bloquear la app
+        }
+    }
+
+    /**
+     * Importa el esquema desde el archivo SQL del proyecto.
+     * Maneja bloques con DELIMITER para triggers convirtiéndolos a ';'.
+     */
+    private function importarEsquemaDesdeSql() {
+        $sqlFile = (defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2)) . '/database/tennisyzapatos_db.sql';
+        if (!file_exists($sqlFile)) {
+            return;
+        }
+        $sql = file_get_contents($sqlFile);
+        if ($sql === false) {
+            return;
+        }
+        // Normalizar saltos de línea
+        $sql = str_replace(["\r\n", "\r"], "\n", $sql);
+        // Eliminar líneas de comentarios '-- ...' y vacías al dividir
+        // Manejar bloques con DELIMITER // ... END// → END;
+        $sql = str_replace(["DELIMITER //", "DELIMITER ;"], '', $sql);
+        $sql = preg_replace("#/\\/#", ";", $sql); // reemplazar '//' por ';'
+        
+        $comandos = explode(';', $sql);
+        foreach ($comandos as $comando) {
+            $comando = trim($comando);
+            if ($comando === '' || strpos($comando, '--') === 0) {
+                continue;
+            }
+            try {
+                $this->conexion->exec($comando);
+            } catch (PDOException $e) {
+                // Ignorar errores de objetos ya existentes
+                $mensaje = $e->getMessage();
+                if (stripos($mensaje, 'already exists') !== false) {
+                    continue;
+                }
+                // Re-lanzar otros errores críticos
+                throw $e;
+            }
+        }
     }
     
     // Prevenir clonación
