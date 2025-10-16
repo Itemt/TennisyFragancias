@@ -208,7 +208,7 @@
         <div class="row g-4">
             <?php foreach ($productos_destacados as $producto): ?>
                 <div class="col-6 col-md-6 col-lg-3">
-                    <div class="card h-100 producto-card border-0 shadow-sm">
+                    <div class="card h-100 producto-card border-0 shadow-sm position-relative">
                         <div class="position-relative overflow-hidden">
                             <?php if ($producto['imagen_principal']): ?>
                                 <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
@@ -250,10 +250,9 @@
                             <!-- Overlay con botón al hover -->
                             <div class="position-absolute bottom-0 start-0 end-0 p-3 translate-middle-y" 
                                  style="opacity: 0; transition: opacity 0.3s, transform 0.3s; transform: translateY(20px);">
-                                <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" 
-                                   class="btn btn-light w-100 shadow">
+                                <div class="btn btn-light w-100 shadow">
                                     <i class="bi bi-eye-fill me-2"></i>Ver Detalles
-                                </a>
+                                </div>
                             </div>
                         </div>
                         
@@ -283,12 +282,12 @@
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                                <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" 
-                                   class="btn btn-primario btn-sm rounded-circle d-lg-none" 
-                                   style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <div class="btn btn-primario btn-sm rounded-circle d-lg-none" 
+                                     style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
                                     <i class="bi bi-arrow-right"></i>
-                                </a>
+                                </div>
                             </div>
+                            <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" class="stretched-link" aria-label="Ver detalles de <?= Vista::escapar($producto['nombre']) ?>"></a>
                         </div>
                     </div>
                 </div>

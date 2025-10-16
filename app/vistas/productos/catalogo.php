@@ -7,7 +7,7 @@
         <!-- Filtros -->
         <div class="col-md-3 mb-4">
             <div class="card">
-                <div class="card-header bg-secundario text-white">
+                <div class="card-header bg-light text-dark">
                     <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
                 </div>
                 <div class="card-body">
@@ -107,24 +107,19 @@
                 <div class="row g-4">
                     <?php foreach ($productos as $producto): ?>
                         <div class="col-md-4">
+                            <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" class="text-decoration-none text-dark d-block">
                             <div class="card h-100 producto-card">
-                                <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>">
-                                    <?php if ($producto['imagen_principal']): ?>
-                                        <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
-                                             class="card-img-top" alt="<?= Vista::escapar($producto['nombre']) ?>" 
-                                             style="height: 250px; object-fit: cover;">
-                                    <?php else: ?>
-                                        <div class="bg-light" style="height: 250px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-image fs-1 text-muted"></i>
-                                        </div>
-                                    <?php endif; ?>
-                                </a>
+                                <?php if ($producto['imagen_principal']): ?>
+                                    <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
+                                         class="card-img-top" alt="<?= Vista::escapar($producto['nombre']) ?>" 
+                                         style="height: 250px; object-fit: cover;">
+                                <?php else: ?>
+                                    <div class="bg-light" style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-image fs-1 text-muted"></i>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="card-body">
-                                    <h5 class="card-title">
-                                        <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" class="text-decoration-none text-dark">
-                                            <?= Vista::escapar($producto['nombre']) ?>
-                                        </a>
-                                    </h5>
+                                    <h5 class="card-title mb-1"><?= Vista::escapar($producto['nombre']) ?></h5>
                                     <p class="text-muted small"><?= Vista::escapar($producto['categoria_nombre']) ?></p>
                                     <div class="mb-2">
                                         <?php if ($producto['precio_oferta']): ?>
@@ -141,11 +136,12 @@
                                     <?php endif; ?>
                                 </div>
                                 <div class="card-footer bg-white border-0">
-                                    <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" class="btn btn-primario w-100">
+                                    <div class="btn btn-primario w-100">
                                         <i class="bi bi-eye"></i> Ver Detalles
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
+                            </a>
                         </div>
                     <?php endforeach; ?>
                 </div>

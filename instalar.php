@@ -475,6 +475,20 @@ if (php_sapi_name() === 'cli') {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
                 $ejecutados++;
                 
+                // Asegurar índice único por nombre (por si la tabla existía sin la restricción)
+                try {
+                    $pdo->exec("ALTER TABLE categorias ADD UNIQUE KEY uq_categorias_nombre (nombre)");
+                } catch (PDOException $e) {
+                    // Ignorar si ya existe el índice único
+                }
+                
+                // Eliminar posibles duplicados previos por nombre, conservando el registro con id menor
+                try {
+                    $pdo->exec("DELETE c1 FROM categorias c1 INNER JOIN categorias c2 ON c1.nombre = c2.nombre AND c1.id > c2.id");
+                } catch (PDOException $e) {
+                    // No interrumpir instalación si falla
+                }
+                
                 // Tabla productos
                 $pdo->exec("CREATE TABLE IF NOT EXISTS productos (
                     id INT AUTO_INCREMENT PRIMARY KEY,

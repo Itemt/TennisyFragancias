@@ -19,11 +19,20 @@ class Categoria extends Modelo {
      * Obtener categoría con contador de productos
      */
     public function obtenerConContador() {
-        $sql = "SELECT c.*, COUNT(p.id) as total_productos 
-                FROM {$this->tabla} c 
-                LEFT JOIN productos p ON c.id = p.categoria_id AND p.estado = 'activo'
+        // Unificar categorías duplicadas por nombre (mismo nombre, distintos IDs)
+        $sql = "SELECT 
+                    MIN(c.id) AS id,
+                    c.nombre,
+                    MAX(c.descripcion) AS descripcion,
+                    MAX(c.imagen) AS imagen,
+                    'activo' AS estado,
+                    COUNT(p.id) AS total_productos
+                FROM {$this->tabla} c
+                LEFT JOIN productos p 
+                    ON p.categoria_id = c.id 
+                    AND p.estado = 'activo'
                 WHERE c.estado = 'activo'
-                GROUP BY c.id 
+                GROUP BY c.nombre
                 ORDER BY c.nombre ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();

@@ -6,9 +6,9 @@
     <title><?= $titulo ?? 'Tennis y Fragancias' ?></title>
     
     <!-- Favicon & App Icons -->
-    <link rel="icon" href="<?= URL_PUBLICA ?>favicon.svg" type="image/svg+xml">
-    <link rel="icon" href="<?= URL_PUBLICA ?>favicon.png" type="image/png">
-    <link rel="apple-touch-icon" href="<?= URL_PUBLICA ?>favicon.png">
+    <link rel="icon" href="<?= URL_PUBLICA ?>imagenes/tacones-altos.png" type="image/png">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= URL_PUBLICA ?>imagenes/tacones-altos.png">
+    <link rel="shortcut icon" href="<?= URL_PUBLICA ?>imagenes/tacones-altos.png" type="image/png">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -65,6 +65,8 @@
         
         .navbar-brand { font-weight: bold; font-size: 1.25rem; display: flex; align-items: center; gap: .5rem; }
         .navbar-brand img { height: 28px; width: auto; display: block; }
+         /* Color de marca acorde al ícono (rosa) */
+         .navbar-brand.text-primario { color: #E66982 !important; }
         .navbar { box-shadow: 0 6px 20px rgba(0,0,0,.06); }
         
         .producto-card {
@@ -114,7 +116,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-secundario">
         <div class="container">
             <a class="navbar-brand text-primario" href="<?= Vista::url() ?>">
-                <img src="<?= URL_PUBLICA ?>imagenes/logo.svg" alt="Logo">
+                <img src="<?= URL_PUBLICA ?>imagenes/tacones-altos.png" alt="Logo">
                 Tennis y Fragancias
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
