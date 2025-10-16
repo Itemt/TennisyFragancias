@@ -75,11 +75,11 @@ class ConfiguracionPortable {
             
             // Aplicación
             'URL_BASE' => 'http://localhost/tennisyfragancias/',
-            'EMPRESA_NOMBRE' => 'Tennis y Zapatos',
+            'EMPRESA_NOMBRE' => 'Tennis y Fragancias',
             'EMPRESA_CIUDAD' => 'Barrancabermeja',
             'EMPRESA_DEPARTAMENTO' => 'Santander',
             'EMPRESA_PAIS' => 'Colombia',
-            'EMPRESA_EMAIL' => 'info@tennisyzapatos.com',
+            'EMPRESA_EMAIL' => 'info@tennisyfragancias.com',
             'EMPRESA_TELEFONO' => '+57 300 123 4567',
             
             // MercadoPago
@@ -91,8 +91,8 @@ class ConfiguracionPortable {
             'EMAIL_PORT' => '587',
             'EMAIL_USUARIO' => 'tu_email@gmail.com',
             'EMAIL_PASSWORD' => 'tu_password',
-            'EMAIL_REMITENTE' => 'info@tennisyzapatos.com',
-            'EMAIL_REMITENTE_NOMBRE' => 'Tennis y Zapatos',
+            'EMAIL_REMITENTE' => 'info@tennisyfragancias.com',
+            'EMAIL_REMITENTE_NOMBRE' => 'Tennis y Fragancias',
             
             // Seguridad
             'APP_SECRET_KEY' => 'clave_secreta_por_defecto_cambiar_en_produccion',
@@ -114,16 +114,16 @@ class ConfiguracionPortable {
         define('DB_PUERTO', self::obtener('DB_PUERTO', '3306'));
         
         // Aplicación
-        define('NOMBRE_SITIO', self::obtener('EMPRESA_NOMBRE', 'Tennis y Zapatos'));
+        define('NOMBRE_SITIO', self::obtener('EMPRESA_NOMBRE', 'Tennis y Fragancias'));
         define('URL_BASE', self::obtener('URL_BASE', 'http://localhost/tennisyfragancias/'));
         define('URL_PUBLICA', URL_BASE . 'public/');
         
         // Empresa
-        define('EMPRESA_NOMBRE', self::obtener('EMPRESA_NOMBRE', 'Tennis y Zapatos'));
+        define('EMPRESA_NOMBRE', self::obtener('EMPRESA_NOMBRE', 'Tennis y Fragancias'));
         define('EMPRESA_CIUDAD', self::obtener('EMPRESA_CIUDAD', 'Barrancabermeja'));
         define('EMPRESA_DEPARTAMENTO', self::obtener('EMPRESA_DEPARTAMENTO', 'Santander'));
         define('EMPRESA_PAIS', self::obtener('EMPRESA_PAIS', 'Colombia'));
-        define('EMPRESA_EMAIL', self::obtener('EMPRESA_EMAIL', 'info@tennisyzapatos.com'));
+        define('EMPRESA_EMAIL', self::obtener('EMPRESA_EMAIL', 'info@tennisyfragancias.com'));
         define('EMPRESA_TELEFONO', self::obtener('EMPRESA_TELEFONO', '+57 300 123 4567'));
         
         // Colores corporativos
@@ -140,8 +140,8 @@ class ConfiguracionPortable {
         define('EMAIL_PORT', (int)self::obtener('EMAIL_PORT', '587'));
         define('EMAIL_USUARIO', self::obtener('EMAIL_USUARIO', 'tu_email@gmail.com'));
         define('EMAIL_PASSWORD', self::obtener('EMAIL_PASSWORD', 'tu_password'));
-        define('EMAIL_REMITENTE', self::obtener('EMAIL_REMITENTE', 'info@tennisyzapatos.com'));
-        define('EMAIL_REMITENTE_NOMBRE', self::obtener('EMAIL_REMITENTE_NOMBRE', 'Tennis y Zapatos'));
+        define('EMAIL_REMITENTE', self::obtener('EMAIL_REMITENTE', 'info@tennisyfragancias.com'));
+        define('EMAIL_REMITENTE_NOMBRE', self::obtener('EMAIL_REMITENTE_NOMBRE', 'Tennis y Fragancias'));
         
         // Seguridad
         define('APP_SECRET_KEY', self::obtener('APP_SECRET_KEY', 'clave_secreta_por_defecto'));

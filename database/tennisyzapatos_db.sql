@@ -249,7 +249,8 @@ CREATE TABLE configuracion_sistema (
 -- Insertar usuario administrador por defecto
 -- Contraseña: admin123 (debe cambiarse en producción)
 INSERT INTO usuarios (nombre, apellido, email, telefono, password_hash, rol, estado) VALUES
-('Administrador', 'Sistema', 'admin@tennisyzapatos.com', '3001234567', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrador', 'activo');
+('Administrador', 'Sistema', 'admin@tennisyfragancias.com', '3001234567', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrador', 'activo')
+ON DUPLICATE KEY UPDATE estado='activo', rol='administrador';
 
 -- Insertar categorías iniciales
 INSERT INTO categorias (nombre, descripcion, estado) VALUES

@@ -10,6 +10,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Usar sesión para pasar opciones entre pasos
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Verificar que estamos en un entorno web
 if (php_sapi_name() === 'cli') {
     die("Este script debe ejecutarse desde un navegador web.\n");
@@ -148,7 +153,7 @@ if (php_sapi_name() === 'cli') {
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Instalador Tennis y Zapatos</h1>
+            <h1>🚀 Instalador Tennis y Fragancias</h1>
             <p>Configuración automática del sistema</p>
         </div>
         
@@ -239,6 +244,13 @@ if (php_sapi_name() === 'cli') {
                             <input type="number" id="db_puerto" name="db_puerto" value="3306">
                         </div>
                         
+                        <div class="form-group">
+                            <label for="seed_demo">
+                                <input type="checkbox" id="seed_demo" name="seed_demo" value="1" checked>
+                                Cargar datos de ejemplo (productos y categorías)
+                            </label>
+                        </div>
+                        
                         <button type="submit" class="btn">Probar Conexión y Continuar</button>
                         <a href="?paso=1" class="btn">Anterior</a>
                     </form>
@@ -253,6 +265,8 @@ if (php_sapi_name() === 'cli') {
                     $db_usuario = $_POST['db_usuario'];
                     $db_password = $_POST['db_password'];
                     $db_puerto = $_POST['db_puerto'] ?: '3306';
+                    $seed_demo = isset($_POST['seed_demo']) ? '1' : '0';
+                    $_SESSION['seed_demo'] = $seed_demo;
                     
                     // Probar conexión
                     try {
@@ -273,11 +287,11 @@ if (php_sapi_name() === 'cli') {
                             'DB_CHARSET' => 'utf8mb4',
                             'DB_PUERTO' => $db_puerto,
                             'URL_BASE' => 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/',
-                            'EMPRESA_NOMBRE' => 'Tennis y Zapatos',
+                            'EMPRESA_NOMBRE' => 'Tennis y Fragancias',
                             'EMPRESA_CIUDAD' => 'Barrancabermeja',
                             'EMPRESA_DEPARTAMENTO' => 'Santander',
                             'EMPRESA_PAIS' => 'Colombia',
-                            'EMPRESA_EMAIL' => 'info@tennisyzapatos.com',
+                            'EMPRESA_EMAIL' => 'info@tennisyfragancias.com',
                             'EMPRESA_TELEFONO' => '+57 300 123 4567',
                             'MERCADOPAGO_PUBLIC_KEY' => 'TU_PUBLIC_KEY_AQUI',
                             'MERCADOPAGO_ACCESS_TOKEN' => 'TU_ACCESS_TOKEN_AQUI',
@@ -285,8 +299,8 @@ if (php_sapi_name() === 'cli') {
                             'EMAIL_PORT' => '587',
                             'EMAIL_USUARIO' => 'tu_email@gmail.com',
                             'EMAIL_PASSWORD' => 'tu_password',
-                            'EMAIL_REMITENTE' => 'info@tennisyzapatos.com',
-                            'EMAIL_REMITENTE_NOMBRE' => 'Tennis y Zapatos',
+                            'EMAIL_REMITENTE' => 'info@tennisyfragancias.com',
+                            'EMAIL_REMITENTE_NOMBRE' => 'Tennis y Fragancias',
                             'APP_SECRET_KEY' => bin2hex(random_bytes(32)),
                             'APP_ENV' => 'development',
                             'DEBUG_MODE' => 'true'
@@ -355,6 +369,11 @@ if (php_sapi_name() === 'cli') {
                         $ejecutados = $resultado['ejecutados'];
                         $total = $resultado['total'];
                         
+                        // Insertar datos de ejemplo si se seleccionó
+                        if (!empty($_SESSION['seed_demo']) && $_SESSION['seed_demo'] === '1') {
+                            insertarDatosDemo($pdo);
+                        }
+                        
                         echo '<div class="alert alert-success">';
                         echo "✅ Base de datos instalada exitosamente.<br>";
                         echo "📊 Comandos ejecutados: $ejecutados de $total<br>";
@@ -363,7 +382,7 @@ if (php_sapi_name() === 'cli') {
                         
                         echo '<div class="alert alert-info">';
                         echo '<strong>Credenciales de administrador:</strong><br>';
-                        echo 'Email: admin@tennisyzapatos.com<br>';
+                        echo 'Email: admin@tennisyfragancias.com<br>';
                         echo 'Contraseña: admin123<br>';
                         echo '<em>⚠️ Cambia esta contraseña inmediatamente después del primer inicio de sesión.</em>';
                         echo '</div>';
@@ -459,6 +478,73 @@ if (php_sapi_name() === 'cli') {
                     }
                 }
                 return ['ejecutados' => $ejecutados, 'total' => $total];
+            }
+            
+            /**
+             * Inserta categorías y productos de ejemplo para una demo completa.
+             */
+            function insertarDatosDemo(PDO $pdo): void {
+                // Asegurar categorías base
+                $categorias = [
+                    'Tenis Deportivos' => 'Calzado deportivo para hombre, mujer y niños',
+                    'Tenis Casuales' => 'Calzado casual para el día a día',
+                    'Zapatos Formales' => 'Calzado formal para hombre y mujer',
+                    'Zapatos Deportivos' => 'Calzado deportivo especializado',
+                    'Accesorios' => 'Medias, cordones y accesorios para calzado'
+                ];
+                $stmtCat = $pdo->prepare("INSERT INTO categorias (nombre, descripcion, estado) VALUES (:n, :d, 'activo') ON DUPLICATE KEY UPDATE descripcion=VALUES(descripcion), estado='activo'");
+                foreach ($categorias as $nombre => $desc) {
+                    $stmtCat->execute([':n' => $nombre, ':d' => $desc]);
+                }
+                // Mapa nombre -> id
+                $ids = [];
+                $res = $pdo->query("SELECT id, nombre FROM categorias");
+                foreach ($res->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $ids[$row['nombre']] = (int)$row['id'];
+                }
+                
+                // Productos de ejemplo
+                $productos = [
+                    ['Tenis Runner Pro', 'Tenis Deportivos', 219000, 30, 'RUNPRO-001', 'unisex', 'Nike', '42', 'Azul'],
+                    ['Tenis Street Classic', 'Tenis Casuales', 189000, 25, 'STREET-002', 'unisex', 'Adidas', '41', 'Blanco'],
+                    ['Zapato Oxford Premium', 'Zapatos Formales', 259000, 15, 'OXFORD-003', 'hombre', 'Clarks', '43', 'Negro'],
+                    ['Zapato Derby Elegance', 'Zapatos Formales', 249000, 12, 'DERBY-004', 'hombre', 'Bata', '42', 'Café'],
+                    ['Tenis Trail Grip', 'Zapatos Deportivos', 299000, 18, 'TRAIL-005', 'unisex', 'Salomon', '42', 'Gris'],
+                    ['Tenis Ultra Light', 'Tenis Deportivos', 239000, 40, 'ULTRA-006', 'mujer', 'Puma', '38', 'Rosa'],
+                    ['Tenis Retro 90s', 'Tenis Casuales', 199000, 28, 'RETRO-007', 'unisex', 'Reebok', '41', 'Blanco'],
+                    ['Cordones Resistentes', 'Accesorios', 19000, 200, 'ACC-CL-008', 'unisex', 'Generic', null, 'Negro'],
+                    ['Medias Deportivas Pack x3', 'Accesorios', 35000, 150, 'ACC-MD-009', 'unisex', 'Generic', null, 'Blanco'],
+                    ['Plantillas Confort', 'Accesorios', 42000, 120, 'ACC-PL-010', 'unisex', 'Dr. Scholl', null, 'Azul'],
+                    ['Tenis Air Zoom', 'Tenis Deportivos', 329000, 20, 'AIRZ-011', 'unisex', 'Nike', '42', 'Negro'],
+                    ['Tenis Canvas Low', 'Tenis Casuales', 159000, 35, 'CANV-012', 'unisex', 'Converse', '41', 'Rojo'],
+                    ['Tenis City Walk', 'Tenis Casuales', 179000, 27, 'CITY-013', 'unisex', 'Skechers', '42', 'Gris'],
+                    ['Tenis Court Pro', 'Zapatos Deportivos', 269000, 22, 'COURT-014', 'unisex', 'Wilson', '43', 'Blanco'],
+                    ['Zapato Loafer Ejecutivo', 'Zapatos Formales', 239000, 10, 'LOAF-015', 'hombre', 'Florsheim', '42', 'Marrón'],
+                    ['Tenis Marathon X', 'Tenis Deportivos', 289000, 16, 'MARAX-016', 'unisex', 'Asics', '42', 'Azul'],
+                    ['Tenis Flex Run', 'Tenis Deportivos', 209000, 26, 'FLEX-017', 'mujer', 'New Balance', '39', 'Morado'],
+                    ['Tenis Urban Move', 'Tenis Casuales', 169000, 32, 'URBAN-018', 'unisex', 'Vans', '41', 'Negro'],
+                    ['Zapato Monk Strap', 'Zapatos Formales', 279000, 8, 'MONK-019', 'hombre', 'Bata', '42', 'Café'],
+                    ['Tenis Pro Training', 'Zapatos Deportivos', 259000, 19, 'TRAIN-020', 'unisex', 'Under Armour', '43', 'Azul']
+                ];
+                $stmtProd = $pdo->prepare("INSERT INTO productos (nombre, descripcion, precio, categoria_id, stock, imagen_principal, marca, talla, color, genero, codigo_sku, estado, destacado) VALUES (:n, :d, :p, :cat, :s, :img, :m, :t, :c, :g, :sku, 'activo', 1) ON DUPLICATE KEY UPDATE precio=VALUES(precio), stock=VALUES(stock), estado='activo', destacado=1");
+                foreach ($productos as $p) {
+                    list($nombre, $catNombre, $precio, $stock, $sku, $genero, $marca, $talla, $color) = $p;
+                    $catId = isset($ids[$catNombre]) ? $ids[$catNombre] : null;
+                    if (!$catId) continue;
+                    $stmtProd->execute([
+                        ':n' => $nombre,
+                        ':d' => $nombre . ' - Producto de demostración.',
+                        ':p' => $precio,
+                        ':cat' => $catId,
+                        ':s' => $stock,
+                        ':img' => null,
+                        ':m' => $marca,
+                        ':t' => $talla,
+                        ':c' => $color,
+                        ':g' => $genero,
+                        ':sku' => $sku
+                    ]);
+                }
             }
             
             function verificarRequisitos() {

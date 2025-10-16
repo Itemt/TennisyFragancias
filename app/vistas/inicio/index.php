@@ -1,18 +1,49 @@
 <?php require_once VIEWS_PATH . '/layout/header.php'; ?>
 
-<!-- Hero Section -->
-<section class="bg-light py-5">
+<!-- Hero / Carousel -->
+<section class="py-4">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="display-4 fw-bold">Bienvenido a <span class="text-primario">Tennis y Fragancias</span></h1>
-                <p class="lead">Los mejores productos en calzado deportivo y fragancias en Barrancabermeja</p>
-                <a href="<?= Vista::url('productos') ?>" class="btn btn-primario btn-lg">
-                    <i class="bi bi-shop"></i> Ver Catálogo
-                </a>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="container py-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <h1 class="display-4 fw-bold">Estrena estilo con <span class="text-primario">Tennis y Fragancias</span></h1>
+                            <p class="lead">Calzado deportivo, casual y accesorios para cualquier ocasión.</p>
+                            <a href="<?= Vista::url('productos') ?>" class="btn btn-primario btn-lg"><i class="bi bi-shop"></i> Ver Catálogo</a>
+                        </div>
+                        <div class="col-lg-6 text-center position-relative">
+                            <span class="ribbon">Nuevo</span>
+                            <img src="<?= Vista::urlPublica('imagenes/hero-image.jpg') ?>" class="img-fluid" style="max-height:380px;object-fit:cover" onerror="this.src='https://via.placeholder.com/600x380?text=Cat%C3%A1logo'" alt="Hero" loading="lazy">
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6">
-                <img src="<?= Vista::urlPublica('imagenes/hero-image.jpg') ?>" alt="Tennis y Fragancias" class="img-fluid rounded" onerror="this.src='https://via.placeholder.com/600x400?text=Tennis+y+Fragancias'">
+            <div class="carousel-item">
+                <div class="container py-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <h2 class="fw-bold">Envíos a todo el país</h2>
+                            <p class="lead">Compra segura y soporte siempre disponible.</p>
+                            <a href="<?= Vista::url('inicio/sobre_nosotros') ?>" class="btn btn-outline-dark btn-lg">Conócenos</a>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <img src="<?= Vista::urlPublica('imagenes/hero-image-2.jpg') ?>" class="img-fluid" style="max-height:380px;object-fit:cover" onerror="this.src='https://via.placeholder.com/600x380?text=Env%C3%ADos+R%C3%A1pidos'" alt="Hero 2" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
             </div>
         </div>
     </div>
@@ -29,7 +60,7 @@
                     <a href="<?= Vista::url('productos/categoria/' . $categoria['id']) ?>" class="text-decoration-none">
                         <div class="card h-100 text-center producto-card">
                             <?php if ($categoria['imagen']): ?>
-                                <img src="<?= Vista::urlPublica('imagenes/categorias/' . $categoria['imagen']) ?>" class="card-img-top" alt="<?= Vista::escapar($categoria['nombre']) ?>">
+                                <img src="<?= Vista::urlPublica('imagenes/categorias/' . $categoria['imagen']) ?>" class="card-img-top" alt="<?= Vista::escapar($categoria['nombre']) ?>" loading="lazy">
                             <?php else: ?>
                                 <div class="bg-light" style="height: 200px; display: flex; align-items: center; justify-content: center;">
                                     <i class="bi bi-tag fs-1 text-muted"></i>
@@ -58,7 +89,7 @@
                 <div class="col-md-6 col-lg-3">
                     <div class="card h-100 producto-card">
                         <?php if ($producto['imagen_principal']): ?>
-                            <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" class="card-img-top" alt="<?= Vista::escapar($producto['nombre']) ?>" style="height: 250px; object-fit: cover;">
+                            <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" class="card-img-top" alt="<?= Vista::escapar($producto['nombre']) ?>" style="height: 250px; object-fit: cover;" loading="lazy">
                         <?php else: ?>
                             <div class="bg-light" style="height: 250px; display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-image fs-1 text-muted"></i>

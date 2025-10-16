@@ -3,7 +3,7 @@
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card">
+            <div class="card producto-card fade-in">
                 <div class="card-body p-4">
                     <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
                     

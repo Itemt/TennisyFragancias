@@ -5,13 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $titulo ?? 'Tennis y Fragancias' ?></title>
     
+    <!-- Favicon & App Icons -->
+    <link rel="icon" href="<?= URL_PUBLICA ?>favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="<?= URL_PUBLICA ?>favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="<?= URL_PUBLICA ?>favicon.png">
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     
     <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="<?= URL_PUBLICA ?>css/styles.css">
     <style>
         :root {
             --color-primario: #DC3545;
@@ -23,6 +31,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fb 100%);
+            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
         }
         
         main {
@@ -53,10 +63,9 @@
             color: white;
         }
         
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
+        .navbar-brand { font-weight: bold; font-size: 1.25rem; display: flex; align-items: center; gap: .5rem; }
+        .navbar-brand img { height: 28px; width: auto; display: block; }
+        .navbar { box-shadow: 0 6px 20px rgba(0,0,0,.06); }
         
         .producto-card {
             transition: transform 0.3s, box-shadow 0.3s;
@@ -105,7 +114,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-secundario">
         <div class="container">
             <a class="navbar-brand text-primario" href="<?= Vista::url() ?>">
-                <i class="bi bi-shop"></i> Tennis y Fragancias
+                <img src="<?= URL_PUBLICA ?>imagenes/logo.svg" alt="Logo">
+                Tennis y Fragancias
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -121,6 +131,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Vista::url('inicio/contacto') ?>">Contacto</a>
                     </li>
+                    
                 </ul>
                 
                 <ul class="navbar-nav">

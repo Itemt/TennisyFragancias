@@ -1,4 +1,4 @@
-# 🥾 Tennis y Zapatos - E-commerce
+# 🥾 Tennis y Fragancias - E-commerce
 
 Sistema de comercio electrónico especializado en zapatos deportivos, casuales y accesorios.
 

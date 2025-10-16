@@ -1,54 +1,44 @@
 <?php require_once VIEWS_PATH . '/layout/header.php'; ?>
 
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-10 mx-auto">
-            <h1 class="mb-4">Sobre Nosotros</h1>
-            
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h3 class="text-primario">Tennis y Fragancias</h3>
-                    <p class="lead">Tu tienda de confianza en Barrancabermeja</p>
-                    
-                    <p>Somos una empresa colombiana dedicada a ofrecer los mejores productos en calzado deportivo y fragancias. Con años de experiencia en el mercado, nos hemos posicionado como líderes en la región de Barrancabermeja, Santander.</p>
-                    
-                    <h4 class="mt-4">Nuestra Misión</h4>
-                    <p>Proporcionar a nuestros clientes productos de alta calidad a precios competitivos, brindando una experiencia de compra excepcional tanto en nuestra tienda física como en nuestra plataforma online.</p>
-                    
-                    <h4 class="mt-4">Nuestra Visión</h4>
-                    <p>Ser la tienda líder en calzado y fragancias en la región, reconocida por nuestra calidad, variedad de productos y excelente servicio al cliente.</p>
-                    
-                    <h4 class="mt-4">Nuestros Valores</h4>
-                    <ul>
-                        <li><strong>Calidad:</strong> Ofrecemos solo productos de las mejores marcas</li>
-                        <li><strong>Servicio:</strong> Atención personalizada y profesional</li>
-                        <li><strong>Confianza:</strong> Construimos relaciones duraderas con nuestros clientes</li>
-                        <li><strong>Innovación:</strong> Constantemente actualizamos nuestro catálogo</li>
-                    </ul>
-                </div>
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <img class="img-fluid rounded shadow" src="<?= Vista::urlPublica('imagenes/about.jpg') ?>" onerror="this.src='https://via.placeholder.com/720x420?text=Tennis+y+Fragancias'" alt="Sobre Nosotros">
             </div>
-            
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5><i class="bi bi-shop text-primario"></i> Tienda Física</h5>
-                            <p>Visítanos en nuestra tienda en Barrancabermeja para ver y probar nuestros productos.</p>
+            <div class="col-lg-6">
+                <h1 class="fw-bold">Nuestra Historia</h1>
+                <p class="lead">Tennis y Fragancias nace con la misión de llevar productos de calidad a precios justos, con una experiencia de compra simple y segura.</p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded h-100">
+                            <h5 class="text-primario mb-1"><i class="bi bi-truck"></i> Envíos Rápidos</h5>
+                            <p class="small mb-0">Llegamos a todo el país con logística confiable.</p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5><i class="bi bi-laptop text-primario"></i> Tienda Online</h5>
-                            <p>Compra desde la comodidad de tu hogar con envíos a todo Colombia.</p>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded h-100">
+                            <h5 class="text-primario mb-1"><i class="bi bi-shield-check"></i> Compra Segura</h5>
+                            <p class="small mb-0">Pagos protegidos y datos siempre seguros.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded h-100">
+                            <h5 class="text-primario mb-1"><i class="bi bi-emoji-smile"></i> Atención Cercana</h5>
+                            <p class="small mb-0">Equipo listo para ayudarte en todo momento.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded h-100">
+                            <h5 class="text-primario mb-1"><i class="bi bi-recycle"></i> Cambios Fáciles</h5>
+                            <p class="small mb-0">Política clara de cambios y devoluciones.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
 
