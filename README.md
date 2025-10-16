@@ -413,4 +413,4 @@ Proyecto académico - Libre uso con fines educativos
 ---
 
 **Desarrollado con ❤️ en Barrancabermeja, Santander, Colombia**  
-**Tennis y Fragancias - E-commerce 2024**
+**Tennis y Fragancias - E-commerce 2025**
