@@ -208,6 +208,7 @@
         <div class="row g-4">
             <?php foreach ($productos_destacados as $producto): ?>
                 <div class="col-6 col-md-6 col-lg-3">
+                    <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" class="text-decoration-none text-dark d-block">
                     <div class="card h-100 producto-card border-0 shadow-sm position-relative">
                         <div class="position-relative overflow-hidden">
                             <?php if ($producto['imagen_principal']): ?>
@@ -287,9 +288,10 @@
                                     <i class="bi bi-arrow-right"></i>
                                 </div>
                             </div>
-                            <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" class="stretched-link" aria-label="Ver detalles de <?= Vista::escapar($producto['nombre']) ?>"></a>
+                            
                         </div>
                     </div>
+                    </a>
                 </div>
             <?php endforeach; ?>
         </div>
