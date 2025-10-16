@@ -1,56 +1,139 @@
     </main>
     
-    <!-- Footer -->
-    <footer class="mt-5 py-4">
+    <!-- Footer Moderno -->
+    <footer class="mt-5 pt-5 pb-4">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <h5 class="text-primario">Tennis y Fragancias</h5>
-                    <p class="small">
-                        Tu tienda de confianza en Barrancabermeja para los mejores tenis y fragancias.
+            <div class="row g-4 mb-4">
+                <!-- Información Principal -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="text-primario mb-3">
+                        <i class="bi bi-bag-heart-fill me-2"></i>Tennis y Fragancias
+                    </h5>
+                    <p class="mb-3" style="opacity: 0.9; line-height: 1.7;">
+                        Tu tienda de confianza en Barrancabermeja para los mejores tenis y fragancias. 
+                        Calidad garantizada y atención personalizada.
                     </p>
-                    <p class="small">
-                        <i class="bi bi-geo-alt"></i> Barrancabermeja, Santander, Colombia<br>
-                        <i class="bi bi-telephone"></i> <?= EMPRESA_TELEFONO ?><br>
-                        <i class="bi bi-envelope"></i> <?= EMPRESA_EMAIL ?>
-                    </p>
+                    <div class="mb-2">
+                        <i class="bi bi-geo-alt-fill text-primario me-2"></i>
+                        <span>Barrancabermeja, Santander, Colombia</span>
+                    </div>
+                    <div class="mb-2">
+                        <i class="bi bi-telephone-fill text-primario me-2"></i>
+                        <a href="tel:<?= EMPRESA_TELEFONO ?>" class="text-decoration-none"><?= EMPRESA_TELEFONO ?></a>
+                    </div>
+                    <div class="mb-2">
+                        <i class="bi bi-envelope-fill text-primario me-2"></i>
+                        <a href="mailto:<?= EMPRESA_EMAIL ?>" class="text-decoration-none"><?= EMPRESA_EMAIL ?></a>
+                    </div>
                 </div>
                 
-                <div class="col-md-2 mb-3">
-                    <h6>Enlaces</h6>
-                    <ul class="list-unstyled small">
-                        <li><a href="<?= Vista::url() ?>">Inicio</a></li>
-                        <li><a href="<?= Vista::url('productos') ?>">Productos</a></li>
-                        <li><a href="<?= Vista::url('inicio/sobre_nosotros') ?>">Sobre Nosotros</a></li>
-                        <li><a href="<?= Vista::url('inicio/contacto') ?>">Contacto</a></li>
+                <!-- Enlaces Rápidos -->
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="mb-3">Enlaces Rápidos</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="<?= Vista::url() ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Inicio
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('productos') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Productos
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('inicio/sobre_nosotros') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Sobre Nosotros
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('inicio/contacto') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Contacto
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 
-                <div class="col-md-3 mb-3">
-                    <h6>Información</h6>
-                    <ul class="list-unstyled small">
-                        <li><a href="#">Política de Privacidad</a></li>
-                        <li><a href="#">Términos y Condiciones</a></li>
-                        <li><a href="#">Cambios y Devoluciones</a></li>
-                        <li><a href="#">Envíos</a></li>
+                <!-- Información Legal -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6 class="mb-3">Información</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('inicio/privacidad') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Política de Privacidad
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('inicio/terminos') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Términos y Condiciones
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('inicio/devoluciones') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Cambios y Devoluciones
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('inicio/envios') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Envíos y Entregas
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="<?= Vista::url('inicio/faq') ?>">
+                                <i class="bi bi-chevron-right me-1"></i>Preguntas Frecuentes
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 
-                <div class="col-md-3 mb-3">
-                    <h6>Síguenos</h6>
-                    <div class="d-flex gap-3">
-                        <a href="#" class="fs-4"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="fs-4"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="fs-4"><i class="bi bi-whatsapp"></i></a>
+                <!-- Redes Sociales y Newsletter -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6 class="mb-3">Síguenos</h6>
+                    <p class="mb-3" style="opacity: 0.9;">
+                        Mantente al día con nuestras últimas ofertas y novedades
+                    </p>
+                    <div class="social-links d-flex gap-2 mb-4">
+                        <a href="#" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" title="WhatsApp">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+                        <a href="#" title="TikTok">
+                            <i class="bi bi-tiktok"></i>
+                        </a>
+                    </div>
+                    
+                    <!-- Newsletter simple -->
+                    <div class="newsletter-box">
+                        <div class="input-group">
+                            <input type="email" class="form-control form-control-sm" placeholder="Tu email" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                            <button class="btn btn-primario btn-sm" type="button">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <hr class="border-secondary">
+            <hr style="border-color: rgba(255,255,255,0.2); margin: 2rem 0 1.5rem;">
             
-            <div class="row">
-                <div class="col-md-12 text-center small">
-                    <p class="mb-0">&copy; <?= date('Y') ?> Tennis y Fragancias. Todos los derechos reservados.</p>
+            <!-- Copyright y Pagos -->
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <p class="mb-0" style="opacity: 0.8;">
+                        &copy; <?= date('Y') ?> <strong>Tennis y Fragancias</strong>. Todos los derechos reservados.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <small style="opacity: 0.8;">
+                        <i class="bi bi-credit-card me-2"></i>
+                        Pagos seguros con 
+                        <strong class="text-primario">MercadoPago</strong>
+                    </small>
                 </div>
             </div>
         </div>

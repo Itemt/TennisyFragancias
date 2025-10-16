@@ -96,9 +96,13 @@ class AdminControlador extends Controlador {
         
         // Manejar imagen
         if (!empty($_FILES['imagen']['name'])) {
-            $imagen = $this->subirImagen($_FILES['imagen']);
-            if ($imagen) {
-                $datosProducto['imagen_principal'] = $imagen;
+            $resultado = $this->subirImagen($_FILES['imagen']);
+            if ($resultado['exito']) {
+                $datosProducto['imagen_principal'] = $resultado['nombre_archivo'];
+            } else {
+                $_SESSION['error'] = $resultado['mensaje'];
+                $this->redirigir('admin/producto_nuevo');
+                return;
             }
         }
         
@@ -143,17 +147,22 @@ class AdminControlador extends Controlador {
             
             // Manejar nueva imagen
             if (!empty($_FILES['imagen']['name'])) {
-                $imagen = $this->subirImagen($_FILES['imagen']);
-                if ($imagen) {
-                    $datosActualizar['imagen_principal'] = $imagen;
+                $resultado = $this->subirImagen($_FILES['imagen']);
+                if ($resultado['exito']) {
+                    $datosActualizar['imagen_principal'] = $resultado['nombre_archivo'];
+                } else {
+                    $_SESSION['error'] = $resultado['mensaje'];
+                    // No redirigir, mostrar error en la misma página
                 }
             }
             
-            if ($productoModelo->actualizar($id, $datosActualizar)) {
-                $_SESSION['exito'] = 'Producto actualizado correctamente';
-                $this->redirigir('admin/productos');
-            } else {
-                $_SESSION['error'] = 'Error al actualizar el producto';
+            if (!isset($_SESSION['error'])) {
+                if ($productoModelo->actualizar($id, $datosActualizar)) {
+                    $_SESSION['exito'] = 'Producto actualizado correctamente';
+                    $this->redirigir('admin/productos');
+                } else {
+                    $_SESSION['error'] = 'Error al actualizar el producto';
+                }
             }
         }
         
@@ -277,26 +286,68 @@ class AdminControlador extends Controlador {
             mkdir($directorioDestino, 0755, true);
         }
         
-        $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
+        // Validar si hay errores en la subida
+        if ($archivo['error'] !== UPLOAD_ERR_OK) {
+            return [
+                'exito' => false,
+                'mensaje' => 'Error al subir el archivo. Por favor, intente nuevamente.'
+            ];
+        }
+        
+        $extension = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
         $nombreArchivo = 'prod_' . time() . '_' . rand(1000, 9999) . '.' . $extension;
         $rutaCompleta = $directorioDestino . $nombreArchivo;
         
         // Validar tipo de archivo
         $tiposPermitidos = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        if (!in_array(strtolower($extension), $tiposPermitidos)) {
-            return false;
+        if (!in_array($extension, $tiposPermitidos)) {
+            return [
+                'exito' => false,
+                'mensaje' => 'Tipo de imagen no soportado. Los formatos permitidos son: JPEG, PNG, GIF y WEBP.'
+            ];
+        }
+        
+        // Validar tipo MIME real del archivo (seguridad adicional)
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $archivo['tmp_name']);
+        finfo_close($finfo);
+        
+        $mimePermitidos = [
+            'image/jpeg',
+            'image/jpg', 
+            'image/png',
+            'image/gif',
+            'image/webp'
+        ];
+        
+        if (!in_array($mimeType, $mimePermitidos)) {
+            return [
+                'exito' => false,
+                'mensaje' => 'El archivo no es una imagen válida. Los formatos permitidos son: JPEG, PNG, GIF y WEBP.'
+            ];
         }
         
         // Validar tamaño
         if ($archivo['size'] > TAMANO_MAXIMO_IMAGEN) {
-            return false;
+            $tamanoMaxMB = TAMANO_MAXIMO_IMAGEN / 1024 / 1024;
+            return [
+                'exito' => false,
+                'mensaje' => "La imagen es demasiado grande. El tamaño máximo permitido es {$tamanoMaxMB}MB."
+            ];
         }
         
+        // Intentar mover el archivo
         if (move_uploaded_file($archivo['tmp_name'], $rutaCompleta)) {
-            return $nombreArchivo;
+            return [
+                'exito' => true,
+                'nombre_archivo' => $nombreArchivo
+            ];
         }
         
-        return false;
+        return [
+            'exito' => false,
+            'mensaje' => 'Error al guardar la imagen. Verifique los permisos del directorio.'
+        ];
     }
 }
 ?>

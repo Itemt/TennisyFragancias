@@ -127,8 +127,8 @@
                                          class="img-fluid rounded" alt="Imagen actual">
                                 </div>
                             <?php endif; ?>
-                            <input type="file" class="form-control" name="imagen" accept="image/*">
-                            <div class="form-text">JPG, PNG, GIF, WEBP (máx. 5MB)</div>
+                            <input type="file" class="form-control" name="imagen" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp">
+                            <div class="form-text">Formatos permitidos: JPG, PNG, GIF, WEBP (máx. 5MB)</div>
                         </div>
                         
                         <?php if (isset($producto)): ?>

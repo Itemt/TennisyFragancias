@@ -244,11 +244,25 @@ if (php_sapi_name() === 'cli') {
                             <input type="number" id="db_puerto" name="db_puerto" value="3306">
                         </div>
                         
-                        <div class="form-group">
-                            <label for="seed_demo">
-                                <input type="checkbox" id="seed_demo" name="seed_demo" value="1" checked>
-                                Cargar datos de ejemplo (productos y categorías)
-                            </label>
+                        <hr style="margin: 30px 0;">
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid #28a745;">
+                            <h4 style="margin-top: 0; color: #28a745;">📦 Datos Iniciales</h4>
+                            <p>Elige cómo quieres inicializar tu base de datos:</p>
+                            
+                            <div style="margin: 15px 0;">
+                                <label style="display: block; padding: 15px; background: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; margin-bottom: 10px;" onmouseover="this.style.borderColor='#28a745'" onmouseout="if(!document.getElementById('seed_demo').checked) this.style.borderColor='#ddd'">
+                                    <input type="radio" name="seed_option" id="seed_demo" value="1" checked onchange="document.querySelectorAll('label').forEach(l => l.style.borderColor='#ddd'); this.parentElement.style.borderColor='#28a745';">
+                                    <strong>🎯 Con datos de prueba (Recomendado)</strong><br>
+                                    <small style="color: #6c757d;">Incluye 20 productos de ejemplo, 5 categorías y usuarios de prueba. Perfecto para explorar el sistema.</small>
+                                </label>
+                                
+                                <label style="display: block; padding: 15px; background: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;" onmouseover="this.style.borderColor='#dc3545'" onmouseout="if(!document.getElementById('seed_clean').checked) this.style.borderColor='#ddd'">
+                                    <input type="radio" name="seed_option" id="seed_clean" value="0" onchange="document.querySelectorAll('label').forEach(l => l.style.borderColor='#ddd'); this.parentElement.style.borderColor='#dc3545';">
+                                    <strong>🔲 Base de datos limpia</strong><br>
+                                    <small style="color: #6c757d;">Solo estructura de tablas y usuarios admin/empleado. Ideal para producción.</small>
+                                </label>
+                            </div>
                         </div>
                         
                         <button type="submit" class="btn">Probar Conexión y Continuar</button>
@@ -265,7 +279,7 @@ if (php_sapi_name() === 'cli') {
                     $db_usuario = $_POST['db_usuario'];
                     $db_password = $_POST['db_password'];
                     $db_puerto = $_POST['db_puerto'] ?: '3306';
-                    $seed_demo = isset($_POST['seed_demo']) ? '1' : '0';
+                    $seed_demo = isset($_POST['seed_option']) ? $_POST['seed_option'] : '1';
                     $_SESSION['seed_demo'] = $seed_demo;
                     
                     // Probar conexión
@@ -359,32 +373,52 @@ if (php_sapi_name() === 'cli') {
                         $pdo = new PDO($dsn, $config['DB_USUARIO'], $config['DB_PASSWORD']);
                         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                         
-                        // Leer y ejecutar script SQL con soporte de DELIMITER (triggers)
-                        $sqlFile = 'database/tennisyzapatos_db.sql';
-                        if (!file_exists($sqlFile)) {
-                            throw new Exception('Archivo SQL no encontrado: ' . $sqlFile);
-                        }
-                        
-                        $resultado = ejecutarSqlConDelimiters($pdo, $sqlFile);
-                        $ejecutados = $resultado['ejecutados'];
-                        $total = $resultado['total'];
+                        // Crear estructura de base de datos
+                        $ejecutados = crearEstructuraBaseDatos($pdo);
                         
                         // Insertar datos de ejemplo si se seleccionó
+                        $conDatosDemo = false;
                         if (!empty($_SESSION['seed_demo']) && $_SESSION['seed_demo'] === '1') {
                             insertarDatosDemo($pdo);
+                            $conDatosDemo = true;
                         }
                         
                         echo '<div class="alert alert-success">';
                         echo "✅ Base de datos instalada exitosamente.<br>";
-                        echo "📊 Comandos ejecutados: $ejecutados de $total<br>";
+                        echo "📊 Tablas creadas: $ejecutados<br>";
+                        if ($conDatosDemo) {
+                            echo "📦 Datos de prueba cargados: 20 productos y 5 categorías<br>";
+                        } else {
+                            echo "🔲 Base de datos limpia (sin datos de prueba)<br>";
+                        }
                         echo "🎉 El sistema está listo para usar.";
                         echo '</div>';
                         
                         echo '<div class="alert alert-info">';
-                        echo '<strong>Credenciales de administrador:</strong><br>';
-                        echo 'Email: admin@tennisyfragancias.com<br>';
-                        echo 'Contraseña: admin123<br>';
-                        echo '<em>⚠️ Cambia esta contraseña inmediatamente después del primer inicio de sesión.</em>';
+                        echo '<strong>🔑 Credenciales predefinidas:</strong><br><br>';
+                        
+                        echo '<div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">';
+                        echo '<strong>👑 Administrador (Control Total):</strong><br>';
+                        echo 'Email: <code>admin@tennisyfragancias.com</code><br>';
+                        echo 'Contraseña: <code>admin123</code><br>';
+                        echo '<small>Gestiona productos, categorías, usuarios, pedidos y todo el sistema.</small>';
+                        echo '</div>';
+                        
+                        echo '<div style="background: #d1ecf1; padding: 10px; border-radius: 5px; margin-bottom: 10px;">';
+                        echo '<strong>👔 Empleado (Ventas y Facturación):</strong><br>';
+                        echo 'Email: <code>empleado@tennisyfragancias.com</code><br>';
+                        echo 'Contraseña: <code>empleado123</code><br>';
+                        echo '<small>Gestiona ventas, facturación y atención al cliente.</small>';
+                        echo '</div>';
+                        
+                        echo '<div style="background: #d4edda; padding: 10px; border-radius: 5px; margin-bottom: 10px;">';
+                        echo '<strong>🛒 Cliente de Ejemplo:</strong><br>';
+                        echo 'Email: <code>cliente@example.com</code><br>';
+                        echo 'Contraseña: <code>cliente123</code><br>';
+                        echo '<small>Para probar el proceso de compra como cliente.</small>';
+                        echo '</div>';
+                        
+                        echo '<em>⚠️ <strong>Importante:</strong> Cambia estas contraseñas inmediatamente en producción y elimina el cliente de ejemplo.</em>';
                         echo '</div>';
                         
                         echo '<a href="index.php" class="btn btn-success">🚀 Ir al Sistema</a>';
@@ -398,6 +432,182 @@ if (php_sapi_name() === 'cli') {
                     ?>
                 </div>
                 <?php
+            }
+            
+            /**
+             * Crea toda la estructura de la base de datos
+             */
+            function crearEstructuraBaseDatos(PDO $pdo): int {
+                $ejecutados = 0;
+                
+                // Tabla usuarios
+                $pdo->exec("CREATE TABLE IF NOT EXISTS usuarios (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL,
+                    apellido VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) NOT NULL UNIQUE,
+                    password_hash VARCHAR(255) NOT NULL,
+                    telefono VARCHAR(20),
+                    direccion TEXT,
+                    ciudad VARCHAR(100),
+                    departamento VARCHAR(100),
+                    codigo_postal VARCHAR(10),
+                    rol ENUM('cliente', 'empleado', 'administrador') DEFAULT 'cliente',
+                    estado ENUM('activo', 'inactivo', 'suspendido') DEFAULT 'activo',
+                    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    ultima_conexion TIMESTAMP NULL,
+                    INDEX idx_email (email),
+                    INDEX idx_rol (rol),
+                    INDEX idx_estado (estado)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla categorias
+                $pdo->exec("CREATE TABLE IF NOT EXISTS categorias (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL UNIQUE,
+                    descripcion TEXT,
+                    imagen VARCHAR(255),
+                    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+                    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_nombre (nombre),
+                    INDEX idx_estado (estado)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla productos
+                $pdo->exec("CREATE TABLE IF NOT EXISTS productos (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    codigo_sku VARCHAR(50) NOT NULL UNIQUE,
+                    nombre VARCHAR(200) NOT NULL,
+                    descripcion TEXT,
+                    precio DECIMAL(10,2) NOT NULL,
+                    precio_oferta DECIMAL(10,2),
+                    categoria_id INT NOT NULL,
+                    stock INT NOT NULL DEFAULT 0,
+                    stock_minimo INT DEFAULT 5,
+                    imagen_principal VARCHAR(255),
+                    marca VARCHAR(100),
+                    talla VARCHAR(20),
+                    color VARCHAR(50),
+                    genero ENUM('hombre', 'mujer', 'niño', 'niña', 'unisex') DEFAULT 'unisex',
+                    destacado TINYINT(1) DEFAULT 0,
+                    estado ENUM('activo', 'inactivo', 'agotado') DEFAULT 'activo',
+                    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE,
+                    INDEX idx_codigo_sku (codigo_sku),
+                    INDEX idx_nombre (nombre),
+                    INDEX idx_categoria (categoria_id),
+                    INDEX idx_precio (precio),
+                    INDEX idx_destacado (destacado),
+                    INDEX idx_estado (estado)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla pedidos
+                $pdo->exec("CREATE TABLE IF NOT EXISTS pedidos (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    usuario_id INT NOT NULL,
+                    numero_orden VARCHAR(50) NOT NULL UNIQUE,
+                    subtotal DECIMAL(10,2) NOT NULL,
+                    costo_envio DECIMAL(10,2) DEFAULT 0,
+                    descuento DECIMAL(10,2) DEFAULT 0,
+                    total DECIMAL(10,2) NOT NULL,
+                    estado ENUM('pendiente', 'confirmado', 'enviado', 'entregado', 'cancelado') DEFAULT 'pendiente',
+                    metodo_pago VARCHAR(50),
+                    estado_pago ENUM('pendiente', 'pagado', 'rechazado', 'reembolsado') DEFAULT 'pendiente',
+                    direccion_envio TEXT NOT NULL,
+                    ciudad_envio VARCHAR(100) NOT NULL,
+                    departamento_envio VARCHAR(100) NOT NULL,
+                    telefono_contacto VARCHAR(20) NOT NULL,
+                    notas TEXT,
+                    fecha_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+                    INDEX idx_numero_orden (numero_orden),
+                    INDEX idx_usuario (usuario_id),
+                    INDEX idx_estado (estado),
+                    INDEX idx_estado_pago (estado_pago),
+                    INDEX idx_fecha_pedido (fecha_pedido)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla detalle_pedidos
+                $pdo->exec("CREATE TABLE IF NOT EXISTS detalle_pedidos (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    pedido_id INT NOT NULL,
+                    producto_id INT NOT NULL,
+                    cantidad INT NOT NULL,
+                    precio_unitario DECIMAL(10,2) NOT NULL,
+                    subtotal DECIMAL(10,2) NOT NULL,
+                    FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
+                    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
+                    INDEX idx_pedido (pedido_id),
+                    INDEX idx_producto (producto_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla carrito
+                $pdo->exec("CREATE TABLE IF NOT EXISTS carrito (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    usuario_id INT NOT NULL,
+                    producto_id INT NOT NULL,
+                    cantidad INT NOT NULL DEFAULT 1,
+                    fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+                    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
+                    UNIQUE KEY unique_usuario_producto (usuario_id, producto_id),
+                    INDEX idx_usuario (usuario_id),
+                    INDEX idx_producto (producto_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla notificaciones
+                $pdo->exec("CREATE TABLE IF NOT EXISTS notificaciones (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    usuario_id INT NOT NULL,
+                    tipo VARCHAR(50) NOT NULL,
+                    titulo VARCHAR(200) NOT NULL,
+                    mensaje TEXT NOT NULL,
+                    leida TINYINT(1) DEFAULT 0,
+                    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+                    INDEX idx_usuario (usuario_id),
+                    INDEX idx_leida (leida),
+                    INDEX idx_fecha (fecha_creacion)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla facturas
+                $pdo->exec("CREATE TABLE IF NOT EXISTS facturas (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    pedido_id INT NOT NULL UNIQUE,
+                    numero_factura VARCHAR(50) NOT NULL UNIQUE,
+                    fecha_emision TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    total DECIMAL(10,2) NOT NULL,
+                    FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
+                    INDEX idx_numero_factura (numero_factura),
+                    INDEX idx_pedido (pedido_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Insertar usuario administrador por defecto
+                $passwordHash = password_hash('admin123', PASSWORD_DEFAULT);
+                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, direccion, ciudad, departamento, rol, estado) 
+                           VALUES ('Administrador', 'Sistema', 'admin@tennisyfragancias.com', '$passwordHash', '+57 300 123 4567', 'Calle Principal #123', 'Barrancabermeja', 'Santander', 'administrador', 'activo')");
+                
+                // Insertar usuario empleado por defecto
+                $passwordHashEmpleado = password_hash('empleado123', PASSWORD_DEFAULT);
+                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, direccion, ciudad, departamento, rol, estado) 
+                           VALUES ('Empleado', 'Ventas', 'empleado@tennisyfragancias.com', '$passwordHashEmpleado', '+57 300 234 5678', 'Calle Comercio #45', 'Barrancabermeja', 'Santander', 'empleado', 'activo')");
+                
+                // Insertar usuario cliente de ejemplo
+                $passwordHashCliente = password_hash('cliente123', PASSWORD_DEFAULT);
+                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, direccion, ciudad, departamento, codigo_postal, rol, estado) 
+                           VALUES ('Juan Carlos', 'Pérez López', 'cliente@example.com', '$passwordHashCliente', '+57 311 456 7890', 'Carrera 15 #28-45 Apto 301', 'Barrancabermeja', 'Santander', '687031', 'cliente', 'activo')");
+                
+                return $ejecutados;
             }
             
             /**
@@ -565,7 +775,6 @@ if (php_sapi_name() === 'cli') {
                 $requisitos['Permisos de escritura en public/imagenes/'] = is_writable('public/imagenes/');
                 
                 // Archivos necesarios
-                $requisitos['Archivo SQL de base de datos'] = file_exists('database/tennisyfragancias_db.sql');
                 $requisitos['Archivo de configuración portable'] = file_exists('app/config/ConfiguracionPortable.php');
                 
                 return $requisitos;
