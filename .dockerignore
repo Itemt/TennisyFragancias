@@ -1,0 +1,36 @@
+# Archivos a ignorar en el build de Docker
+.git
+.gitignore
+.vscode
+.idea
+*.md
+README.md
+CHANGELOG.md
+
+# Archivos de configuración local
+.env
+.env.local
+app/config/.env
+
+# Logs
+*.log
+logs/
+
+# Cache y temporales
+cache/
+tmp/sessions/
+
+# Archivos de respaldo
+database/backups/*.sql
+*.sql.backup
+
+# Archivos de IDE
+.DS_Store
+Thumbs.db
+
+# Node modules (si los hubiera)
+node_modules/
+
+# Archivos de testing
+tests/
+phpunit.xml
