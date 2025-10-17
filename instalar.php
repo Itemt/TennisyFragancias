@@ -182,6 +182,20 @@ if (php_sapi_name() === 'cli') {
                 ?>
                 <div class="step">
                     <h3>📋 Paso 1: Verificación de Requisitos</h3>
+                    
+                    <?php if (!file_exists('app/config/.env')): ?>
+                        <div class="alert alert-info">
+                            <strong>🚀 Instalación desde GitHub</strong><br>
+                            Parece que acabas de clonar el repositorio. Este instalador te ayudará a configurar todo automáticamente.<br><br>
+                            <strong>Lo que hará este instalador:</strong><br>
+                            ✅ Verificará los requisitos del sistema<br>
+                            ✅ Creará el archivo de configuración .env<br>
+                            ✅ Creará la base de datos automáticamente<br>
+                            ✅ Instalará todas las tablas necesarias<br>
+                            ✅ Creará los usuarios de prueba (admin, empleado, cliente)
+                        </div>
+                    <?php endif; ?>
+                    
                     <p>Verificando que el sistema cumple con los requisitos mínimos...</p>
                     
                     <div class="progress">
@@ -213,35 +227,64 @@ if (php_sapi_name() === 'cli') {
             }
             
             function mostrarPaso2() {
+                // Detectar si hay un archivo .env existente
+                $envExiste = file_exists('app/config/.env');
+                $configExistente = [];
+                
+                if ($envExiste) {
+                    $lines = file('app/config/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                    foreach ($lines as $line) {
+                        if (strpos($line, '=') !== false && strpos(trim($line), '#') !== 0) {
+                            list($key, $value) = explode('=', $line, 2);
+                            $configExistente[trim($key)] = trim($value);
+                        }
+                    }
+                }
                 ?>
                 <div class="step">
                     <h3>⚙️ Paso 2: Configuración de Base de Datos</h3>
+                    
+                    <?php if ($envExiste): ?>
+                        <div class="alert alert-info">
+                            ℹ️ Se detectó una configuración existente. Puedes mantenerla o modificarla.
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-info">
+                            ℹ️ Primera instalación. Configura la conexión a tu base de datos.
+                        </div>
+                    <?php endif; ?>
+                    
                     <p>Configura los parámetros de conexión a la base de datos:</p>
                     
                     <form method="POST" action="?paso=3">
                         <div class="form-group">
                             <label for="db_host">Host de Base de Datos:</label>
-                            <input type="text" id="db_host" name="db_host" value="localhost" required>
+                            <input type="text" id="db_host" name="db_host" value="<?php echo isset($configExistente['DB_HOST']) ? htmlspecialchars($configExistente['DB_HOST']) : 'localhost'; ?>" required>
+                            <small style="color: #6c757d;">Local: localhost | Docker: nombre_contenedor_mysql</small>
                         </div>
                         
                         <div class="form-group">
                             <label for="db_nombre">Nombre de la Base de Datos:</label>
-                            <input type="text" id="db_nombre" name="db_nombre" value="tennisyzapatos_db" required>
+                            <input type="text" id="db_nombre" name="db_nombre" value="<?php echo isset($configExistente['DB_NOMBRE']) ? htmlspecialchars($configExistente['DB_NOMBRE']) : 'tennisyzapatos_db'; ?>" required>
+                            <small style="color: #6c757d;">Se creará automáticamente si no existe</small>
                         </div>
                         
                         <div class="form-group">
                             <label for="db_usuario">Usuario:</label>
-                            <input type="text" id="db_usuario" name="db_usuario" value="root" required>
+                            <input type="text" id="db_usuario" name="db_usuario" value="<?php echo isset($configExistente['DB_USUARIO']) ? htmlspecialchars($configExistente['DB_USUARIO']) : 'root'; ?>" required>
+                            <small style="color: #6c757d;">XAMPP: root | Producción: usuario específico</small>
                         </div>
                         
                         <div class="form-group">
                             <label for="db_password">Contraseña:</label>
-                            <input type="password" id="db_password" name="db_password">
+                            <input type="password" id="db_password" name="db_password" placeholder="<?php echo isset($configExistente['DB_PASSWORD']) && !empty($configExistente['DB_PASSWORD']) ? '••••••••' : 'Vacío por defecto en XAMPP'; ?>">
+                            <small style="color: #6c757d;">Dejar vacío en XAMPP, usar contraseña segura en producción</small>
                         </div>
                         
                         <div class="form-group">
                             <label for="db_puerto">Puerto:</label>
-                            <input type="number" id="db_puerto" name="db_puerto" value="3306">
+                            <input type="number" id="db_puerto" name="db_puerto" value="<?php echo isset($configExistente['DB_PUERTO']) ? htmlspecialchars($configExistente['DB_PUERTO']) : '3306'; ?>">
+                            <small style="color: #6c757d;">3306 es el puerto por defecto de MySQL</small>
                         </div>
                         
                         <hr style="margin: 30px 0;">

@@ -1,40 +1,142 @@
-# Archivos de configuración sensibles (solo .env local)
+# ===================================
+# Archivos sensibles (NO subir a GitHub)
+# ===================================
+
+# Configuración con credenciales reales
 app/config/.env
-
-# Logs
-*.log
-logs/
-
-# Archivos temporales
-*.tmp
-*.temp
-.DS_Store
-Thumbs.db
-
-# Archivos de respaldo
-database/backups/
-*.sql.backup
-
-# Archivos de IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Archivos de sistema
-.DS_Store
-Thumbs.db
-
-# Archivos de sesión PHP
-sessions/
-
-# Archivos de cache
-cache/
-tmp/
-
-# Archivos de uploads temporales
-uploads/temp/
 
 # Archivos de configuración local
 config.local.php
 .env.local
+
+# ===================================
+# Archivos de usuario subidos
+# ===================================
+
+# Imágenes de productos subidas por usuarios
+public/imagenes/productos/*
+!public/imagenes/productos/.gitkeep
+
+# Imágenes de categorías subidas por usuarios
+public/imagenes/categorias/*
+!public/imagenes/categorias/.gitkeep
+
+# ===================================
+# Respaldos de base de datos
+# ===================================
+
+# Respaldos automáticos y manuales
+database/backups/
+database/backup_*.sql
+*.sql.backup
+*.sql.gz
+
+# ===================================
+# Logs y archivos temporales
+# ===================================
+
+# Logs de la aplicación
+*.log
+logs/
+error.log
+access.log
+
+# Archivos temporales
+*.tmp
+*.temp
+tmp/
+cache/
+
+# Sesiones PHP
+sessions/
+php_sessions/
+
+# Uploads temporales
+uploads/temp/
+
+# ===================================
+# Archivos de IDE y editores
+# ===================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PHPStorm / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+
+# ===================================
+# Archivos de sistema operativo
+# ===================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+# ===================================
+# Dependencias y paquetes
+# ===================================
+
+# Composer (si se usa en el futuro)
+vendor/
+composer.lock
+
+# Node.js (si se usa en el futuro)
+node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+# ===================================
+# Archivos de prueba y desarrollo
+# ===================================
+
+# Archivos de testing
+test.php
+testing/
+phpunit.xml
+
+# Archivos de depuración
+debug.php
+test_*.php
+dump.sql
+
+# ===================================
+# Archivos varios
+# ===================================
+
+# Archivos comprimidos temporales
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Archivos de documentación temporal
+TODO.txt
+NOTES.txt

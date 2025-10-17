@@ -2,7 +2,9 @@
 
 Sistema de comercio electrónico completo especializado en calzado deportivo, casual, formal y accesorios. Desarrollado como proyecto universitario en Barrancabermeja, Santander, Colombia.
 
-> **🚀 Despliegue Automático**: Este proyecto está configurado para desplegarse automáticamente en Coolify cada vez que se hace un commit a la rama principal.
+> **🚀 Despliegue Automático**: Configurado para CI/CD con Coolify/GitHub Actions  
+> **📦 100% Portable**: Instalación automática con un solo comando  
+> **🔧 Sin configuración manual**: El instalador hace todo por ti
 
 ## 🌟 Características Principales
 
@@ -20,16 +22,47 @@ Sistema de comercio electrónico completo especializado en calzado deportivo, ca
  - 🖱️ **UX Mejorada**: Las cards de productos (catálogo, categorías e inicio) son completamente clickeables
  - 🖼️ **Branding**: Soporte de logo y favicon personalizados (ej. `public/imagenes/tacones-altos.png`)
 
-## 🚀 Instalación Rápida con Instalador Automático
+---
 
-### Paso 1: Requisitos Previos
-1. **XAMPP** instalado (PHP 7.4+, MySQL 5.7+, Apache)
-2. **Copiar archivos** a `C:\xampp\htdocs\tennisyfragancias\`
-3. **Iniciar servicios** en XAMPP (Apache + MySQL)
+## 🚀 Instalación Rápida
 
-### Paso 2: Ejecutar Instalador
-1. Abrir navegador en: `http://localhost/tennisyfragancias/instalar.php`
-2. El instalador guiará en **4 pasos simples**:
+### Opción A: Clonar desde GitHub (Recomendado)
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/Itemt/TennisyFragancias.git
+cd TennisyFragancias
+
+# 2. Mover a la carpeta de XAMPP
+# Windows: Mover a C:\xampp\htdocs\tennisyfragancias
+# Linux/Mac: Mover a /opt/lampp/htdocs/tennisyfragancias
+
+# 3. Iniciar XAMPP
+# - Activar Apache y MySQL
+
+# 4. Abrir el instalador web
+# Ir a: http://localhost/tennisyfragancias/instalar.php
+# Seguir los 3 pasos del asistente
+# ¡Listo! 🎉
+```
+
+### Opción B: Instalación Local (Descarga ZIP)
+
+1. **Descargar** el proyecto desde GitHub (Code → Download ZIP)
+2. **Extraer** en `C:\xampp\htdocs\tennisyfragancias\`
+3. **Iniciar XAMPP** (Apache + MySQL)
+4. **Abrir navegador**: `http://localhost/tennisyfragancias/instalar.php`
+5. **Seguir el asistente** de instalación
+
+### Requisitos del Sistema
+- ✅ PHP 7.4+ (incluido en XAMPP)
+- ✅ MySQL 5.7+ (incluido en XAMPP)
+- ✅ Apache (incluido en XAMPP)
+- ✅ Extensiones PHP: PDO, MySQL, cURL, mbstring
+
+---
+
+## 📋 Pasos del Instalador Automático
 
 #### 📋 Paso 1: Verificación de Requisitos
 El instalador verificará automáticamente:
@@ -312,11 +345,108 @@ Si necesitas reinstalar el sistema:
    - Ejecuta `instalar.php`
    - Elige tu opción preferida
 
-## 📞 Documentación Adicional
+---
 
-- 📖 **`INSTALACION.md`** - Guía detallada de instalación paso a paso
-- 🚀 **`README_PORTABILIDAD.md`** - Información sobre portabilidad del sistema
-- 📚 **`MANUAL_USUARIO.md`** - Manual completo para usuarios finales
+## 🔒 Configuración de Seguridad para GitHub
+
+### Archivos que NO se suben a GitHub (.gitignore)
+
+El proyecto está configurado para **NO subir** archivos sensibles:
+
+✅ **Archivos excluidos automáticamente:**
+- `app/config/.env` (credenciales de base de datos)
+- `public/imagenes/productos/*` (imágenes subidas por usuarios)
+- `public/imagenes/categorias/*` (imágenes de categorías)
+- `database/backups/*` (respaldos de base de datos)
+- Archivos temporales, logs y cache
+
+✅ **Archivos incluidos en el repositorio:**
+- `env.example` (plantilla de configuración)
+- `.gitkeep` (mantiene carpetas vacías)
+- Todo el código fuente
+- Documentación
+
+### Para Desarrolladores
+
+Si clonas el repositorio:
+1. El archivo `.env` **NO estará presente** (es correcto)
+2. El instalador lo creará automáticamente
+3. Nunca hagas `git add app/config/.env`
+4. Usa `env.example` como referencia
+
+---
+
+## 🚀 Despliegue en Producción (Coolify/Docker)
+
+### Configuración de Webhook para Auto-Deploy
+
+1. **En GitHub:**
+   - Ve a Settings → Webhooks → Add webhook
+   - Payload URL: `https://tu-coolify.com/api/v1/webhooks/github`
+   - Content type: `application/json`
+   - Events: "Just the push event"
+
+2. **En Coolify:**
+   - Activa "Auto Deploy on Push"
+   - Configura la rama: `main`
+
+3. **Resultado:**
+   - Cada `git push` desplegará automáticamente
+   - Sin intervención manual necesaria 🎉
+
+### Variables de Entorno en Producción
+
+En Coolify/Docker, configura estas variables:
+```env
+DB_HOST=tu_host_mysql
+DB_NOMBRE=tu_base_datos
+DB_USUARIO=tu_usuario
+DB_PASSWORD=tu_password_segura
+URL_BASE=https://tudominio.com/
+APP_ENV=production
+DEBUG_MODE=false
+APP_SECRET_KEY=genera_clave_unica_aqui
+```
+
+---
+
+## 📚 Guía de Uso Rápida
+
+### 🔑 Credenciales Predefinidas
+
+El instalador crea 3 usuarios automáticamente:
+
+| Rol | Email | Contraseña | Permisos |
+|-----|-------|------------|----------|
+| 👑 **Admin** | `admin@tennisyfragancias.com` | `admin123` | Control total del sistema |
+| 👔 **Empleado** | `empleado@tennisyfragancias.com` | `empleado123` | Ventas y facturación |
+| 🛒 **Cliente** | `cliente@example.com` | `cliente123` | Compras online |
+
+⚠️ **IMPORTANTE**: Cambiar estas contraseñas en producción
+
+### 🎯 Funcionalidades por Rol
+
+**👑 Administrador:**
+- Dashboard con estadísticas
+- Gestión completa de productos y categorías
+- Control de usuarios y roles
+- Reportes y análisis
+- Configuración del sistema
+
+**👔 Empleado:**
+- Panel de ventas
+- Generación de facturas
+- Gestión de pedidos
+- Atención al cliente
+
+**🛒 Cliente:**
+- Navegación del catálogo
+- Carrito de compras
+- Proceso de checkout
+- Seguimiento de pedidos
+- Gestión de perfil
+
+---
 
 ## 🔗 Recursos Útiles
 
@@ -376,43 +506,27 @@ Si necesitas reinstalar el sistema:
 - El sistema valida tipo MIME real del archivo
 - Evita archivos corruptos o con extensión incorrecta
 
+---
+
 ## 🎓 Proyecto Universitario
 
-Este sistema de e-commerce fue desarrollado como proyecto universitario en Barrancabermeja, Santander, Colombia.
+Desarrollado como proyecto académico en Barrancabermeja, Santander, Colombia.
 
-### 🎯 Objetivos Académicos Cumplidos
-
-- ✅ Implementación completa de arquitectura MVC
-- ✅ Sistema CRUD completo con múltiples tablas relacionadas
-- ✅ Gestión de roles y permisos
-- ✅ Integración con API de pagos (MercadoPago)
-- ✅ Sistema de autenticación seguro
-- ✅ Validación de datos y seguridad
-- ✅ Responsive design y UX moderna
-- ✅ Documentación técnica completa
-
-### 📚 Características Académicas
-
-- 📖 **Documentación exhaustiva** - README, manuales y guías
-- 🔄 **Sistema 100% portable** - Instalación en cualquier entorno
-- 🛠️ **Instalador automático** - Sin configuración manual
-- 📊 **Código bien estructurado** - Fácil de revisar y evaluar
-- 🧪 **Datos de prueba incluidos** - Para testing inmediato
-- 📱 **Interfaz profesional** - Cumple estándares de calidad
-
-### 👥 Roles Implementados para Evaluación
-
-1. **Administrador** - Control total del sistema
-2. **Empleado** - Gestión de ventas
-3. **Cliente** - Proceso de compra completo
+**Características destacadas:**
+- ✅ Arquitectura MVC completa
+- ✅ Sistema CRUD con múltiples tablas relacionadas
+- ✅ Integración con pasarela de pagos (MercadoPago)
+- ✅ Autenticación y autorización por roles
+- ✅ 100% portable y fácil de instalar
+- ✅ Código limpio y bien documentado
 
 ---
 
 ## 📄 Licencia
 
-Proyecto académico - Libre uso con fines educativos
+Proyecto académico - Uso libre con fines educativos
 
 ---
 
 **Desarrollado con ❤️ en Barrancabermeja, Santander, Colombia**  
-**Tennis y Fragancias - E-commerce 2025**
+**Tennis y Fragancias © 2025**
