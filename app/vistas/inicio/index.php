@@ -158,9 +158,9 @@
         </div>
         <div class="row g-4">
             <?php foreach ($categorias as $categoria): ?>
-                <div class="col-6 col-md-4 col-lg-3">
-                    <a href="<?= Vista::url('productos/categoria/' . $categoria['id']) ?>" class="text-decoration-none">
-                        <div class="card h-100 text-center producto-card border-0 shadow-sm">
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <a href="<?= Vista::url('productos/categoria/' . $categoria['id']) ?>" class="text-decoration-none">
+                                <div class="card h-100 text-center categoria-card border-0 shadow-sm">
                             <div class="position-relative overflow-hidden">
                                 <?php if ($categoria['imagen']): ?>
                                     <img src="<?= Vista::urlPublica('imagenes/categorias/' . $categoria['imagen']) ?>" 

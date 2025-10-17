@@ -1,240 +1,169 @@
 # 🚀 Guía de Portabilidad - Tennis y Fragancias
 
-## 📋 Resumen de Mejoras
+## 📋 Instalación desde Clone
 
-Este proyecto ha sido mejorado para ser completamente **portable** y fácil de mover entre diferentes entornos. Las mejoras incluyen:
+### Requisitos Previos
+- XAMPP 8.0+ (Apache + MySQL + PHP)
+- Git
 
-### ✨ Nuevas Características
+### Pasos de Instalación
 
-1. **🔧 Configuración Portable**
-   - Sistema de configuración basado en archivos `.env`
-   - Configuración automática para diferentes entornos
-   - Valores por defecto que funcionan "out of the box"
-
-2. **⚙️ Instalador Automático**
-   - Script de instalación web (`instalar.php`)
-   - Verificación automática de requisitos
-   - Configuración de base de datos en pasos guiados
-   - Instalación automática de la estructura de datos
-
-3. **🗄️ Sistema de Respaldo**
-   - Interfaz web para respaldos (`database/backup.php`)
-   - Respaldos automáticos con fecha y hora
-   - Restauración fácil entre entornos
-   - Historial de respaldos disponibles
-
-## 🎯 Instalación Rápida (3 Pasos)
-
-### Para Estudiantes Universitarios
-
-1. **Copiar archivos**
+1. **Clonar el repositorio**
    ```bash
-   # Copiar la carpeta del proyecto a htdocs
-   cp -r tennisyfragancias/ C:\xampp\htdocs\
+   git clone [URL_DEL_REPO]
+   cd tennisyfragancias
    ```
 
-2. **Iniciar XAMPP**
-   - Abrir Panel de Control de XAMPP
-   - Activar Apache y MySQL
+2. **Configurar XAMPP**
+   - Iniciar Apache y MySQL desde el Panel de Control de XAMPP
+   - Verificar que esté funcionando en `http://localhost`
 
 3. **Instalación automática**
-   - Ir a: `http://localhost/tennisyfragancias/instalar.php`
-   - Seguir los 3 pasos del instalador
-   - ¡Listo!
+   - Abrir navegador: `http://localhost/tennisyfragancias/instalar.php`
+   - Seguir los pasos del instalador
+   - **¡Listo!** El sistema estará funcionando
 
-## 🔄 Mover el Proyecto Entre Entornos
+### Configuración Opcional
 
-### De Desarrollo a Producción
+Si necesitas personalizar la configuración:
 
-1. **Crear respaldo en desarrollo**
+1. **Copiar archivo de configuración**
    ```bash
-   # Ir a: http://localhost/tennisyfragancias/database/backup.php
-   # Crear respaldo automático
+   cp app/config/env.example app/config/.env
    ```
 
-2. **Copiar archivos**
-   ```bash
-   # Copiar toda la carpeta del proyecto
-   # Incluye: código, configuración, respaldos
-   ```
+2. **Editar configuración** (opcional)
+   - Editar `app/config/.env` con tus datos específicos
+   - Si no editas nada, funcionará con valores por defecto
 
-3. **Configurar en producción**
-   ```bash
-   # Editar app/config/.env con datos de producción
-   # O usar el instalador automático
-   ```
+## 🗄️ Base de Datos
 
-4. **Restaurar datos**
-   ```bash
-   # Ir a: http://tu-servidor.com/tennisyfragancias/database/backup.php
-   # Restaurar el respaldo creado en desarrollo
-   ```
+### Instalación Automática (Recomendada)
+El instalador crea automáticamente:
+- ✅ Estructura de base de datos
+- ✅ Tablas necesarias
+- ✅ Usuarios por defecto
+- ✅ Datos de prueba (opcional)
 
-### Entre Diferentes Computadoras
+### Usuarios por Defecto
+- **Admin**: `admin@tennisyfragancias.com` / `admin123`
+- **Empleado**: `empleado@tennisyfragancias.com` / `empleado123`
+- **Cliente**: `cliente@example.com` / `cliente123`
 
-1. **Crear paquete portable**
-   ```bash
-   # Crear respaldo de la base de datos
-   # Comprimir toda la carpeta del proyecto
-   ```
-
-2. **En la nueva computadora**
-   ```bash
-   # Instalar XAMPP
-   # Descomprimir el proyecto
-   # Ejecutar instalar.php
-   # Restaurar respaldo si es necesario
-   ```
-
-## 📁 Estructura de Archivos Importantes
+## 📁 Estructura del Proyecto
 
 ```
 tennisyfragancias/
-├── instalar.php                 # 🚀 Instalador automático
-├── app/config/
-│   ├── ConfiguracionPortable.php  # 🔧 Sistema de configuración
-│   ├── env.example              # 📝 Plantilla de configuración
-│   └── .env                     # ⚙️ Configuración actual (se crea automáticamente)
-├── database/
-│   ├── tennisyfragancias_db.sql # 🗄️ Estructura de base de datos
-│   ├── backup.php               # 💾 Sistema de respaldo
-│   └── backups/                # 📦 Respaldos automáticos
-└── ... (resto del proyecto)
+├── app/                    # Código de la aplicación
+│   ├── config/            # Configuración
+│   ├── controladores/     # Lógica de negocio
+│   ├── modelos/           # Acceso a datos
+│   └── vistas/           # Interfaz de usuario
+├── public/               # Archivos públicos
+│   ├── css/             # Estilos
+│   ├── js/              # JavaScript
+│   └── imagenes/        # Imágenes del sitio
+├── database/            # Scripts de base de datos
+├── instalar.php         # Instalador automático
+└── index.php           # Punto de entrada
 ```
 
-## ⚙️ Configuración Manual (Opcional)
+## 🔧 Configuración Avanzada
 
-### Archivo de Configuración (.env)
+### Variables de Entorno
+El sistema usa configuración portable que se adapta automáticamente:
 
+- **URL_BASE**: Se detecta automáticamente
+- **DB_HOST**: localhost por defecto
+- **DB_NOMBRE**: tennisyfragancias_db por defecto
+- **DB_USUARIO**: root por defecto
+- **DB_PASSWORD**: vacío por defecto
+
+### Personalización
+Para cambiar la configuración:
+
+1. Crear `app/config/.env`
+2. Definir solo las variables que quieres cambiar
+3. El resto usará valores por defecto
+
+Ejemplo de `.env`:
 ```env
-# Base de Datos
-DB_HOST=localhost
-DB_NOMBRE=tennisyfragancias_db
-DB_USUARIO=root
-DB_PASSWORD=
-DB_PUERTO=3306
-
-# Aplicación
-URL_BASE=http://localhost/tennisyfragancias/
-EMPRESA_NOMBRE=Tennis y Fragancias
-EMPRESA_CIUDAD=Barrancabermeja
-EMPRESA_DEPARTAMENTO=Santander
-EMPRESA_PAIS=Colombia
-
-# MercadoPago (opcional)
-MERCADOPAGO_PUBLIC_KEY=TU_PUBLIC_KEY_AQUI
-MERCADOPAGO_ACCESS_TOKEN=TU_ACCESS_TOKEN_AQUI
-
-# Email (opcional)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USUARIO=tu_email@gmail.com
-EMAIL_PASSWORD=tu_password
+DB_NOMBRE=mi_base_datos
+EMPRESA_NOMBRE=Mi Empresa
+URL_BASE=http://mi-dominio.com/
 ```
 
-## 🔧 Casos de Uso Comunes
+## 🚀 Despliegue en Producción
 
-### 1. Proyecto Universitario
-```bash
-# Instalación inicial
-1. Copiar proyecto a htdocs
-2. Ejecutar instalar.php
-3. ¡Listo para usar!
+### Preparación
+1. **Configurar servidor web** (Apache/Nginx)
+2. **Configurar base de datos** (MySQL/MariaDB)
+3. **Configurar PHP** (7.4+)
+
+### Pasos
+1. **Subir archivos** al servidor
+2. **Configurar base de datos**:
+   - Crear base de datos
+   - Ejecutar `instalar.php`
+3. **Configurar variables**:
+   - Crear `app/config/.env` con datos de producción
+4. **Configurar permisos**:
+   ```bash
+   chmod 755 public/imagenes/
+   chmod 755 database/backups/
+   ```
+
+### Variables de Producción
+```env
+DB_HOST=tu-servidor-db
+DB_NOMBRE=tu_base_datos
+DB_USUARIO=tu_usuario
+DB_PASSWORD=tu_password_seguro
+URL_BASE=https://tu-dominio.com/
+APP_ENV=production
+DEBUG_MODE=false
 ```
 
-### 2. Demostración en Clase
-```bash
-# Crear respaldo con datos de ejemplo
-1. Agregar productos de prueba
-2. Crear respaldo automático
-3. Comprimir proyecto completo
-4. Llevar a clase y restaurar
-```
+## 🔒 Seguridad
 
-### 3. Entrega de Proyecto
-```bash
-# Preparar entrega
-1. Crear respaldo final
-2. Limpiar datos de prueba (opcional)
-3. Comprimir proyecto
-4. Incluir instrucciones de instalación
-```
+### Cambios Obligatorios en Producción
+1. **Cambiar contraseñas** de usuarios por defecto
+2. **Configurar APP_SECRET_KEY** única
+3. **Configurar DB_PASSWORD** seguro
+4. **Desactivar DEBUG_MODE**
 
-### 4. Desarrollo Colaborativo
-```bash
-# Compartir con compañeros
-1. Crear respaldo con datos de desarrollo
-2. Subir a Google Drive/Dropbox
-3. Compañero descarga y ejecuta instalar.php
-4. Restaura respaldo si necesita datos
-```
-
-## 🛠️ Herramientas Incluidas
-
-### Instalador Web (`instalar.php`)
-- ✅ Verificación automática de requisitos
-- ⚙️ Configuración guiada de base de datos
-- 🗄️ Instalación automática de estructura
-- 🎯 Interfaz amigable paso a paso
-
-### Sistema de Respaldo (`database/backup.php`)
-- 💾 Crear respaldos con un clic
-- 📋 Lista de respaldos disponibles
-- 🔄 Restaurar respaldos fácilmente
-- 📊 Información de fecha y tamaño
-
-### Configuración Portable
-- 🔧 Un solo archivo de configuración
-- 🌍 Funciona en cualquier entorno
-- 📝 Fácil de editar y mantener
-- 🔒 Valores seguros por defecto
-
-## 🚨 Solución de Problemas
-
-### Error: "No se puede conectar a la base de datos"
-```bash
-# Solución:
-1. Verificar que MySQL esté ejecutándose
-2. Revisar credenciales en app/config/.env
-3. Usar el instalador automático
-```
-
-### Error: "Archivo .env no encontrado"
-```bash
-# Solución:
-1. Copiar env.example a .env
-2. O ejecutar el instalador automático
-```
-
-### Error: "Permisos insuficientes"
-```bash
-# Solución:
-1. Verificar permisos de escritura en app/config/
-2. Verificar permisos en public/imagenes/
-```
+### Recomendaciones
+- Usar HTTPS en producción
+- Configurar respaldos automáticos
+- Mantener actualizado el sistema
+- Revisar logs regularmente
 
 ## 📞 Soporte
 
-### Para Estudiantes
-- 📖 Revisar `INSTALACION.md` para instrucciones detalladas
-- 🔧 Usar el instalador automático (`instalar.php`)
-- 💾 Usar el sistema de respaldo para mover datos
+### Problemas Comunes
 
-### Para Profesores
-- 🎯 El proyecto es completamente portable
-- 📦 Se puede entregar como un solo archivo comprimido
-- 🚀 Instalación en 3 pasos simples
-- 🔄 Fácil de evaluar en diferentes entornos
+**Error 404 en todas las páginas**
+- Verificar que mod_rewrite esté habilitado
+- Verificar archivo `.htaccess`
 
-## 🎉 Beneficios de la Portabilidad
+**Error de base de datos**
+- Verificar que MySQL esté ejecutándose
+- Verificar credenciales en `.env`
 
-1. **⚡ Instalación Rápida**: 3 pasos para tener el sistema funcionando
-2. **🔄 Fácil Movimiento**: Entre computadoras, servidores, entornos
-3. **💾 Respaldos Automáticos**: No perder datos al mover el proyecto
-4. **🎯 Configuración Simple**: Un archivo para toda la configuración
-5. **🛠️ Herramientas Incluidas**: Todo lo necesario está en el proyecto
-6. **📚 Documentación Completa**: Guías paso a paso para cualquier situación
+**Imágenes no se cargan**
+- Verificar permisos de carpeta `public/imagenes/`
+- Verificar configuración de URL_PUBLICA
+
+**Estilos no se aplican**
+- Verificar que Apache esté sirviendo archivos estáticos
+- Verificar configuración de URL_PUBLICA
+
+### Logs y Debug
+- Logs de Apache: `C:\xampp\apache\logs\error.log`
+- Logs de PHP: `C:\xampp\php\logs\`
+- Activar debug: `DEBUG_MODE=true` en `.env`
 
 ---
 
-**¡El proyecto Tennis y Fragancias ahora es completamente portable y fácil de usar! 🚀**
+**Versión**: 1.0.0  
+**Última actualización**: Octubre 2024

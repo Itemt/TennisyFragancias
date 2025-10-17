@@ -1,6 +1,5 @@
-# Archivos de configuración sensibles
+# Archivos de configuración sensibles (solo .env local)
 app/config/.env
-app/config/config.php
 
 # Logs
 *.log
