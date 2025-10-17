@@ -148,6 +148,127 @@
             text-decoration: line-through;
             color: #6c757d;
         }
+        
+        /* Estilos críticos adicionales del CSS externo */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            position: relative;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--color-primario);
+            border-radius: 2px;
+        }
+        
+        .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            font-weight: 500;
+            text-transform: none;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-primario {
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-primario:hover {
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+        
+        .btn-outline-dark {
+            border: 2px solid #212529;
+            color: #212529;
+            background: transparent;
+        }
+        
+        .btn-outline-dark:hover {
+            background: #212529;
+            color: #fff;
+            border-color: #212529;
+            box-shadow: 0 8px 20px rgba(33, 37, 41, 0.3);
+        }
+        
+        .btn-lg {
+            padding: 0.875rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 12px;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 8px;
+        }
+        
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-10px);
+        }
     </style>
     
     <!-- Bootstrap 5 CSS con atributos de carga optimizados -->
@@ -160,7 +281,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" media="all">
     
     <!-- Estilos personalizados adicionales -->
-    <link rel="stylesheet" href="<?= URL_PUBLICA ?>css/styles.css" media="all">
+    <link rel="stylesheet" href="<?= URL_PUBLICA ?>css/styles.css" media="all" onerror="console.error('Error cargando CSS:', this.href)">
     
     <!-- Script para prevenir FOUC adicional -->
     <script>

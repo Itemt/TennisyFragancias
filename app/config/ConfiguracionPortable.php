@@ -115,7 +115,15 @@ class ConfiguracionPortable {
         
         // Aplicación
         define('NOMBRE_SITIO', self::obtener('EMPRESA_NOMBRE', 'Tennis y Fragancias'));
-        define('URL_BASE', self::obtener('URL_BASE', 'http://localhost/tennisyfragancias/'));
+        
+        // Detectar URL base automáticamente
+        $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $script = $_SERVER['SCRIPT_NAME'] ?? '';
+        $directorio = dirname($script);
+        $urlBase = $protocolo . '://' . $host . $directorio . '/';
+        
+        define('URL_BASE', self::obtener('URL_BASE', $urlBase));
         define('URL_PUBLICA', URL_BASE . 'public/');
         
         // Empresa
