@@ -2,6 +2,8 @@
 
 Sistema de comercio electrónico completo especializado en calzado deportivo, casual, formal y accesorios. Desarrollado como proyecto universitario en Barrancabermeja, Santander, Colombia.
 
+> **🚀 Despliegue Automático**: Este proyecto está configurado para desplegarse automáticamente en Coolify cada vez que se hace un commit a la rama principal.
+
 ## 🌟 Características Principales
 
 - ✅ **Sistema de Usuarios Multi-rol**: Administradores, empleados y clientes con permisos diferenciados
