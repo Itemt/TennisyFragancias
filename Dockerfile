@@ -41,10 +41,43 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 777 public/imagenes \
     && chmod -R 777 database/backups \
-    && chmod -R 777 tmp
+    && chmod -R 777 tmp \
+    && chmod -R 777 app/config
 
 # Exponer puerto 80
 EXPOSE 80
 
+# Script de inicio
+COPY <<'EOF' /usr/local/bin/docker-entrypoint.sh
+#!/bin/bash
+set -e
+
+# Crear archivo .env si no existe
+if [ ! -f /var/www/html/app/config/.env ]; then
+    echo "Creando archivo .env..."
+    cat > /var/www/html/app/config/.env <<ENVEOF
+DB_HOST=${DB_HOST}
+DB_NOMBRE=${DB_NOMBRE}
+DB_USUARIO=${DB_USUARIO}
+DB_PASSWORD=${DB_PASSWORD}
+DB_PUERTO=${DB_PUERTO}
+URL_BASE=${URL_BASE}
+EMPRESA_NOMBRE=${EMPRESA_NOMBRE}
+EMPRESA_CIUDAD=${EMPRESA_CIUDAD}
+EMPRESA_DEPARTAMENTO=${EMPRESA_DEPARTAMENTO}
+EMPRESA_PAIS=${EMPRESA_PAIS}
+EMPRESA_EMAIL=${EMPRESA_EMAIL}
+EMPRESA_TELEFONO=${EMPRESA_TELEFONO}
+APP_ENV=${APP_ENV}
+DEBUG_MODE=${DEBUG_MODE}
+ENVEOF
+fi
+
+# Iniciar Apache
+exec apache2-foreground
+EOF
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Comando de inicio
-CMD ["apache2-foreground"]
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
