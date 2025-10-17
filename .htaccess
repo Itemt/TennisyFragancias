@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /tennisyfragancias/
+RewriteBase /
 
 # Redirigir todo al index.php excepto archivos existentes
 RewriteCond %{REQUEST_FILENAME} !-f
