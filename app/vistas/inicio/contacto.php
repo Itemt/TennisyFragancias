@@ -7,27 +7,33 @@
             
             <div class="row mb-5">
                 <div class="col-md-4 mb-3">
-                    <div class="card h-100">
+                    <div class="card h-100 contacto-card">
                         <div class="card-body text-center">
-                            <i class="bi bi-geo-alt fs-1 text-primario"></i>
+                            <div class="contacto-icon">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
                             <h5 class="mt-3">Ubicación</h5>
                             <p class="small"><?= EMPRESA_CIUDAD ?><br><?= EMPRESA_DEPARTAMENTO ?>, <?= EMPRESA_PAIS ?></p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="card h-100">
+                    <div class="card h-100 contacto-card">
                         <div class="card-body text-center">
-                            <i class="bi bi-telephone fs-1 text-primario"></i>
+                            <div class="contacto-icon">
+                                <i class="bi bi-telephone"></i>
+                            </div>
                             <h5 class="mt-3">Teléfono</h5>
                             <p class="small"><?= EMPRESA_TELEFONO ?></p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="card h-100">
+                    <div class="card h-100 contacto-card">
                         <div class="card-body text-center">
-                            <i class="bi bi-envelope fs-1 text-primario"></i>
+                            <div class="contacto-icon">
+                                <i class="bi bi-envelope"></i>
+                            </div>
                             <h5 class="mt-3">Email</h5>
                             <p class="small"><?= EMPRESA_EMAIL ?></p>
                         </div>

@@ -408,6 +408,87 @@
                 font-size: 1rem;
             }
         }
+        
+        /* Estilos adicionales para consistencia total */
+        .card {
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--color-primario);
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .text-primario {
+            color: #E66982 !important;
+        }
+        
+        .bg-primario {
+            background-color: #DC3545 !important;
+        }
+        
+        .bg-secundario {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+        }
+        
+        /* Asegurar que el logo se vea */
+        .navbar-brand img {
+            height: 32px;
+            width: auto;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        /* Estilos para página de contacto */
+        .contacto-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .contacto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .contacto-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #DC3545, #b72a37);
+            color: white;
+            font-size: 1.5rem;
+        }
     </style>
     
     <!-- Bootstrap 5 CSS con atributos de carga optimizados -->
@@ -433,7 +514,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-secundario">
         <div class="container">
             <a class="navbar-brand text-primario" href="<?= Vista::url() ?>">
-                <img src="<?= URL_PUBLICA ?>imagenes/tacones-altos.png" alt="Logo" loading="eager" style="height: 32px; width: auto;" onerror="this.src='<?= URL_PUBLICA ?>imagenes/logo.svg'; this.style.height='32px';">
+                <img src="<?= URL_PUBLICA ?>imagenes/tacones-altos.png" alt="Logo" loading="eager" style="height: 32px; width: auto;" onerror="this.src='<?= URL_PUBLICA ?>imagenes/logo.svg'; this.style.height='32px'; this.style.display='inline-block';">
                 Tennis y Fragancias
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-expanded="false" aria-label="Toggle navigation">
