@@ -1,28 +1,13 @@
 <?php
 /**
- * Script para crear usuarios de administrador y empleado
- * Se ejecuta automáticamente en producción
+ * Script para forzar la creación de usuarios
+ * Ejecutar directamente en el navegador
  */
-
-// Verificar que estamos en producción
-if (!isset($_SERVER['HTTP_HOST']) || strpos($_SERVER['HTTP_HOST'], 'itemt.tech') === false) {
-    exit();
-}
-
-// Verificar si ya se ejecutó hoy
-$users_file = __DIR__ . '/.users_created';
-$today = date('Y-m-d');
-
-if (file_exists($users_file) && file_get_contents($users_file) === $today) {
-    // Ya se ejecutó hoy, no hacer nada
-    exit();
-}
 
 // Cargar configuración
 require_once 'app/config/configuracion.php';
 
-// Log para debug
-error_log("🔧 Ejecutando creación automática de usuarios...");
+echo "<h2>🔧 Creando usuarios de administrador y empleado...</h2>";
 
 try {
     // Crear conexión directa a la base de datos
@@ -32,12 +17,12 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
     
-    error_log("✅ Conexión a la base de datos establecida");
+    echo "<p>✅ Conexión a la base de datos establecida</p>";
     
     // ========================================
     // CREAR USUARIO ADMINISTRADOR
     // ========================================
-    error_log("🔄 Creando usuario administrador...");
+    echo "<h3>🔄 Creando usuario administrador...</h3>";
     
     $adminEmail = 'admin@tennisyfragancias.com';
     $adminPassword = 'Admin123!';
@@ -48,7 +33,7 @@ try {
     $stmt->execute([$adminEmail]);
     
     if ($stmt->fetch()) {
-        error_log("  ℹ️ Usuario administrador ya existe");
+        echo "<p>ℹ️ Usuario administrador ya existe</p>";
     } else {
         // Crear administrador
         $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, apellido, email, password, password_hash, telefono, direccion, ciudad, departamento, rol, estado, activo, fecha_registro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
@@ -67,15 +52,15 @@ try {
             1
         ]);
         
-        error_log("  ✅ Usuario administrador creado");
-        error_log("  📧 Email: $adminEmail");
-        error_log("  🔑 Password: $adminPassword");
+        echo "<p>✅ Usuario administrador creado</p>";
+        echo "<p>📧 Email: $adminEmail</p>";
+        echo "<p>🔑 Password: $adminPassword</p>";
     }
     
     // ========================================
     // CREAR USUARIO EMPLEADO
     // ========================================
-    error_log("🔄 Creando usuario empleado...");
+    echo "<h3>🔄 Creando usuario empleado...</h3>";
     
     $empleadoEmail = 'empleado@tennisyfragancias.com';
     $empleadoPassword = 'Empleado123!';
@@ -86,7 +71,7 @@ try {
     $stmt->execute([$empleadoEmail]);
     
     if ($stmt->fetch()) {
-        error_log("  ℹ️ Usuario empleado ya existe");
+        echo "<p>ℹ️ Usuario empleado ya existe</p>";
     } else {
         // Crear empleado
         $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, apellido, email, password, password_hash, telefono, direccion, ciudad, departamento, rol, estado, activo, fecha_registro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
@@ -105,25 +90,22 @@ try {
             1
         ]);
         
-        error_log("  ✅ Usuario empleado creado");
-        error_log("  📧 Email: $empleadoEmail");
-        error_log("  🔑 Password: $empleadoPassword");
+        echo "<p>✅ Usuario empleado creado</p>";
+        echo "<p>📧 Email: $empleadoEmail</p>";
+        echo "<p>🔑 Password: $empleadoPassword</p>";
     }
     
-    // Marcar que los usuarios se crearon hoy
-    file_put_contents($users_file, $today);
-    
-    error_log("🎉 ¡Usuarios creados exitosamente!");
-    error_log("✅ Administrador: admin@tennisyfragancias.com");
-    error_log("✅ Empleado: empleado@tennisyfragancias.com");
-    error_log("🔐 Credenciales de acceso:");
-    error_log("👑 Admin: Admin123!");
-    error_log("👷 Empleado: Empleado123!");
-    error_log("🚀 Los usuarios están listos para usar!");
+    echo "<h2>🎉 ¡Usuarios creados exitosamente!</h2>";
+    echo "<p>✅ Administrador: admin@tennisyfragancias.com</p>";
+    echo "<p>✅ Empleado: empleado@tennisyfragancias.com</p>";
+    echo "<h3>🔐 Credenciales de acceso:</h3>";
+    echo "<p>👑 Admin: Admin123!</p>";
+    echo "<p>👷 Empleado: Empleado123!</p>";
+    echo "<p>🚀 Los usuarios están listos para usar!</p>";
     
 } catch (Exception $e) {
-    error_log("❌ Error durante la creación de usuarios: " . $e->getMessage());
-    error_log("🔧 Verifica la configuración de la base de datos");
-    exit(1);
+    echo "<h3>❌ Error durante la creación de usuarios:</h3>";
+    echo "<p>" . $e->getMessage() . "</p>";
+    echo "<p>🔧 Verifica la configuración de la base de datos</p>";
 }
 ?>
