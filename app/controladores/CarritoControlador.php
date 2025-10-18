@@ -226,7 +226,6 @@ class CarritoControlador extends Controlador {
                 $detallePedidoModelo->agregarDetalle(
                     $pedidoId,
                     $item['producto_id'],
-                    $item['nombre'],
                     $item['precio_unitario'],
                     $item['cantidad']
                 );

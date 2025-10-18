@@ -22,13 +22,12 @@ class DetallePedido extends Modelo {
     /**
      * Agregar detalle de pedido
      */
-    public function agregarDetalle($pedidoId, $productoId, $nombreProducto, $precioUnitario, $cantidad) {
+    public function agregarDetalle($pedidoId, $productoId, $precioUnitario, $cantidad) {
         $subtotal = $precioUnitario * $cantidad;
         
         $datos = [
             'pedido_id' => $pedidoId,
             'producto_id' => $productoId,
-            'nombre_producto' => $nombreProducto,
             'precio_unitario' => $precioUnitario,
             'cantidad' => $cantidad,
             'subtotal' => $subtotal
@@ -43,7 +42,7 @@ class DetallePedido extends Modelo {
     public function obtenerMasVendidos($limite = 10, $fechaDesde = null, $fechaHasta = null) {
         $sql = "SELECT 
                     dp.producto_id,
-                    dp.nombre_producto,
+                    p.nombre as nombre_producto,
                     SUM(dp.cantidad) as total_vendido,
                     SUM(dp.subtotal) as total_ingresos,
                     p.imagen_principal,
@@ -65,7 +64,7 @@ class DetallePedido extends Modelo {
             $params[':fecha_hasta'] = $fechaHasta;
         }
         
-        $sql .= " GROUP BY dp.producto_id, dp.nombre_producto
+        $sql .= " GROUP BY dp.producto_id, p.nombre
                   ORDER BY total_vendido DESC
                   LIMIT :limite";
         

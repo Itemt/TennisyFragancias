@@ -126,7 +126,6 @@ class EmpleadoControlador extends Controlador {
                 $detallePedidoModelo->agregarDetalle(
                     $pedidoId,
                     $item['id'],
-                    $item['nombre'],
                     $item['precio'],
                     $item['cantidad']
                 );
