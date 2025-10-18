@@ -4,6 +4,11 @@
  */
 class AdminControlador extends Controlador {
     
+    public function index() {
+        // Redirigir al dashboard por defecto
+        $this->redirigir('admin/dashboard');
+    }
+    
     public function dashboard() {
         $this->verificarRol(ROL_ADMINISTRADOR);
         
@@ -452,6 +457,41 @@ class AdminControlador extends Controlador {
             $this->enviarJson(['exito' => true, 'mensaje' => 'Estado del usuario actualizado exitosamente']);
         } else {
             $this->enviarJson(['exito' => false, 'mensaje' => 'Error al actualizar el estado del usuario']);
+        }
+    }
+    
+    /**
+     * Eliminar usuario completamente
+     */
+    public function eliminarUsuario() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $usuarioId = (int)($_POST['usuario_id'] ?? 0);
+        
+        // Validar datos
+        if ($usuarioId <= 0) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
+            return;
+        }
+        
+        // No permitir eliminar el propio usuario
+        if ($usuarioId === (int)$_SESSION['usuario_id']) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'No puedes eliminar tu propia cuenta']);
+            return;
+        }
+        
+        // Eliminar usuario
+        $usuarioModelo = $this->cargarModelo('Usuario');
+        
+        if ($usuarioModelo->eliminar($usuarioId)) {
+            $this->enviarJson(['exito' => true, 'mensaje' => 'Usuario eliminado exitosamente']);
+        } else {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error al eliminar el usuario']);
         }
     }
 }

@@ -357,5 +357,3 @@ class Producto extends Modelo {
         return $sku;
     }
 }
-?>
-

@@ -146,9 +146,9 @@
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item" href="#" 
-                                                       onclick="cambiarEstado(<?= $usuario['id'] ?>, 'suspendido')">
-                                                        <i class="bi bi-x-circle"></i> Suspender
+                                                    <a class="dropdown-item text-danger" href="#" 
+                                                       onclick="eliminarUsuario(<?= $usuario['id'] ?>, '<?= Vista::escapar($usuario['nombre'] . ' ' . $usuario['apellido']) ?>')">
+                                                        <i class="bi bi-trash"></i> Eliminar
                                                     </a>
                                                 </li>
                                             </ul>
@@ -326,6 +326,33 @@ document.getElementById('formCambiarPassword').addEventListener('submit', functi
         alert('Error al cambiar la contraseña');
     });
 });
+
+function eliminarUsuario(usuarioId, nombreUsuario) {
+    if (confirm(`¿Estás seguro de que deseas eliminar al usuario "${nombreUsuario}"?\n\nEsta acción no se puede deshacer y eliminará todos los datos del usuario.`)) {
+        fetch('<?= Vista::url("admin/usuarios/eliminar") ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                usuario_id: usuarioId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exito) {
+                alert(data.mensaje);
+                location.reload();
+            } else {
+                alert('Error: ' + data.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar el usuario');
+        });
+    }
+}
 </script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
