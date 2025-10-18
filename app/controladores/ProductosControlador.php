@@ -91,5 +91,3 @@ class ProductosControlador extends Controlador {
         $this->cargarVista('productos/categoria', $datos);
     }
 }
-?>
-

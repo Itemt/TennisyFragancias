@@ -72,5 +72,3 @@ class InicioControlador extends Controlador {
         $this->cargarVista('inicio/faq', $datos);
     }
 }
-?>
-

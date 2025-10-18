@@ -213,5 +213,3 @@ class AuthControlador extends Controlador {
         }
     }
 }
-?>
-

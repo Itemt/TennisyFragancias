@@ -182,5 +182,3 @@ class Usuario extends Modelo {
         return $stmt->fetch();
     }
 }
-?>
-

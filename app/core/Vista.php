@@ -75,5 +75,3 @@ class Vista {
         return URL_PUBLICA . $ruta;
     }
 }
-?>
-

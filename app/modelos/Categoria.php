@@ -51,5 +51,3 @@ class Categoria extends Modelo {
         return $resultado['total'] > 0;
     }
 }
-?>
-
