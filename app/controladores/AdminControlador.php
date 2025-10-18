@@ -244,7 +244,7 @@ class AdminControlador extends Controlador {
         $this->verificarRol(ROL_ADMINISTRADOR);
         
         $categoriaModelo = $this->cargarModelo('Categoria');
-        $categorias = $categoriaModelo->obtenerTodos();
+        $categorias = $categoriaModelo->obtenerConContadorProductos();
         
         $datos = [
             'titulo' => 'Gestión de Categorías - ' . NOMBRE_SITIO,
@@ -252,6 +252,82 @@ class AdminControlador extends Controlador {
         ];
         
         $this->cargarVista('admin/categorias/lista', $datos);
+    }
+    
+    /**
+     * Editar categoría
+     */
+    public function categoriaEditar() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        $categoriaId = $this->parametros[0] ?? null;
+        
+        if (!$categoriaId) {
+            $this->redirigir('admin/categorias');
+        }
+        
+        $categoriaModelo = $this->cargarModelo('Categoria');
+        $categoria = $categoriaModelo->obtenerPorId($categoriaId);
+        
+        if (!$categoria) {
+            $this->redirigir('admin/categorias');
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $datos = [
+                'nombre' => trim($_POST['nombre']),
+                'descripcion' => trim($_POST['descripcion']),
+                'imagen' => trim($_POST['imagen'])
+            ];
+            
+            if ($categoriaModelo->actualizar($categoriaId, $datos)) {
+                $this->mensaje = 'Categoría actualizada correctamente';
+                $this->tipoMensaje = 'success';
+            } else {
+                $this->mensaje = 'Error al actualizar la categoría';
+                $this->tipoMensaje = 'error';
+            }
+            
+            $this->redirigir('admin/categorias');
+        }
+        
+        $datos = [
+            'titulo' => 'Editar Categoría - ' . NOMBRE_SITIO,
+            'categoria' => $categoria
+        ];
+        
+        $this->cargarVista('admin/categorias/editar', $datos);
+    }
+    
+    /**
+     * Eliminar categoría
+     */
+    public function categoriaEliminar() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $categoriaId = $_POST['categoria_id'] ?? null;
+            
+            if ($categoriaId) {
+                $categoriaModelo = $this->cargarModelo('Categoria');
+                
+                // Verificar si la categoría tiene productos
+                if ($categoriaModelo->tieneProductos($categoriaId)) {
+                    $this->mensaje = 'No se puede eliminar la categoría porque tiene productos asociados';
+                    $this->tipoMensaje = 'error';
+                } else {
+                    if ($categoriaModelo->eliminar($categoriaId)) {
+                        $this->mensaje = 'Categoría eliminada correctamente';
+                        $this->tipoMensaje = 'success';
+                    } else {
+                        $this->mensaje = 'Error al eliminar la categoría';
+                        $this->tipoMensaje = 'error';
+                    }
+                }
+            }
+        }
+        
+        $this->redirigir('admin/categorias');
     }
     
     // ========== GESTIÓN DE USUARIOS ==========

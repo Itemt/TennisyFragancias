@@ -1,8 +1,4 @@
-<?php 
-// Debug temporal
-error_log("Título recibido: " . ($titulo ?? 'No definido'));
-require_once VIEWS_PATH . '/layout/header.php'; 
-?>
+<?php require_once VIEWS_PATH . '/layout/header.php'; ?>
 
 <div class="container-fluid">
     <div class="row">
@@ -102,13 +98,13 @@ require_once VIEWS_PATH . '/layout/header.php';
                                     </td>
                                     <td>
                                         <span class="badge bg-info">
-                                            <?= $categoria['total_productos'] ?? 0 ?> productos
+                                            <?= $categoria['cantidad_productos'] ?? 0 ?> productos
                                         </span>
                                     </td>
                                     <td><?= date('d/m/Y', strtotime($categoria['fecha_creacion'])) ?></td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="<?= Vista::url('admin/categoria_editar/' . $categoria['id']) ?>" 
+                                            <a href="<?= Vista::url('admin/categoria-editar/' . $categoria['id']) ?>" 
                                                class="btn btn-sm btn-outline-primary" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
@@ -167,7 +163,7 @@ function eliminarCategoria(id, nombre) {
         // Crear formulario para enviar POST
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '<?= Vista::url('admin/categoria_eliminar') ?>';
+        form.action = '<?= Vista::url('admin/categoria-eliminar') ?>';
         
         const input = document.createElement('input');
         input.type = 'hidden';

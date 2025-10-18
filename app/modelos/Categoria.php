@@ -50,4 +50,58 @@ class Categoria extends Modelo {
         $resultado = $stmt->fetch();
         return $resultado['total'] > 0;
     }
+    
+    /**
+     * Obtener categoría por ID
+     */
+    public function obtenerPorId($id) {
+        $sql = "SELECT * FROM {$this->tabla} WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+    
+    /**
+     * Actualizar categoría
+     */
+    public function actualizar($id, $datos) {
+        $sql = "UPDATE {$this->tabla} SET nombre = :nombre, descripcion = :descripcion, imagen = :imagen WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':nombre', $datos['nombre']);
+        $stmt->bindParam(':descripcion', $datos['descripcion']);
+        $stmt->bindParam(':imagen', $datos['imagen']);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Eliminar categoría
+     */
+    public function eliminar($id) {
+        $sql = "DELETE FROM {$this->tabla} WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Obtener categorías con contador de productos
+     */
+    public function obtenerConContadorProductos() {
+        $sql = "SELECT 
+                    c.id,
+                    c.nombre,
+                    c.descripcion,
+                    c.imagen,
+                    c.estado,
+                    COUNT(p.id) as cantidad_productos
+                FROM {$this->tabla} c
+                LEFT JOIN productos p ON p.categoria_id = c.id
+                GROUP BY c.id, c.nombre, c.descripcion, c.imagen, c.estado
+                ORDER BY c.nombre ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }
