@@ -356,6 +356,17 @@ class Producto extends Modelo {
         
         return $sku;
     }
+    
+    /**
+     * Actualizar stock de producto
+     */
+    public function actualizarStock($productoId, $nuevoStock) {
+        $sql = "UPDATE {$this->tabla} SET stock = :stock WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':stock', $nuevoStock);
+        $stmt->bindParam(':id', $productoId);
+        return $stmt->execute();
+    }
 }
 ?>
 

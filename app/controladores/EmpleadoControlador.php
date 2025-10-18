@@ -229,4 +229,111 @@ class EmpleadoControlador extends Controlador {
         
         $this->cargarVista('empleado/factura', $datos);
     }
+    
+    /**
+     * Venta presencial - mostrar productos
+     */
+    public function ventaPresencial() {
+        $this->verificarRol([ROL_EMPLEADO, ROL_ADMINISTRADOR]);
+        
+        $productoModelo = $this->cargarModelo('Producto');
+        $categoriaModelo = $this->cargarModelo('Categoria');
+        $marcaModelo = $this->cargarModelo('Marca');
+        $tallaModelo = $this->cargarModelo('Talla');
+        
+        // Obtener productos con stock
+        $productos = $productoModelo->obtenerTodos(['stock_minimo' => 1]);
+        
+        // Obtener datos para filtros
+        $categorias = $categoriaModelo->obtenerTodos();
+        $marcas = $marcaModelo->obtenerTodos();
+        $tallas = $tallaModelo->obtenerTodos();
+        
+        $datos = [
+            'titulo' => 'Venta Presencial - ' . NOMBRE_SITIO,
+            'productos' => $productos,
+            'categorias' => $categorias,
+            'marcas' => $marcas,
+            'tallas' => $tallas
+        ];
+        
+        $this->cargarVista('empleado/venta_presencial', $datos);
+    }
+    
+    /**
+     * Procesar venta presencial
+     */
+    public function procesarVentaPresencial() {
+        $this->verificarRol([ROL_EMPLEADO, ROL_ADMINISTRADOR]);
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $productos = $input['productos'] ?? [];
+        $descuento = (float)($input['descuento'] ?? 0);
+        $total = (float)($input['total'] ?? 0);
+        
+        if (empty($productos)) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'No hay productos seleccionados']);
+            return;
+        }
+        
+        try {
+            // Crear pedido
+            $pedidoModelo = $this->cargarModelo('Pedido');
+            $datosPedido = [
+                'cliente_id' => null, // Venta presencial sin cliente registrado
+                'empleado_id' => $_SESSION['usuario_id'],
+                'total' => $total,
+                'descuento' => $descuento,
+                'metodo_pago' => 'efectivo', // Venta presencial en efectivo
+                'estado' => 'entregado', // Venta presencial se entrega inmediatamente
+                'tipo' => 'presencial',
+                'observaciones' => 'Venta presencial realizada por ' . $_SESSION['usuario_nombre']
+            ];
+            
+            if ($pedidoModelo->crearPedido($datosPedido)) {
+                $pedidoId = $pedidoModelo->obtenerUltimoId();
+                
+                // Agregar detalles del pedido
+                $detallePedidoModelo = $this->cargarModelo('DetallePedido');
+                $productoModelo = $this->cargarModelo('Producto');
+                
+                foreach ($productos as $productoId => $cantidad) {
+                    $producto = $productoModelo->obtenerPorId($productoId);
+                    if ($producto && $producto['stock'] >= $cantidad) {
+                        $precio = $producto['precio_oferta'] ?? $producto['precio'];
+                        $detallePedidoModelo->agregarDetalle(
+                            $pedidoId,
+                            $productoId,
+                            $precio,
+                            $cantidad
+                        );
+                        
+                        // Actualizar stock
+                        $productoModelo->actualizarStock($productoId, $producto['stock'] - $cantidad);
+                    }
+                }
+                
+                // Generar factura
+                $facturaModelo = $this->cargarModelo('Factura');
+                $numeroFactura = $facturaModelo->generarFactura($pedidoId);
+                
+                $this->enviarJson([
+                    'exito' => true, 
+                    'mensaje' => 'Venta procesada exitosamente',
+                    'pedido_id' => $pedidoId,
+                    'numero_factura' => $numeroFactura
+                ]);
+            } else {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al crear el pedido']);
+            }
+            
+        } catch (Exception $e) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error: ' . $e->getMessage()]);
+        }
+    }
 }
