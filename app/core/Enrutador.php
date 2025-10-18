@@ -27,8 +27,11 @@ class Enrutador {
         
         // Buscar método
         if (isset($url[1])) {
-            if (method_exists($this->controlador, $url[1])) {
-                $this->metodo = $url[1];
+            // Convertir guiones a camelCase
+            $metodoNombre = $this->convertirGuionesACamelCase($url[1]);
+            
+            if (method_exists($this->controlador, $metodoNombre)) {
+                $this->metodo = $metodoNombre;
                 unset($url[1]);
             }
         }
@@ -49,5 +52,13 @@ class Enrutador {
             return $url;
         }
         return [];
+    }
+    
+    /**
+     * Convertir guiones a camelCase
+     * Ejemplo: actualizar-stock -> actualizarStock
+     */
+    private function convertirGuionesACamelCase($string) {
+        return lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $string))));
     }
 }

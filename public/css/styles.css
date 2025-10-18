@@ -401,10 +401,33 @@ body {
 .table thead th {
     background: #fafbfc;
     border-bottom: var(--tbl-border);
+    color: #212529 !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
 }
-.table tbody td { border-top: var(--tbl-border); }
+.table tbody td { 
+    border-top: var(--tbl-border);
+    color: #495057;
+    padding: 0.75rem;
+}
 .table-striped tbody tr:nth-of-type(odd) { background-color: #fcfdff; }
 .table-hover tbody tr:hover { background-color: #f6f9ff; }
+
+/* Tablas con fondo oscuro para admin */
+.table-dark thead th {
+    background: #343a40 !important;
+    color: #ffffff !important;
+    border-color: #495057;
+}
+
+.table-dark tbody td {
+    background: #495057;
+    color: #ffffff;
+    border-color: #6c757d;
+}
 
 /* Badges y estados modernos */
 .badge { 

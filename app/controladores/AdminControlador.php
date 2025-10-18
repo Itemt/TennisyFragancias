@@ -545,6 +545,11 @@ class AdminControlador extends Controlador {
      * Vista de actualización de stock
      */
     public function actualizarStock() {
+        // Debug temporal
+        error_log("🔍 actualizarStock() llamado");
+        error_log("🔍 Usuario autenticado: " . (isset($_SESSION['usuario_id']) ? 'Sí' : 'No'));
+        error_log("🔍 Rol usuario: " . ($_SESSION['usuario_rol'] ?? 'No definido'));
+        
         $this->verificarRol([ROL_ADMINISTRADOR, ROL_EMPLEADO]);
         
         $productoModelo = $this->cargarModelo('Producto');
@@ -558,6 +563,13 @@ class AdminControlador extends Controlador {
         ];
         
         $this->cargarVista('admin/stock/actualizar', $datos);
+    }
+    
+    /**
+     * Alias para actualizar-stock (con guiones)
+     */
+    public function actualizar_stock() {
+        $this->actualizarStock();
     }
     
     /**
@@ -628,6 +640,13 @@ class AdminControlador extends Controlador {
         ];
         
         $this->cargarVista('admin/stock/historial', $datos);
+    }
+    
+    /**
+     * Alias para historial-stock (con guiones)
+     */
+    public function historial_stock() {
+        $this->historialStock();
     }
     
     /**

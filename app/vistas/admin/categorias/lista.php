@@ -1,7 +1,7 @@
-<?php
-/**
- * Vista: Lista de categorías - Admin
- */
+<?php 
+// Debug temporal
+error_log("Título recibido: " . ($titulo ?? 'No definido'));
+require_once VIEWS_PATH . '/layout/header.php'; 
 ?>
 
 <div class="container-fluid">
@@ -210,3 +210,5 @@ document.getElementById('filtroEstado').addEventListener('change', function() {
     });
 });
 </script>
+
+<?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
