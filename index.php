@@ -8,6 +8,11 @@
 // Iniciar sesión
 session_start();
 
+// Ejecutar migración automática (solo en producción)
+if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'itemt.tech') !== false) {
+    require_once 'auto-migrate.php';
+}
+
 // Configuración de errores para desarrollo
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
