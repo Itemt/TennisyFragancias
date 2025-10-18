@@ -27,10 +27,17 @@ class Usuario extends Modelo {
         
         $usuario = $stmt->fetch();
         
-        if ($usuario && password_verify($password, $usuario['password_hash'])) {
-            // Actualizar última conexión
-            $this->actualizarUltimaConexion($usuario['id']);
-            return $usuario;
+        if ($usuario) {
+            // Verificar contraseña con password_hash (método preferido)
+            if (!empty($usuario['password_hash']) && password_verify($password, $usuario['password_hash'])) {
+                $this->actualizarUltimaConexion($usuario['id']);
+                return $usuario;
+            }
+            // Verificar contraseña con password (método legacy)
+            elseif (!empty($usuario['password']) && $usuario['password'] === $password) {
+                $this->actualizarUltimaConexion($usuario['id']);
+                return $usuario;
+            }
         }
         
         return false;
