@@ -4,13 +4,19 @@
  * Ejecutar en el servidor de producción
  */
 
-require_once 'app/config/base_datos.php';
+// Cargar configuración
+require_once 'app/config/configuracion.php';
 
 echo "🔄 Iniciando migración de base de datos...\n";
 
 try {
-    $db = new BaseDatos();
-    $pdo = $db->obtenerConexion();
+    // Crear conexión directa a la base de datos
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NOMBRE . ";charset=" . DB_CHARSET;
+    $pdo = new PDO($dsn, DB_USUARIO, DB_PASSWORD, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET
+    ]);
     
     echo "✅ Conexión a la base de datos establecida\n";
     
