@@ -266,38 +266,41 @@ class AdminControlador extends Controlador {
     /**
      * Editar categoría
      */
-    public function categoriaEditar() {
+    public function categoriaEditar($categoriaId = null) {
         $this->verificarRol(ROL_ADMINISTRADOR);
         
-        $categoriaId = $this->parametros[0] ?? null;
-        
         if (!$categoriaId) {
+            $_SESSION['error'] = 'ID de categoría no especificado';
             $this->redirigir('admin/categorias');
+            return;
         }
         
         $categoriaModelo = $this->cargarModelo('Categoria');
         $categoria = $categoriaModelo->obtenerPorId($categoriaId);
         
         if (!$categoria) {
+            $_SESSION['error'] = 'Categoría no encontrada';
             $this->redirigir('admin/categorias');
+            return;
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $datos = [
                 'nombre' => trim($_POST['nombre']),
                 'descripcion' => trim($_POST['descripcion']),
-                'imagen' => trim($_POST['imagen'])
+                'imagen' => trim($_POST['imagen'] ?? '')
             ];
             
             if ($categoriaModelo->actualizar($categoriaId, $datos)) {
-                $this->mensaje = 'Categoría actualizada correctamente';
-                $this->tipoMensaje = 'success';
+                $_SESSION['mensaje'] = 'Categoría actualizada correctamente';
+                $_SESSION['tipo_mensaje'] = 'success';
             } else {
-                $this->mensaje = 'Error al actualizar la categoría';
-                $this->tipoMensaje = 'error';
+                $_SESSION['mensaje'] = 'Error al actualizar la categoría';
+                $_SESSION['tipo_mensaje'] = 'error';
             }
             
             $this->redirigir('admin/categorias');
+            return;
         }
         
         $datos = [
@@ -371,27 +374,30 @@ class AdminControlador extends Controlador {
         $this->redirigir('admin/categorias');
     }
     
-    // ========== ALIASES PARA RUTAS ==========
+    // ========== GESTIÓN DE PEDIDOS ==========
     
-    /**
-     * Alias para actualizar stock
-     */
-    public function stockActualizar() {
-        $this->actualizarStock();
-    }
-    
-    /**
-     * Alias para historial de stock
-     */
-    public function stockHistorial() {
-        $this->historialStock();
-    }
-    
-    /**
-     * Alias para editar categoría (con guión)
-     */
-    public function categoria_editar() {
-        $this->categoriaEditar();
+    public function pedidos() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        $pedidoModelo = $this->cargarModelo('Pedido');
+        
+        // Filtros
+        $filtros = [
+            'estado' => $_GET['estado'] ?? '',
+            'buscar' => $_GET['buscar'] ?? '',
+            'pagina' => (int)($_GET['pagina'] ?? 1)
+        ];
+        
+        // Obtener pedidos
+        $pedidos = $pedidoModelo->obtenerTodos($filtros);
+        
+        $datos = [
+            'titulo' => 'Gestión de Pedidos - ' . NOMBRE_SITIO,
+            'pedidos' => $pedidos,
+            'filtros' => $filtros
+        ];
+        
+        $this->cargarVista('admin/pedidos', $datos);
     }
     
     // ========== GESTIÓN DE USUARIOS ==========
@@ -579,9 +585,13 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        $usuarioId = (int)($_POST['usuario_id'] ?? 0);
-        $nuevaPassword = $_POST['nueva_password'] ?? '';
-        $confirmarPassword = $_POST['confirmar_password'] ?? '';
+        // Leer datos JSON del body
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+        
+        $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
+        $nuevaPassword = $data['nueva_password'] ?? $_POST['nueva_password'] ?? '';
+        $confirmarPassword = $data['confirmar_password'] ?? $_POST['confirmar_password'] ?? '';
         
         // Validar datos
         if ($usuarioId <= 0) {
@@ -621,8 +631,12 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        $usuarioId = (int)($_POST['usuario_id'] ?? 0);
-        $nuevoEstado = $_POST['estado'] ?? '';
+        // Leer datos JSON del body
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+        
+        $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
+        $nuevoEstado = $data['estado'] ?? $_POST['estado'] ?? '';
         
         // Validar datos
         if ($usuarioId <= 0) {
@@ -657,7 +671,11 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        $usuarioId = (int)($_POST['usuario_id'] ?? 0);
+        // Leer datos JSON del body
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+        
+        $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
         
         // Validar datos
         if ($usuarioId <= 0) {

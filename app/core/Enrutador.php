@@ -27,28 +27,12 @@ class Enrutador {
         
         // Buscar método
         if (isset($url[1])) {
-            // Manejar rutas con múltiples niveles como stock/actualizar
-            if (isset($url[2])) {
-                $metodoNombre = $this->convertirGuionesACamelCase($url[1] . '_' . $url[2]);
-                if (method_exists($this->controlador, $metodoNombre)) {
-                    $this->metodo = $metodoNombre;
-                    unset($url[1], $url[2]);
-                } else {
-                    // Intentar solo con el segundo nivel
-                    $metodoNombre = $this->convertirGuionesACamelCase($url[2]);
-                    if (method_exists($this->controlador, $metodoNombre)) {
-                        $this->metodo = $metodoNombre;
-                        unset($url[1], $url[2]);
-                    }
-                }
-            } else {
-                // Convertir guiones a camelCase
-                $metodoNombre = $this->convertirGuionesACamelCase($url[1]);
-                
-                if (method_exists($this->controlador, $metodoNombre)) {
-                    $this->metodo = $metodoNombre;
-                    unset($url[1]);
-                }
+            // Convertir guiones a camelCase
+            $metodoNombre = $this->convertirGuionesACamelCase($url[1]);
+            
+            if (method_exists($this->controlador, $metodoNombre)) {
+                $this->metodo = $metodoNombre;
+                unset($url[1]);
             }
         }
         
