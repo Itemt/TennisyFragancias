@@ -227,16 +227,6 @@ class CarritoControlador extends Controlador {
             // Vaciar carrito
             $carritoModelo->vaciarCarrito($_SESSION['usuario_id']);
             
-            // Crear notificación
-            $notificacionModelo = $this->cargarModelo('Notificacion');
-            $pedido = $pedidoModelo->obtenerPorId($pedidoId);
-            $notificacionModelo->crearNotificacion(
-                $_SESSION['usuario_id'],
-                'pedido',
-                'Pedido realizado con éxito',
-                'Tu pedido #' . $pedido['numero_pedido'] . ' ha sido registrado correctamente.',
-                'pedidos/ver/' . $pedidoId
-            );
             
             $_SESSION['exito'] = 'Pedido realizado con éxito';
             $this->redirigir('pedidos/ver/' . $pedidoId);

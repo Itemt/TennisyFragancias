@@ -11,10 +11,9 @@ Sistema de comercio electrónico completo especializado en calzado deportivo, ca
 - ✅ **Sistema de Usuarios Multi-rol**: Administradores, empleados y clientes con permisos diferenciados
 - 🛒 **Carrito de Compras**: Gestión completa con persistencia de sesión
 - 💳 **Pasarela de Pagos**: Integración con MercadoPago
-- 📦 **Gestión de Pedidos**: Seguimiento completo con estados y notificaciones
+- 📦 **Gestión de Pedidos**: Seguimiento completo con estados
 - 🗄️ **Gestión de Inventario**: Control de stock, alertas de stock mínimo
 - 🏷️ **Sistema de Categorías**: Organización por tipos de productos
-- 📧 **Notificaciones**: Sistema de alertas en tiempo real
 - 📊 **Dashboard Administrativo**: Reportes, estadísticas y gráficos
 - 🔐 **Seguridad**: Encriptación de contraseñas, validación de datos, protección CSRF
 - 📱 **Diseño Responsive**: Compatible con dispositivos móviles y tablets
@@ -101,24 +100,33 @@ El instalador:
 
 #### 🗄️ Paso 4: Instalación de Base de Datos
 El instalador creará automáticamente:
-- 8 tablas principales
+- 15 tablas normalizadas
 - Índices y relaciones
 - Usuarios predefinidos
 - Datos de prueba (si se seleccionó)
 
-## 🗄️ Estructura de Base de Datos
+## 🗄️ Estructura de Base de Datos Normalizada
 
-El instalador crea automáticamente las siguientes tablas:
+El instalador crea automáticamente las siguientes tablas normalizadas:
 
 ### Tablas Principales
 1. **usuarios** - Gestión de usuarios (clientes, empleados, administradores)
-2. **categorias** - Categorías de productos
-3. **productos** - Catálogo de productos con stock y precios
-4. **pedidos** - Órdenes de compra de clientes
-5. **detalle_pedidos** - Detalles de productos por pedido
-6. **carrito** - Carrito de compras persistente
-7. **notificaciones** - Sistema de notificaciones en tiempo real
+2. **direcciones** - Direcciones de usuarios (normalizada)
+3. **categorias** - Categorías de productos
+4. **productos** - Catálogo de productos con referencias normalizadas
+5. **pedidos** - Órdenes de compra con referencias normalizadas
+6. **detalle_pedidos** - Detalles de productos por pedido
+7. **carrito** - Carrito de compras persistente
 8. **facturas** - Facturación electrónica
+
+### Tablas de Referencia (Normalizadas)
+9. **marcas** - Marcas de productos
+10. **tallas** - Tallas disponibles
+11. **colores** - Colores disponibles
+12. **generos** - Géneros de productos
+13. **metodos_pago** - Métodos de pago disponibles
+14. **estados_pedido** - Estados de pedidos
+15. **estados_pago** - Estados de pagos
 
 ### Datos de Prueba (Opción "Con datos de prueba")
 
@@ -234,7 +242,6 @@ El instalador **NO requiere archivos SQL**. Todo se genera mediante código PHP:
 - 💳 Realizar compras con MercadoPago
 - 📦 Seguimiento de pedidos
 - 👤 Gestionar perfil y direcciones
-- 🔔 Ver notificaciones
 - 🔒 Cambiar contraseña
 
 ## 🔄 Sistema de Respaldo

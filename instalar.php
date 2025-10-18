@@ -483,7 +483,7 @@ if (php_sapi_name() === 'cli') {
             function crearEstructuraBaseDatos(PDO $pdo): int {
                 $ejecutados = 0;
                 
-                // Tabla usuarios
+                // Tabla usuarios (normalizada - sin datos de dirección)
                 $pdo->exec("CREATE TABLE IF NOT EXISTS usuarios (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     nombre VARCHAR(100) NOT NULL,
@@ -491,10 +491,6 @@ if (php_sapi_name() === 'cli') {
                     email VARCHAR(100) NOT NULL UNIQUE,
                     password_hash VARCHAR(255) NOT NULL,
                     telefono VARCHAR(20),
-                    direccion TEXT,
-                    ciudad VARCHAR(100),
-                    departamento VARCHAR(100),
-                    codigo_postal VARCHAR(10),
                     rol ENUM('cliente', 'empleado', 'administrador') DEFAULT 'cliente',
                     estado ENUM('activo', 'inactivo', 'suspendido') DEFAULT 'activo',
                     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -502,6 +498,93 @@ if (php_sapi_name() === 'cli') {
                     INDEX idx_email (email),
                     INDEX idx_rol (rol),
                     INDEX idx_estado (estado)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla direcciones (normalizada)
+                $pdo->exec("CREATE TABLE IF NOT EXISTS direcciones (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    usuario_id INT NOT NULL,
+                    tipo ENUM('principal', 'envio', 'facturacion') DEFAULT 'principal',
+                    direccion TEXT NOT NULL,
+                    ciudad VARCHAR(100) NOT NULL,
+                    departamento VARCHAR(100) NOT NULL,
+                    codigo_postal VARCHAR(10),
+                    es_principal TINYINT(1) DEFAULT 0,
+                    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+                    INDEX idx_usuario (usuario_id),
+                    INDEX idx_tipo (tipo),
+                    INDEX idx_principal (es_principal)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla marcas (normalizada)
+                $pdo->exec("CREATE TABLE IF NOT EXISTS marcas (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL UNIQUE,
+                    descripcion TEXT,
+                    logo VARCHAR(255),
+                    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+                    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_nombre (nombre),
+                    INDEX idx_estado (estado)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla tallas (normalizada)
+                $pdo->exec("CREATE TABLE IF NOT EXISTS tallas (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(20) NOT NULL UNIQUE,
+                    orden INT DEFAULT 0,
+                    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+                    INDEX idx_nombre (nombre),
+                    INDEX idx_orden (orden)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla colores (normalizada)
+                $pdo->exec("CREATE TABLE IF NOT EXISTS colores (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(50) NOT NULL UNIQUE,
+                    codigo_hex VARCHAR(7),
+                    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+                    INDEX idx_nombre (nombre)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla generos (normalizada)
+                $pdo->exec("CREATE TABLE IF NOT EXISTS generos (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(20) NOT NULL UNIQUE,
+                    descripcion VARCHAR(100),
+                    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+                    INDEX idx_nombre (nombre)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla metodos_pago (normalizada)
+                $pdo->exec("CREATE TABLE IF NOT EXISTS metodos_pago (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(50) NOT NULL UNIQUE,
+                    descripcion TEXT,
+                    activo TINYINT(1) DEFAULT 1,
+                    requiere_configuracion TINYINT(1) DEFAULT 0,
+                    INDEX idx_nombre (nombre),
+                    INDEX idx_activo (activo)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+                $ejecutados++;
+                
+                // Tabla estados_pedido (normalizada)
+                $pdo->exec("CREATE TABLE IF NOT EXISTS estados_pedido (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(50) NOT NULL UNIQUE,
+                    descripcion VARCHAR(200),
+                    orden INT DEFAULT 0,
+                    es_final TINYINT(1) DEFAULT 0,
+                    color VARCHAR(7) DEFAULT '#6c757d',
+                    INDEX idx_nombre (nombre),
+                    INDEX idx_orden (orden)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
                 $ejecutados++;
                 
@@ -532,7 +615,7 @@ if (php_sapi_name() === 'cli') {
                     // No interrumpir instalación si falla
                 }
                 
-                // Tabla productos
+                // Tabla productos (normalizada)
                 $pdo->exec("CREATE TABLE IF NOT EXISTS productos (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     codigo_sku VARCHAR(50) NOT NULL UNIQUE,
@@ -541,28 +624,36 @@ if (php_sapi_name() === 'cli') {
                     precio DECIMAL(10,2) NOT NULL,
                     precio_oferta DECIMAL(10,2),
                     categoria_id INT NOT NULL,
+                    marca_id INT,
+                    talla_id INT,
+                    color_id INT,
+                    genero_id INT,
                     stock INT NOT NULL DEFAULT 0,
                     stock_minimo INT DEFAULT 5,
                     imagen_principal VARCHAR(255),
-                    marca VARCHAR(100),
-                    talla VARCHAR(20),
-                    color VARCHAR(50),
-                    genero ENUM('hombre', 'mujer', 'niño', 'niña', 'unisex') DEFAULT 'unisex',
                     destacado TINYINT(1) DEFAULT 0,
                     estado ENUM('activo', 'inactivo', 'agotado') DEFAULT 'activo',
                     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE,
+                    FOREIGN KEY (marca_id) REFERENCES marcas(id) ON DELETE SET NULL,
+                    FOREIGN KEY (talla_id) REFERENCES tallas(id) ON DELETE SET NULL,
+                    FOREIGN KEY (color_id) REFERENCES colores(id) ON DELETE SET NULL,
+                    FOREIGN KEY (genero_id) REFERENCES generos(id) ON DELETE SET NULL,
                     INDEX idx_codigo_sku (codigo_sku),
                     INDEX idx_nombre (nombre),
                     INDEX idx_categoria (categoria_id),
+                    INDEX idx_marca (marca_id),
+                    INDEX idx_talla (talla_id),
+                    INDEX idx_color (color_id),
+                    INDEX idx_genero (genero_id),
                     INDEX idx_precio (precio),
                     INDEX idx_destacado (destacado),
                     INDEX idx_estado (estado)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
                 $ejecutados++;
                 
-                // Tabla pedidos
+                // Tabla pedidos (normalizada)
                 $pdo->exec("CREATE TABLE IF NOT EXISTS pedidos (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     usuario_id INT NOT NULL,
@@ -571,20 +662,22 @@ if (php_sapi_name() === 'cli') {
                     costo_envio DECIMAL(10,2) DEFAULT 0,
                     descuento DECIMAL(10,2) DEFAULT 0,
                     total DECIMAL(10,2) NOT NULL,
-                    estado ENUM('pendiente', 'confirmado', 'enviado', 'entregado', 'cancelado') DEFAULT 'pendiente',
-                    metodo_pago VARCHAR(50),
+                    estado_id INT NOT NULL,
+                    metodo_pago_id INT,
                     estado_pago ENUM('pendiente', 'pagado', 'rechazado', 'reembolsado') DEFAULT 'pendiente',
-                    direccion_envio TEXT NOT NULL,
-                    ciudad_envio VARCHAR(100) NOT NULL,
-                    departamento_envio VARCHAR(100) NOT NULL,
+                    direccion_envio_id INT,
                     telefono_contacto VARCHAR(20) NOT NULL,
                     notas TEXT,
                     fecha_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+                    FOREIGN KEY (estado_id) REFERENCES estados_pedido(id),
+                    FOREIGN KEY (metodo_pago_id) REFERENCES metodos_pago(id) ON DELETE SET NULL,
+                    FOREIGN KEY (direccion_envio_id) REFERENCES direcciones(id) ON DELETE SET NULL,
                     INDEX idx_numero_orden (numero_orden),
                     INDEX idx_usuario (usuario_id),
-                    INDEX idx_estado (estado),
+                    INDEX idx_estado (estado_id),
+                    INDEX idx_metodo_pago (metodo_pago_id),
                     INDEX idx_estado_pago (estado_pago),
                     INDEX idx_fecha_pedido (fecha_pedido)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
@@ -629,21 +722,6 @@ if (php_sapi_name() === 'cli') {
                 // Asegurar columna precio_unitario para instalaciones previas
                 try { $pdo->exec("ALTER TABLE carrito ADD COLUMN IF NOT EXISTS precio_unitario DECIMAL(10,2) DEFAULT 0"); } catch (PDOException $e) {}
                 
-                // Tabla notificaciones
-                $pdo->exec("CREATE TABLE IF NOT EXISTS notificaciones (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    usuario_id INT NOT NULL,
-                    tipo VARCHAR(50) NOT NULL,
-                    titulo VARCHAR(200) NOT NULL,
-                    mensaje TEXT NOT NULL,
-                    leida TINYINT(1) DEFAULT 0,
-                    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-                    INDEX idx_usuario (usuario_id),
-                    INDEX idx_leida (leida),
-                    INDEX idx_fecha (fecha_creacion)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-                $ejecutados++;
                 
                 // Tabla facturas
                 $pdo->exec("CREATE TABLE IF NOT EXISTS facturas (
@@ -658,20 +736,113 @@ if (php_sapi_name() === 'cli') {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
                 $ejecutados++;
                 
+                // Insertar datos básicos en tablas normalizadas
+                
+                // Insertar marcas
+                $pdo->exec("INSERT IGNORE INTO marcas (nombre, descripcion, estado) VALUES 
+                    ('Nike', 'Nike Inc. - Just Do It', 'activo'),
+                    ('Adidas', 'Adidas AG - Impossible is Nothing', 'activo'),
+                    ('Puma', 'Puma SE - Forever Faster', 'activo'),
+                    ('Reebok', 'Reebok International Ltd.', 'activo'),
+                    ('Converse', 'Converse Inc. - All Star', 'activo'),
+                    ('New Balance', 'New Balance Athletics Inc.', 'activo'),
+                    ('Vans', 'Vans Inc. - Off The Wall', 'activo'),
+                    ('Jordan', 'Air Jordan by Nike', 'activo'),
+                    ('Under Armour', 'Under Armour Inc.', 'activo'),
+                    ('Fila', 'Fila Holdings Corp.', 'activo')");
+                
+                // Insertar tallas
+                $pdo->exec("INSERT IGNORE INTO tallas (nombre, orden, estado) VALUES 
+                    ('XS', 1, 'activo'),
+                    ('S', 2, 'activo'),
+                    ('M', 3, 'activo'),
+                    ('L', 4, 'activo'),
+                    ('XL', 5, 'activo'),
+                    ('XXL', 6, 'activo'),
+                    ('28', 7, 'activo'),
+                    ('29', 8, 'activo'),
+                    ('30', 9, 'activo'),
+                    ('31', 10, 'activo'),
+                    ('32', 11, 'activo'),
+                    ('33', 12, 'activo'),
+                    ('34', 13, 'activo'),
+                    ('35', 14, 'activo'),
+                    ('36', 15, 'activo'),
+                    ('37', 16, 'activo'),
+                    ('38', 17, 'activo'),
+                    ('39', 18, 'activo'),
+                    ('40', 19, 'activo'),
+                    ('41', 20, 'activo'),
+                    ('42', 21, 'activo'),
+                    ('43', 22, 'activo'),
+                    ('44', 23, 'activo'),
+                    ('45', 24, 'activo')");
+                
+                // Insertar colores
+                $pdo->exec("INSERT IGNORE INTO colores (nombre, codigo_hex, estado) VALUES 
+                    ('Negro', '#000000', 'activo'),
+                    ('Blanco', '#FFFFFF', 'activo'),
+                    ('Rojo', '#FF0000', 'activo'),
+                    ('Azul', '#0000FF', 'activo'),
+                    ('Verde', '#008000', 'activo'),
+                    ('Amarillo', '#FFFF00', 'activo'),
+                    ('Naranja', '#FFA500', 'activo'),
+                    ('Rosa', '#FFC0CB', 'activo'),
+                    ('Morado', '#800080', 'activo'),
+                    ('Gris', '#808080', 'activo'),
+                    ('Marrón', '#A52A2A', 'activo'),
+                    ('Azul Marino', '#000080', 'activo'),
+                    ('Turquesa', '#40E0D0', 'activo'),
+                    ('Dorado', '#FFD700', 'activo'),
+                    ('Plateado', '#C0C0C0', 'activo')");
+                
+                // Insertar géneros
+                $pdo->exec("INSERT IGNORE INTO generos (nombre, descripcion, estado) VALUES 
+                    ('Hombre', 'Productos para hombres', 'activo'),
+                    ('Mujer', 'Productos para mujeres', 'activo'),
+                    ('Niño', 'Productos para niños', 'activo'),
+                    ('Niña', 'Productos para niñas', 'activo'),
+                    ('Unisex', 'Productos unisex', 'activo')");
+                
+                // Insertar métodos de pago
+                $pdo->exec("INSERT IGNORE INTO metodos_pago (nombre, descripcion, activo, requiere_configuracion) VALUES 
+                    ('Efectivo', 'Pago en efectivo', 1, 0),
+                    ('Tarjeta de Crédito', 'Pago con tarjeta de crédito', 1, 1),
+                    ('Tarjeta Débito', 'Pago con tarjeta débito', 1, 1),
+                    ('Transferencia Bancaria', 'Transferencia bancaria', 1, 0),
+                    ('MercadoPago', 'Pago a través de MercadoPago', 1, 1),
+                    ('Nequi', 'Pago con Nequi', 1, 1),
+                    ('Daviplata', 'Pago con Daviplata', 1, 1)");
+                
+                // Insertar estados de pedido
+                $pdo->exec("INSERT IGNORE INTO estados_pedido (nombre, descripcion, orden, es_final, color) VALUES 
+                    ('Pendiente', 'Pedido pendiente de confirmación', 1, 0, '#ffc107'),
+                    ('Confirmado', 'Pedido confirmado y en preparación', 2, 0, '#17a2b8'),
+                    ('Enviado', 'Pedido enviado al cliente', 3, 0, '#007bff'),
+                    ('Entregado', 'Pedido entregado exitosamente', 4, 1, '#28a745'),
+                    ('Cancelado', 'Pedido cancelado', 5, 1, '#dc3545'),
+                    ('Reembolsado', 'Pedido reembolsado', 6, 1, '#6c757d')");
+                
                 // Insertar usuario administrador por defecto
                 $passwordHash = password_hash('admin123', PASSWORD_DEFAULT);
-                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, direccion, ciudad, departamento, rol, estado) 
-                           VALUES ('Administrador', 'Sistema', 'admin@tennisyfragancias.com', '$passwordHash', '+57 300 123 4567', 'Calle Principal #123', 'Barrancabermeja', 'Santander', 'administrador', 'activo')");
+                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, rol, estado) 
+                           VALUES ('Administrador', 'Sistema', 'admin@tennisyfragancias.com', '$passwordHash', '+57 300 123 4567', 'administrador', 'activo')");
                 
                 // Insertar usuario empleado por defecto
                 $passwordHashEmpleado = password_hash('empleado123', PASSWORD_DEFAULT);
-                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, direccion, ciudad, departamento, rol, estado) 
-                           VALUES ('Empleado', 'Ventas', 'empleado@tennisyfragancias.com', '$passwordHashEmpleado', '+57 300 234 5678', 'Calle Comercio #45', 'Barrancabermeja', 'Santander', 'empleado', 'activo')");
+                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, rol, estado) 
+                           VALUES ('Empleado', 'Ventas', 'empleado@tennisyfragancias.com', '$passwordHashEmpleado', '+57 300 234 5678', 'empleado', 'activo')");
                 
                 // Insertar usuario cliente de ejemplo
                 $passwordHashCliente = password_hash('cliente123', PASSWORD_DEFAULT);
-                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, direccion, ciudad, departamento, codigo_postal, rol, estado) 
-                           VALUES ('Juan Carlos', 'Pérez López', 'cliente@example.com', '$passwordHashCliente', '+57 311 456 7890', 'Carrera 15 #28-45 Apto 301', 'Barrancabermeja', 'Santander', '687031', 'cliente', 'activo')");
+                $pdo->exec("INSERT IGNORE INTO usuarios (nombre, apellido, email, password_hash, telefono, rol, estado) 
+                           VALUES ('Juan Carlos', 'Pérez López', 'cliente@example.com', '$passwordHashCliente', '+57 311 456 7890', 'cliente', 'activo')");
+                
+                // Insertar direcciones para los usuarios
+                $pdo->exec("INSERT IGNORE INTO direcciones (usuario_id, tipo, direccion, ciudad, departamento, codigo_postal, es_principal) VALUES 
+                    (1, 'principal', 'Calle Principal #123', 'Barrancabermeja', 'Santander', '687031', 1),
+                    (2, 'principal', 'Calle Comercio #45', 'Barrancabermeja', 'Santander', '687031', 1),
+                    (3, 'principal', 'Carrera 15 #28-45 Apto 301', 'Barrancabermeja', 'Santander', '687031', 1)");
                 
                 return $ejecutados;
             }

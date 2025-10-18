@@ -3,7 +3,7 @@
  * Modelo DetallePedido
  */
 class DetallePedido extends Modelo {
-    protected $tabla = 'detalle_pedido';
+    protected $tabla = 'detalle_pedidos';
     
     /**
      * Obtener detalles de un pedido

@@ -6,12 +6,21 @@ class Producto extends Modelo {
     protected $tabla = 'productos';
     
     /**
-     * Obtener productos con información de categoría
+     * Obtener productos con información normalizada
      */
     public function obtenerTodos() {
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 ORDER BY p.fecha_creacion DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -19,12 +28,21 @@ class Producto extends Modelo {
     }
     
     /**
-     * Obtener producto con categoría
+     * Obtener producto con información normalizada
      */
     public function obtenerPorId($id) {
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 WHERE p.id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':id', $id);
@@ -36,9 +54,18 @@ class Producto extends Modelo {
      * Obtener productos activos para el catálogo
      */
     public function obtenerCatalogo($limite = null, $offset = 0) {
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 WHERE p.estado = 'activo'
                 ORDER BY p.destacado DESC, p.fecha_creacion DESC";
         
@@ -62,11 +89,20 @@ class Producto extends Modelo {
      */
     public function buscar($termino, $limite = null) {
         $termino = "%{$termino}%";
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 WHERE p.estado = 'activo' 
-                AND (p.nombre LIKE :termino OR p.descripcion LIKE :termino OR p.marca LIKE :termino)
+                AND (p.nombre LIKE :termino OR p.descripcion LIKE :termino OR m.nombre LIKE :termino)
                 ORDER BY p.nombre ASC";
         
         if ($limite) {
@@ -88,9 +124,18 @@ class Producto extends Modelo {
      * Filtrar productos
      */
     public function filtrar($filtros = []) {
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 WHERE p.estado = 'activo'";
         
         $params = [];
@@ -100,14 +145,24 @@ class Producto extends Modelo {
             $params[':categoria_id'] = $filtros['categoria_id'];
         }
         
-        if (!empty($filtros['genero'])) {
-            $sql .= " AND p.genero = :genero";
-            $params[':genero'] = $filtros['genero'];
+        if (!empty($filtros['genero_id'])) {
+            $sql .= " AND p.genero_id = :genero_id";
+            $params[':genero_id'] = $filtros['genero_id'];
         }
         
-        if (!empty($filtros['marca'])) {
-            $sql .= " AND p.marca = :marca";
-            $params[':marca'] = $filtros['marca'];
+        if (!empty($filtros['marca_id'])) {
+            $sql .= " AND p.marca_id = :marca_id";
+            $params[':marca_id'] = $filtros['marca_id'];
+        }
+        
+        if (!empty($filtros['color_id'])) {
+            $sql .= " AND p.color_id = :color_id";
+            $params[':color_id'] = $filtros['color_id'];
+        }
+        
+        if (!empty($filtros['talla_id'])) {
+            $sql .= " AND p.talla_id = :talla_id";
+            $params[':talla_id'] = $filtros['talla_id'];
         }
         
         if (!empty($filtros['precio_min'])) {
@@ -150,9 +205,18 @@ class Producto extends Modelo {
      * Obtener productos destacados
      */
     public function obtenerDestacados($limite = 8) {
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 WHERE p.estado = 'activo' AND p.destacado = 1
                 ORDER BY RAND()
                 LIMIT :limite";
@@ -166,9 +230,18 @@ class Producto extends Modelo {
      * Obtener productos por categoría
      */
     public function obtenerPorCategoria($categoriaId, $limite = null) {
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 WHERE p.categoria_id = :categoria_id AND p.estado = 'activo'
                 ORDER BY p.fecha_creacion DESC";
         
@@ -215,9 +288,18 @@ class Producto extends Modelo {
      * Obtener productos con stock bajo
      */
     public function obtenerStockBajo() {
-        $sql = "SELECT p.*, c.nombre as categoria_nombre 
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
                 FROM {$this->tabla} p 
                 INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
                 WHERE p.stock <= p.stock_minimo AND p.estado != 'inactivo'
                 ORDER BY p.stock ASC";
         $stmt = $this->db->prepare($sql);
@@ -226,12 +308,14 @@ class Producto extends Modelo {
     }
     
     /**
-     * Obtener marcas disponibles
+     * Obtener marcas disponibles (ahora desde tabla normalizada)
      */
     public function obtenerMarcas() {
-        $sql = "SELECT DISTINCT marca FROM {$this->tabla} 
-                WHERE marca IS NOT NULL AND marca != '' AND estado = 'activo'
-                ORDER BY marca ASC";
+        $sql = "SELECT DISTINCT m.nombre 
+                FROM {$this->tabla} p 
+                INNER JOIN marcas m ON p.marca_id = m.id 
+                WHERE p.estado = 'activo' AND m.estado = 'activo'
+                ORDER BY m.nombre ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
