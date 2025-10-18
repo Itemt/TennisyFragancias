@@ -3,52 +3,7 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('admin/dashboard') ?>">
-                            <i class="bi bi-house-door"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('admin/productos') ?>">
-                            <i class="bi bi-box"></i> Productos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('admin/categorias') ?>">
-                            <i class="bi bi-tags"></i> Categorías
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('admin/usuarios') ?>">
-                            <i class="bi bi-people"></i> Usuarios
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('admin/pedidos') ?>">
-                            <i class="bi bi-bag"></i> Pedidos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('admin/actualizar-stock') ?>">
-                            <i class="bi bi-box-arrow-in-up"></i> Actualizar Stock
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="<?= Vista::url('admin/historial-stock') ?>">
-                            <i class="bi bi-clock-history"></i> Historial Stock
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('admin/reportes') ?>">
-                            <i class="bi bi-graph-up"></i> Reportes
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        <?php require_once VIEWS_PATH . '/admin/sidebar.php'; ?>
 
         <!-- Main content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">

@@ -316,21 +316,51 @@ class AdminControlador extends Controlador {
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $categoriaId = $_POST['categoria_id'] ?? null;
+            $confirmarEliminacion = $_POST['confirmar_eliminacion'] ?? false;
             
             if ($categoriaId) {
                 $categoriaModelo = $this->cargarModelo('Categoria');
+                $productoModelo = $this->cargarModelo('Producto');
+                
+                // Obtener información de la categoría
+                $categoria = $categoriaModelo->obtenerPorId($categoriaId);
                 
                 // Verificar si la categoría tiene productos
                 if ($categoriaModelo->tieneProductos($categoriaId)) {
-                    $this->mensaje = 'No se puede eliminar la categoría porque tiene productos asociados';
-                    $this->tipoMensaje = 'error';
-                } else {
-                    if ($categoriaModelo->eliminar($categoriaId)) {
-                        $this->mensaje = 'Categoría eliminada correctamente';
-                        $this->tipoMensaje = 'success';
+                    // Contar productos asociados
+                    $stmt = $productoModelo->db->prepare("SELECT COUNT(*) as total FROM productos WHERE categoria_id = ?");
+                    $stmt->execute([$categoriaId]);
+                    $totalProductos = $stmt->fetch()['total'];
+                    
+                    if (!$confirmarEliminacion) {
+                        // Mostrar advertencia
+                        $_SESSION['mensaje'] = "⚠️ ADVERTENCIA: Esta categoría tiene $totalProductos productos asociados. Al eliminar la categoría, TODOS estos productos también serán eliminados permanentemente. ¿Está seguro?";
+                        $_SESSION['tipo_mensaje'] = 'warning';
+                        $_SESSION['categoria_advertencia'] = [
+                            'id' => $categoriaId,
+                            'nombre' => $categoria['nombre'],
+                            'total_productos' => $totalProductos
+                        ];
                     } else {
-                        $this->mensaje = 'Error al eliminar la categoría';
-                        $this->tipoMensaje = 'error';
+                        // Eliminar productos primero, luego categoría
+                        $productoModelo->db->prepare("DELETE FROM productos WHERE categoria_id = ?")->execute([$categoriaId]);
+                        
+                        if ($categoriaModelo->eliminar($categoriaId)) {
+                            $_SESSION['mensaje'] = "Categoría y $totalProductos productos eliminados correctamente";
+                            $_SESSION['tipo_mensaje'] = 'success';
+                        } else {
+                            $_SESSION['mensaje'] = 'Error al eliminar la categoría';
+                            $_SESSION['tipo_mensaje'] = 'error';
+                        }
+                    }
+                } else {
+                    // No tiene productos, eliminar directamente
+                    if ($categoriaModelo->eliminar($categoriaId)) {
+                        $_SESSION['mensaje'] = 'Categoría eliminada correctamente';
+                        $_SESSION['tipo_mensaje'] = 'success';
+                    } else {
+                        $_SESSION['mensaje'] = 'Error al eliminar la categoría';
+                        $_SESSION['tipo_mensaje'] = 'error';
                     }
                 }
             }

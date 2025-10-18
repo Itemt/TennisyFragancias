@@ -1,7 +1,15 @@
 <?php require_once VIEWS_PATH . '/layout/header.php'; ?>
 
-<div class="container-fluid my-4">
-    <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard Administrativo</h1>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <?php require_once VIEWS_PATH . '/admin/sidebar.php'; ?>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2"><i class="bi bi-speedometer2"></i> Dashboard Administrativo</h1>
+            </div>
     
     <!-- Estadísticas Principales -->
     <div class="row g-3 mb-4">
@@ -196,7 +204,7 @@
                 </div>
             </div>
             <?php endif; ?>
-        </div>
+        </main>
     </div>
 </div>
 

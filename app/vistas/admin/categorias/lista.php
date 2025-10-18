@@ -51,6 +51,43 @@
                 </div>
             </div>
 
+            <!-- Mensajes y alertas -->
+            <?php if (isset($_SESSION['mensaje'])): ?>
+                <div class="alert alert-<?= $_SESSION['tipo_mensaje'] ?? 'info' ?> alert-dismissible fade show" role="alert">
+                    <?= $_SESSION['mensaje'] ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <?php unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']); ?>
+            <?php endif; ?>
+
+            <!-- Advertencia de eliminación con productos -->
+            <?php if (isset($_SESSION['categoria_advertencia'])): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <h5 class="alert-heading">⚠️ ADVERTENCIA</h5>
+                    <p><?= $_SESSION['mensaje'] ?></p>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>Categoría:</strong> <?= $_SESSION['categoria_advertencia']['nombre'] ?><br>
+                            <strong>Productos asociados:</strong> <?= $_SESSION['categoria_advertencia']['total_productos'] ?>
+                        </div>
+                        <div>
+                            <form method="POST" action="<?= Vista::url('admin/categoria-eliminar') ?>" style="display: inline;">
+                                <input type="hidden" name="categoria_id" value="<?= $_SESSION['categoria_advertencia']['id'] ?>">
+                                <input type="hidden" name="confirmar_eliminacion" value="1">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Eliminar de todos modos
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-secondary btn-sm ms-2" onclick="this.closest('.alert').remove()">
+                                <i class="bi bi-x"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <?php unset($_SESSION['categoria_advertencia']); ?>
+            <?php endif; ?>
+
             <!-- Filtros -->
             <div class="row mb-3">
                 <div class="col-md-6">

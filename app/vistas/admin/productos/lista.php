@@ -1,12 +1,20 @@
 <?php require_once VIEWS_PATH . '/layout/header.php'; ?>
 
-<div class="container-fluid my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="bi bi-box-seam"></i> Gestión de Productos</h1>
-        <a href="<?= Vista::url('admin/producto_nuevo') ?>" class="btn btn-primario">
-            <i class="bi bi-plus-circle"></i> Nuevo Producto
-        </a>
-    </div>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <?php require_once VIEWS_PATH . '/admin/sidebar.php'; ?>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2"><i class="bi bi-box-seam"></i> Gestión de Productos</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="<?= Vista::url('admin/producto_nuevo') ?>" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nuevo Producto
+                    </a>
+                </div>
+            </div>
     
     <div class="card">
         <div class="card-body">
@@ -76,6 +84,8 @@
                 </table>
             </div>
         </div>
+    </div>
+        </main>
     </div>
 </div>
 
