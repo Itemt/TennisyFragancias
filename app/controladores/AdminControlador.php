@@ -830,4 +830,36 @@ class AdminControlador extends Controlador {
         $historialModelo = $this->cargarModelo('HistorialStock');
         return $historialModelo->obtenerHistorial(100);
     }
+    
+    /**
+     * Mostrar mensajes de sesión
+     */
+    public function mostrarMensajes() {
+        // Mostrar mensaje de éxito
+        if (isset($_SESSION['exito'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> <?= Vista::escapar($_SESSION['exito']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['exito']); ?>
+        <?php endif; ?>
+        
+        <?php // Mostrar mensaje de error
+        if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> <?= Vista::escapar($_SESSION['error']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+        
+        <?php // Mostrar mensaje genérico con tipo
+        if (isset($_SESSION['mensaje'])): ?>
+            <div class="alert alert-<?= $_SESSION['tipo_mensaje'] ?? 'info' ?> alert-dismissible fade show" role="alert">
+                <?= Vista::escapar($_SESSION['mensaje']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']); ?>
+        <?php endif;
+    }
 }
