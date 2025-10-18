@@ -1,7 +1,45 @@
 <?php require_once VIEWS_PATH . '/layout/header.php'; ?>
 
-<div class="container-fluid my-4">
-    <h1 class="mb-4"><i class="bi bi-briefcase"></i> Panel de Empleado</h1>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="<?= Vista::url('empleado/panel') ?>">
+                            <i class="bi bi-house-door"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Vista::url('empleado/pedidos') ?>">
+                            <i class="bi bi-bag"></i> Pedidos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Vista::url('empleado/ventas') ?>">
+                            <i class="bi bi-graph-up"></i> Ventas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Vista::url('empleado/venta-presencial') ?>">
+                            <i class="bi bi-cash-register"></i> Venta Presencial
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= Vista::url('empleado/factura') ?>">
+                            <i class="bi bi-receipt"></i> Facturas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2"><i class="bi bi-briefcase"></i> Panel de Empleado</h1>
+            </div>
     
     <!-- Menú Rápido -->
     <div class="row g-3 mb-4">
@@ -136,7 +174,7 @@
                 </div>
             </div>
             <?php endif; ?>
-        </div>
+        </main>
     </div>
 </div>
 

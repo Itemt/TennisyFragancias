@@ -207,8 +207,14 @@ class EmpleadoControlador extends Controlador {
         }
     }
     
-    public function factura($numeroFactura) {
+    public function factura($numeroFactura = null) {
         $this->verificarRol([ROL_EMPLEADO, ROL_ADMINISTRADOR]);
+        
+        // Si no se proporciona número de factura, mostrar lista de facturas
+        if (!$numeroFactura) {
+            $this->listarFacturas();
+            return;
+        }
         
         $facturaModelo = $this->cargarModelo('Factura');
         $factura = $facturaModelo->obtenerPorNumero($numeroFactura);
@@ -228,6 +234,23 @@ class EmpleadoControlador extends Controlador {
         ];
         
         $this->cargarVista('empleado/factura', $datos);
+    }
+    
+    /**
+     * Listar facturas del empleado
+     */
+    public function listarFacturas() {
+        $this->verificarRol([ROL_EMPLEADO, ROL_ADMINISTRADOR]);
+        
+        $facturaModelo = $this->cargarModelo('Factura');
+        $facturas = $facturaModelo->obtenerPorEmpleado($_SESSION['usuario_id']);
+        
+        $datos = [
+            'titulo' => 'Facturas - ' . NOMBRE_SITIO,
+            'facturas' => $facturas
+        ];
+        
+        $this->cargarVista('empleado/facturas', $datos);
     }
     
     /**
