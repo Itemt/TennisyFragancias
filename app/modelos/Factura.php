@@ -120,6 +120,25 @@ class Factura extends Modelo {
         $stmt->execute();
         return $stmt->fetchAll();
     }
+    
+    /**
+     * Obtener facturas por empleado
+     */
+    public function obtenerPorEmpleado($empleadoId) {
+        $sql = "SELECT f.*, 
+                u.nombre as cliente_nombre, u.apellido as cliente_apellido,
+                u.email as cliente_email, u.telefono as cliente_telefono,
+                p.numero_pedido
+                FROM {$this->tabla} f
+                INNER JOIN usuarios u ON f.usuario_id = u.id
+                INNER JOIN pedidos p ON f.pedido_id = p.id
+                WHERE f.empleado_id = :empleado_id
+                ORDER BY f.fecha_emision DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':empleado_id', $empleadoId);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }
 ?>
 
