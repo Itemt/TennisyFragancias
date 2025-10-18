@@ -101,7 +101,7 @@
                                             <?= $categoria['cantidad_productos'] ?? 0 ?> productos
                                         </span>
                                     </td>
-                                    <td><?= date('d/m/Y', strtotime($categoria['fecha_creacion'])) ?></td>
+                                    <td><?= isset($categoria['fecha_creacion']) ? date('d/m/Y', strtotime($categoria['fecha_creacion'])) : 'N/A' ?></td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="<?= Vista::url('admin/categoria-editar/' . $categoria['id']) ?>" 

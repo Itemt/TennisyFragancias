@@ -263,12 +263,60 @@ class Producto extends Modelo {
     /**
      * Actualizar stock
      */
-    public function actualizarStock($productoId, $cantidad) {
+    public function actualizarStock($productoId, $cantidad, $motivo = 'Actualización manual', $usuarioId = null) {
+        // Obtener stock actual
+        $stockActual = $this->obtenerStock($productoId);
+        if ($stockActual === false) {
+            return false;
+        }
+        
+        $stockNuevo = $stockActual + $cantidad;
+        
+        // Actualizar stock
         $sql = "UPDATE {$this->tabla} SET stock = stock + :cantidad WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':cantidad', $cantidad);
         $stmt->bindParam(':id', $productoId);
-        return $stmt->execute();
+        
+        if ($stmt->execute()) {
+            // Registrar en historial
+            $this->registrarMovimientoStock($productoId, $cantidad, $motivo, $stockActual, $stockNuevo, $usuarioId);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Obtener stock actual de un producto
+     */
+    private function obtenerStock($productoId) {
+        $sql = "SELECT stock FROM {$this->tabla} WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $productoId);
+        $stmt->execute();
+        $resultado = $stmt->fetch();
+        return $resultado ? $resultado['stock'] : false;
+    }
+    
+    /**
+     * Registrar movimiento en historial
+     */
+    private function registrarMovimientoStock($productoId, $cantidad, $motivo, $stockAnterior, $stockNuevo, $usuarioId) {
+        $tipo = $cantidad > 0 ? 'entrada' : 'salida';
+        $cantidadAbsoluta = abs($cantidad);
+        
+        $sql = "INSERT INTO historial_stock (producto_id, usuario_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo) 
+                VALUES (:producto_id, :usuario_id, :tipo, :cantidad, :stock_anterior, :stock_nuevo, :motivo)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':producto_id', $productoId);
+        $stmt->bindParam(':usuario_id', $usuarioId);
+        $stmt->bindParam(':tipo', $tipo);
+        $stmt->bindParam(':cantidad', $cantidadAbsoluta);
+        $stmt->bindParam(':stock_anterior', $stockAnterior);
+        $stmt->bindParam(':stock_nuevo', $stockNuevo);
+        $stmt->bindParam(':motivo', $motivo);
+        $stmt->execute();
     }
     
     /**

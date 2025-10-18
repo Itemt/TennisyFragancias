@@ -204,7 +204,7 @@
                 <h5 class="modal-title">Cambiar Contraseña</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formCambiarPassword">
+            <form id="formCambiarPassword" action="<?= Vista::url('admin/usuarios/cambiar-password') ?>" method="POST">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="usuario_id" class="form-label">Usuario</label>

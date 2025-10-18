@@ -218,10 +218,19 @@ class AdminControlador extends Controlador {
         }
         
         $categorias = $categoriaModelo->obtenerActivas();
+        
+        // Cargar datos para los dropdowns
+        $tallaModelo = $this->cargarModelo('Talla');
+        $colorModelo = $this->cargarModelo('Color');
+        $generoModelo = $this->cargarModelo('Genero');
+        
         $datos = [
             'titulo' => 'Editar Producto - ' . NOMBRE_SITIO,
             'producto' => $producto,
-            'categorias' => $categorias
+            'categorias' => $categorias,
+            'tallas' => $tallaModelo->obtenerTodos(),
+            'colores' => $colorModelo->obtenerTodos(),
+            'generos' => $generoModelo->obtenerTodos()
         ];
         $this->cargarVista('admin/productos/form', $datos);
     }
@@ -677,16 +686,13 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        // Calcular nueva cantidad
+        // Calcular cantidad a agregar/quitar
         $cantidadActual = $producto['stock'];
-        $nuevaCantidad = $tipo === 'entrada' ? 
-            $cantidadActual + $cantidad : 
-            max(0, $cantidadActual - $cantidad);
+        $cantidadMovimiento = $tipo === 'entrada' ? $cantidad : -$cantidad;
+        $nuevaCantidad = $cantidadActual + $cantidadMovimiento;
         
-        // Actualizar stock
-        if ($productoModelo->actualizarStock($productoId, $nuevaCantidad)) {
-            // Registrar en historial
-            $this->registrarMovimientoStock($productoId, $tipo, $cantidad, $motivo, $cantidadActual, $nuevaCantidad);
+        // Actualizar stock (el método ya registra en historial)
+        if ($productoModelo->actualizarStock($productoId, $cantidadMovimiento, $motivo, $_SESSION['usuario_id'] ?? null)) {
             
             $this->enviarJson([
                 'exito' => true, 
@@ -748,7 +754,7 @@ class AdminControlador extends Controlador {
      * Obtener historial de stock
      */
     private function obtenerHistorialStock() {
-        // Por ahora retorna array vacío, después se implementará con base de datos
-        return [];
+        $historialModelo = $this->cargarModelo('HistorialStock');
+        return $historialModelo->obtenerHistorial(100);
     }
 }

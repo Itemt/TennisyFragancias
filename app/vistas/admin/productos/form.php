@@ -77,17 +77,9 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Marca</label>
-                                <select class="form-select" name="marca_id">
-                                    <option value="">Seleccionar marca...</option>
-                                    <?php if (isset($marcas)): ?>
-                                        <?php foreach ($marcas as $marca): ?>
-                                            <option value="<?= $marca['id'] ?>" 
-                                                    <?= (isset($producto) && $producto['marca_id'] == $marca['id']) ? 'selected' : '' ?>>
-                                                <?= Vista::escapar($marca['nombre']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
+                                <input type="text" class="form-control" name="marca" 
+                                       value="<?= isset($producto) ? Vista::escapar($producto['marca'] ?? '') : '' ?>"
+                                       placeholder="Ej: Nike, Adidas, Puma...">
                             </div>
                             
                             <div class="col-md-4 mb-3">
