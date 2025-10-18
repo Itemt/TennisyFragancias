@@ -17,13 +17,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('empleado/ventas') ?>">
+                        <a class="nav-link active" href="<?= Vista::url('empleado/ventas') ?>">
                             <i class="bi bi-graph-up"></i> Ventas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="<?= Vista::url('empleado/venta-presencial') ?>">
-                            <i class="bi bi-cash-register"></i> Venta Presencial
                         </a>
                     </li>
                     <li class="nav-item">

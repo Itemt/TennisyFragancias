@@ -8,7 +8,7 @@ class Factura extends Modelo {
     /**
      * Crear factura desde un pedido
      */
-    public function crearDesde Pedido($pedido, $empleadoId = null) {
+    public function crearDesdePedido($pedido, $empleadoId = null) {
         $numeroFactura = $this->generarNumeroFactura();
         
         $datos = [

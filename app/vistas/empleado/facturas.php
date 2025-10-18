@@ -22,11 +22,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Vista::url('empleado/venta-presencial') ?>">
-                            <i class="bi bi-cash-register"></i> Venta Presencial
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link active" href="<?= Vista::url('empleado/factura') ?>">
                             <i class="bi bi-receipt"></i> Facturas
                         </a>
