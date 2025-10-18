@@ -77,35 +77,85 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Marca</label>
-                                <input type="text" class="form-control" name="marca" 
-                                       value="<?= isset($producto) ? Vista::escapar($producto['marca']) : '' ?>">
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Talla</label>
-                                <input type="text" class="form-control" name="talla" 
-                                       value="<?= isset($producto) ? Vista::escapar($producto['talla']) : '' ?>">
+                                <select class="form-select" name="marca_id">
+                                    <option value="">Seleccionar marca...</option>
+                                    <?php if (isset($marcas)): ?>
+                                        <?php foreach ($marcas as $marca): ?>
+                                            <option value="<?= $marca['id'] ?>" 
+                                                    <?= (isset($producto) && $producto['marca_id'] == $marca['id']) ? 'selected' : '' ?>>
+                                                <?= Vista::escapar($marca['nombre']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
                             </div>
                             
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Color</label>
-                                <input type="text" class="form-control" name="color" 
-                                       value="<?= isset($producto) ? Vista::escapar($producto['color']) : '' ?>">
+                                <select class="form-select" name="color_id">
+                                    <option value="">Seleccionar color...</option>
+                                    <?php if (isset($colores)): ?>
+                                        <?php foreach ($colores as $color): ?>
+                                            <option value="<?= $color['id'] ?>" 
+                                                    <?= (isset($producto) && $producto['color_id'] == $color['id']) ? 'selected' : '' ?>>
+                                                <?= Vista::escapar($color['nombre']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Género</label>
+                                <select class="form-select" name="genero_id">
+                                    <option value="">Seleccionar género...</option>
+                                    <?php if (isset($generos)): ?>
+                                        <?php foreach ($generos as $genero): ?>
+                                            <option value="<?= $genero['id'] ?>" 
+                                                    <?= (isset($producto) && $producto['genero_id'] == $genero['id']) ? 'selected' : '' ?>>
+                                                <?= Vista::escapar($genero['nombre']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Selección de Tallas con Cantidades -->
+                        <div class="mb-4">
+                            <label class="form-label">Tallas Disponibles</label>
+                            <div class="row" id="tallas-container">
+                                <?php if (isset($tallas)): ?>
+                                    <?php foreach ($tallas as $talla): ?>
+                                        <div class="col-md-3 col-sm-4 col-6 mb-2">
+                                            <div class="card h-100">
+                                                <div class="card-body p-2 text-center">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                               name="tallas_seleccionadas[]" 
+                                                               value="<?= $talla['id'] ?>" 
+                                                               id="talla_<?= $talla['id'] ?>"
+                                                               onchange="toggleTallaCantidad(<?= $talla['id'] ?>)">
+                                                        <label class="form-check-label fw-bold" for="talla_<?= $talla['id'] ?>">
+                                                            <?= Vista::escapar($talla['nombre']) ?>
+                                                        </label>
+                                                    </div>
+                                                    <div class="mt-2" id="cantidad_<?= $talla['id'] ?>" style="display: none;">
+                                                        <label class="form-label small">Cantidad:</label>
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                               name="cantidad_talla_<?= $talla['id'] ?>" 
+                                                               min="0" value="0" 
+                                                               placeholder="0">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Género</label>
-                                <select class="form-select" name="genero">
-                                    <option value="unisex" <?= (isset($producto) && $producto['genero'] == 'unisex') ? 'selected' : '' ?>>Unisex</option>
-                                    <option value="hombre" <?= (isset($producto) && $producto['genero'] == 'hombre') ? 'selected' : '' ?>>Hombre</option>
-                                    <option value="mujer" <?= (isset($producto) && $producto['genero'] == 'mujer') ? 'selected' : '' ?>>Mujer</option>
-                                    <option value="niño" <?= (isset($producto) && $producto['genero'] == 'niño') ? 'selected' : '' ?>>Niño</option>
-                                    <option value="niña" <?= (isset($producto) && $producto['genero'] == 'niña') ? 'selected' : '' ?>>Niña</option>
-                                </select>
-                            </div>
-                            
                             <div class="col-md-6 mb-3">
                                 <div class="form-check mt-4">
                                     <input class="form-check-input" type="checkbox" name="destacado" id="destacado" 
@@ -151,6 +201,53 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleTallaCantidad(tallaId) {
+    const checkbox = document.getElementById('talla_' + tallaId);
+    const cantidadDiv = document.getElementById('cantidad_' + tallaId);
+    const cantidadInput = document.querySelector('input[name="cantidad_talla_' + tallaId + '"]');
+    
+    if (checkbox.checked) {
+        cantidadDiv.style.display = 'block';
+        cantidadInput.required = true;
+        cantidadInput.focus();
+    } else {
+        cantidadDiv.style.display = 'none';
+        cantidadInput.required = false;
+        cantidadInput.value = 0;
+    }
+}
+
+// Validar que al menos una talla esté seleccionada
+document.querySelector('form').addEventListener('submit', function(e) {
+    const tallasSeleccionadas = document.querySelectorAll('input[name="tallas_seleccionadas[]"]:checked');
+    
+    if (tallasSeleccionadas.length === 0) {
+        e.preventDefault();
+        alert('Debe seleccionar al menos una talla para el producto.');
+        return false;
+    }
+    
+    // Validar que todas las tallas seleccionadas tengan cantidad > 0
+    let cantidadValida = true;
+    tallasSeleccionadas.forEach(function(checkbox) {
+        const tallaId = checkbox.value;
+        const cantidadInput = document.querySelector('input[name="cantidad_talla_' + tallaId + '"]');
+        
+        if (parseInt(cantidadInput.value) <= 0) {
+            cantidadValida = false;
+            cantidadInput.focus();
+        }
+    });
+    
+    if (!cantidadValida) {
+        e.preventDefault();
+        alert('Todas las tallas seleccionadas deben tener una cantidad mayor a 0.');
+        return false;
+    }
+});
+</script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
 

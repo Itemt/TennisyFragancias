@@ -98,6 +98,17 @@
         </div>
         
         <div class="col-md-3">
+            <a href="<?= Vista::url('admin/actualizar-stock') ?>" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-box-arrow-in-up fs-1 text-primario"></i>
+                        <h5 class="mt-2">Actualizar Stock</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-3">
             <a href="<?= Vista::url('admin/reportes') ?>" class="text-decoration-none">
                 <div class="card">
                     <div class="card-body text-center">

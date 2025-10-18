@@ -198,17 +198,17 @@ class Usuario extends Modelo {
         
         if (!empty($filtros['rol'])) {
             $sql .= " AND rol = :rol";
-            $params[':rol'] = $filtros['rol'];
+            $params['rol'] = $filtros['rol'];
         }
         
         if (!empty($filtros['estado'])) {
             $sql .= " AND estado = :estado";
-            $params[':estado'] = $filtros['estado'];
+            $params['estado'] = $filtros['estado'];
         }
         
         if (!empty($filtros['buscar'])) {
             $sql .= " AND (nombre LIKE :buscar OR apellido LIKE :buscar OR email LIKE :buscar)";
-            $params[':buscar'] = '%' . $filtros['buscar'] . '%';
+            $params['buscar'] = '%' . $filtros['buscar'] . '%';
         }
         
         $sql .= " ORDER BY fecha_registro DESC";
@@ -217,12 +217,12 @@ class Usuario extends Modelo {
         if (isset($filtros['pagina']) && $filtros['pagina'] > 0) {
             $offset = ($filtros['pagina'] - 1) * 20;
             $sql .= " LIMIT 20 OFFSET :offset";
-            $params[':offset'] = $offset;
+            $params['offset'] = $offset;
         }
         
         $stmt = $this->db->prepare($sql);
         foreach ($params as $param => $valor) {
-            $stmt->bindValue($param, $valor);
+            $stmt->bindValue(':' . $param, $valor);
         }
         $stmt->execute();
         return $stmt->fetchAll();
@@ -237,22 +237,22 @@ class Usuario extends Modelo {
         
         if (!empty($filtros['rol'])) {
             $sql .= " AND rol = :rol";
-            $params[':rol'] = $filtros['rol'];
+            $params['rol'] = $filtros['rol'];
         }
         
         if (!empty($filtros['estado'])) {
             $sql .= " AND estado = :estado";
-            $params[':estado'] = $filtros['estado'];
+            $params['estado'] = $filtros['estado'];
         }
         
         if (!empty($filtros['buscar'])) {
             $sql .= " AND (nombre LIKE :buscar OR apellido LIKE :buscar OR email LIKE :buscar)";
-            $params[':buscar'] = '%' . $filtros['buscar'] . '%';
+            $params['buscar'] = '%' . $filtros['buscar'] . '%';
         }
         
         $stmt = $this->db->prepare($sql);
         foreach ($params as $param => $valor) {
-            $stmt->bindValue($param, $valor);
+            $stmt->bindValue(':' . $param, $valor);
         }
         $stmt->execute();
         $resultado = $stmt->fetch();
@@ -277,6 +277,16 @@ class Usuario extends Modelo {
         $sql = "UPDATE {$this->tabla} SET estado = :estado WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':estado', $estado);
+        $stmt->bindParam(':id', $usuarioId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Eliminar usuario completamente
+     */
+    public function eliminar($usuarioId) {
+        $sql = "DELETE FROM {$this->tabla} WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':id', $usuarioId);
         return $stmt->execute();
     }

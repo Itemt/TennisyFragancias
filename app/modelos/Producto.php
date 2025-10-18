@@ -340,8 +340,14 @@ class Producto extends Modelo {
     /**
      * Generar código SKU único
      */
-    public function generarCodigoSKU($categoriaId) {
-        $prefijo = 'TF-' . str_pad($categoriaId, 3, '0', STR_PAD_LEFT) . '-';
+    public function generarCodigoSKU($categoriaId, $tallaId = null) {
+        $prefijo = 'TF-' . str_pad($categoriaId, 3, '0', STR_PAD_LEFT);
+        
+        if ($tallaId) {
+            $prefijo .= '-' . str_pad($tallaId, 2, '0', STR_PAD_LEFT);
+        }
+        
+        $prefijo .= '-';
         $numero = 1;
         
         do {

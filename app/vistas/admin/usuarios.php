@@ -251,10 +251,15 @@ function aplicarFiltros() {
 }
 
 function cambiarPassword(usuarioId, nombreUsuario) {
-    document.getElementById('usuario_id').value = usuarioId;
+    // Establecer el usuario seleccionado
+    const selectUsuario = document.getElementById('usuario_id');
+    selectUsuario.value = usuarioId;
+    
+    // Limpiar campos de contraseña
     document.getElementById('nueva_password').value = '';
     document.getElementById('confirmar_password').value = '';
     
+    // Mostrar modal
     const modal = new bootstrap.Modal(document.getElementById('modalCambiarPassword'));
     modal.show();
 }

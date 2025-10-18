@@ -69,9 +69,20 @@ class AdminControlador extends Controlador {
             $this->procesarNuevoProducto();
         } else {
             $categorias = $categoriaModelo->obtenerActivas();
+            
+            // Cargar opciones para los dropdowns
+            $marcaModelo = $this->cargarModelo('Marca');
+            $tallaModelo = $this->cargarModelo('Talla');
+            $colorModelo = $this->cargarModelo('Color');
+            $generoModelo = $this->cargarModelo('Genero');
+            
             $datos = [
                 'titulo' => 'Nuevo Producto - ' . NOMBRE_SITIO,
-                'categorias' => $categorias
+                'categorias' => $categorias,
+                'marcas' => $marcaModelo->obtenerTodos(),
+                'tallas' => $tallaModelo->obtenerTodos(),
+                'colores' => $colorModelo->obtenerTodos(),
+                'generos' => $generoModelo->obtenerTodos()
             ];
             $this->cargarVista('admin/productos/form', $datos);
         }
@@ -88,10 +99,10 @@ class AdminControlador extends Controlador {
             'categoria_id' => (int)$_POST['categoria_id'],
             'stock' => (int)$_POST['stock'],
             'stock_minimo' => (int)($_POST['stock_minimo'] ?? 5),
-            'marca' => $this->limpiarDatos($_POST['marca']),
-            'talla' => $this->limpiarDatos($_POST['talla'] ?? ''),
-            'color' => $this->limpiarDatos($_POST['color'] ?? ''),
-            'genero' => $this->limpiarDatos($_POST['genero']),
+            'marca_id' => !empty($_POST['marca_id']) ? (int)$_POST['marca_id'] : null,
+            'talla_id' => !empty($_POST['talla_id']) ? (int)$_POST['talla_id'] : null,
+            'color_id' => !empty($_POST['color_id']) ? (int)$_POST['color_id'] : null,
+            'genero_id' => !empty($_POST['genero_id']) ? (int)$_POST['genero_id'] : null,
             'destacado' => isset($_POST['destacado']) ? 1 : 0,
             'estado' => 'activo'
         ];
@@ -111,11 +122,46 @@ class AdminControlador extends Controlador {
             }
         }
         
-        if ($productoModelo->crear($datosProducto)) {
-            $_SESSION['exito'] = 'Producto creado correctamente';
+        // Procesar tallas seleccionadas
+        $tallasSeleccionadas = $_POST['tallas_seleccionadas'] ?? [];
+        $productosCreados = 0;
+        $errores = [];
+        
+        if (empty($tallasSeleccionadas)) {
+            $_SESSION['error'] = 'Debe seleccionar al menos una talla';
+            $this->redirigir('admin/producto_nuevo');
+            return;
+        }
+        
+        foreach ($tallasSeleccionadas as $tallaId) {
+            $cantidad = (int)($_POST['cantidad_talla_' . $tallaId] ?? 0);
+            
+            if ($cantidad <= 0) {
+                $errores[] = "La cantidad para la talla seleccionada debe ser mayor a 0";
+                continue;
+            }
+            
+            // Crear datos del producto para esta talla
+            $datosTalla = $datosProducto;
+            $datosTalla['talla_id'] = (int)$tallaId;
+            $datosTalla['stock'] = $cantidad;
+            $datosTalla['codigo_sku'] = $productoModelo->generarCodigoSKU($datosProducto['categoria_id'], $tallaId);
+            
+            if ($productoModelo->crear($datosTalla)) {
+                $productosCreados++;
+            } else {
+                $errores[] = "Error al crear el producto para la talla seleccionada";
+            }
+        }
+        
+        if ($productosCreados > 0) {
+            $_SESSION['exito'] = "Se crearon {$productosCreados} variantes del producto correctamente";
+            if (!empty($errores)) {
+                $_SESSION['error'] = implode(', ', $errores);
+            }
             $this->redirigir('admin/productos');
         } else {
-            $_SESSION['error'] = 'Error al crear el producto';
+            $_SESSION['error'] = 'Error al crear los productos: ' . implode(', ', $errores);
             $this->redirigir('admin/producto_nuevo');
         }
     }
@@ -493,5 +539,121 @@ class AdminControlador extends Controlador {
         } else {
             $this->enviarJson(['exito' => false, 'mensaje' => 'Error al eliminar el usuario']);
         }
+    }
+    
+    /**
+     * Vista de actualización de stock
+     */
+    public function actualizarStock() {
+        $this->verificarRol([ROL_ADMINISTRADOR, ROL_EMPLEADO]);
+        
+        $productoModelo = $this->cargarModelo('Producto');
+        
+        // Obtener productos con información de tallas
+        $productos = $productoModelo->obtenerTodos();
+        
+        $datos = [
+            'titulo' => 'Actualizar Stock - ' . NOMBRE_SITIO,
+            'productos' => $productos
+        ];
+        
+        $this->cargarVista('admin/stock/actualizar', $datos);
+    }
+    
+    /**
+     * Procesar actualización de stock
+     */
+    public function procesarActualizacionStock() {
+        $this->verificarRol([ROL_ADMINISTRADOR, ROL_EMPLEADO]);
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $productoId = (int)($_POST['producto_id'] ?? 0);
+        $cantidad = (int)($_POST['cantidad'] ?? 0);
+        $tipo = $_POST['tipo'] ?? 'entrada'; // entrada o salida
+        $motivo = $this->limpiarDatos($_POST['motivo'] ?? '');
+        
+        if ($productoId <= 0 || $cantidad <= 0) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Datos inválidos']);
+            return;
+        }
+        
+        $productoModelo = $this->cargarModelo('Producto');
+        $producto = $productoModelo->obtenerPorId($productoId);
+        
+        if (!$producto) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Producto no encontrado']);
+            return;
+        }
+        
+        // Calcular nueva cantidad
+        $cantidadActual = $producto['stock'];
+        $nuevaCantidad = $tipo === 'entrada' ? 
+            $cantidadActual + $cantidad : 
+            max(0, $cantidadActual - $cantidad);
+        
+        // Actualizar stock
+        if ($productoModelo->actualizarStock($productoId, $nuevaCantidad)) {
+            // Registrar en historial
+            $this->registrarMovimientoStock($productoId, $tipo, $cantidad, $motivo, $cantidadActual, $nuevaCantidad);
+            
+            $this->enviarJson([
+                'exito' => true, 
+                'mensaje' => 'Stock actualizado correctamente',
+                'stock_anterior' => $cantidadActual,
+                'stock_nuevo' => $nuevaCantidad
+            ]);
+        } else {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error al actualizar el stock']);
+        }
+    }
+    
+    /**
+     * Historial de movimientos de stock
+     */
+    public function historialStock() {
+        $this->verificarRol([ROL_ADMINISTRADOR, ROL_EMPLEADO]);
+        
+        $productoModelo = $this->cargarModelo('Producto');
+        
+        // Obtener historial de movimientos
+        $historial = $this->obtenerHistorialStock();
+        
+        $datos = [
+            'titulo' => 'Historial de Stock - ' . NOMBRE_SITIO,
+            'historial' => $historial
+        ];
+        
+        $this->cargarVista('admin/stock/historial', $datos);
+    }
+    
+    /**
+     * Registrar movimiento de stock
+     */
+    private function registrarMovimientoStock($productoId, $tipo, $cantidad, $motivo, $stockAnterior, $stockNuevo) {
+        // Por ahora solo log, después se puede implementar una tabla de historial
+        $log = [
+            'fecha' => date('Y-m-d H:i:s'),
+            'producto_id' => $productoId,
+            'tipo' => $tipo,
+            'cantidad' => $cantidad,
+            'motivo' => $motivo,
+            'stock_anterior' => $stockAnterior,
+            'stock_nuevo' => $stockNuevo,
+            'usuario_id' => $_SESSION['usuario_id']
+        ];
+        
+        error_log("Movimiento de stock: " . json_encode($log));
+    }
+    
+    /**
+     * Obtener historial de stock
+     */
+    private function obtenerHistorialStock() {
+        // Por ahora retorna array vacío, después se implementará con base de datos
+        return [];
     }
 }
