@@ -30,9 +30,15 @@ class CarritoControlador extends Controlador {
         
         $productoId = (int)($_POST['producto_id'] ?? 0);
         $cantidad = (int)($_POST['cantidad'] ?? 1);
+        $tallaId = (int)($_POST['talla_id'] ?? 0);
         
         if ($productoId <= 0 || $cantidad <= 0) {
             $this->enviarJson(['exito' => false, 'mensaje' => 'Datos inválidos']);
+            return;
+        }
+        
+        if ($tallaId <= 0) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Debe seleccionar una talla']);
             return;
         }
         
@@ -47,7 +53,7 @@ class CarritoControlador extends Controlador {
         $precio = $producto['precio_oferta'] ?? $producto['precio'];
         
         $carritoModelo = $this->cargarModelo('Carrito');
-        if ($carritoModelo->agregarProducto($_SESSION['usuario_id'], $productoId, $cantidad, $precio)) {
+        if ($carritoModelo->agregarProducto($_SESSION['usuario_id'], $productoId, $cantidad, $precio, $tallaId)) {
             $totalItems = $carritoModelo->contarItems($_SESSION['usuario_id']);
             $this->enviarJson([
                 'exito' => true, 

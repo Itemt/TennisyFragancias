@@ -105,9 +105,20 @@
                     <form id="form-agregar-carrito" class="mb-3">
                         <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
                         <div class="row g-2 mb-3">
-                            <div class="col-auto">
+                            <div class="col-md-6">
+                                <label class="form-label">Talla:</label>
+                                <select class="form-select" name="talla_id" required>
+                                    <option value="">Selecciona una talla</option>
+                                    <?php if ($producto['talla_nombre']): ?>
+                                        <option value="<?= $producto['talla_id'] ?>" selected>
+                                            <?= Vista::escapar($producto['talla_nombre']) ?>
+                                        </option>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Cantidad:</label>
-                                <input type="number" class="form-control" name="cantidad" value="1" min="1" max="<?= $producto['stock'] ?>" style="width: 100px;">
+                                <input type="number" class="form-control" name="cantidad" value="1" min="1" max="<?= $producto['stock'] ?>" required>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primario btn-lg w-100">

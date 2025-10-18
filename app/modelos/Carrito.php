@@ -9,10 +9,12 @@ class Carrito extends Modelo {
      * Obtener items del carrito de un usuario
      */
     public function obtenerItemsUsuario($usuarioId) {
-        $sql = "SELECT c.*, p.nombre, p.imagen_principal, p.stock, p.estado, cat.nombre as categoria_nombre
+        $sql = "SELECT c.*, p.nombre, p.imagen_principal, p.stock, p.estado, cat.nombre as categoria_nombre,
+                       t.nombre as talla_nombre
                 FROM {$this->tabla} c
                 INNER JOIN productos p ON c.producto_id = p.id
                 INNER JOIN categorias cat ON p.categoria_id = cat.id
+                LEFT JOIN tallas t ON c.talla_id = t.id
                 WHERE c.usuario_id = :usuario_id
                 ORDER BY c.fecha_agregado DESC";
         $stmt = $this->db->prepare($sql);
@@ -24,12 +26,21 @@ class Carrito extends Modelo {
     /**
      * Agregar producto al carrito
      */
-    public function agregarProducto($usuarioId, $productoId, $cantidad, $precioUnitario) {
-        // Verificar si el producto ya está en el carrito
+    public function agregarProducto($usuarioId, $productoId, $cantidad, $precioUnitario, $tallaId = null) {
+        // Verificar si el producto ya está en el carrito con la misma talla
         $sql = "SELECT * FROM {$this->tabla} WHERE usuario_id = :usuario_id AND producto_id = :producto_id";
+        if ($tallaId) {
+            $sql .= " AND talla_id = :talla_id";
+        } else {
+            $sql .= " AND talla_id IS NULL";
+        }
+        
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':usuario_id', $usuarioId);
         $stmt->bindParam(':producto_id', $productoId);
+        if ($tallaId) {
+            $stmt->bindParam(':talla_id', $tallaId);
+        }
         $stmt->execute();
         $item = $stmt->fetch();
         
@@ -46,7 +57,8 @@ class Carrito extends Modelo {
                 'usuario_id' => $usuarioId,
                 'producto_id' => $productoId,
                 'cantidad' => $cantidad,
-                'precio_unitario' => $precioUnitario
+                'precio_unitario' => $precioUnitario,
+                'talla_id' => $tallaId
             ];
             return $this->crear($datos);
         }

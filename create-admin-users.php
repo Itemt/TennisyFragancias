@@ -1,12 +1,6 @@
 <?php
 /**
- * Script para crear usuarios de empleado y administrador
- * Tennis y Fragancias - E-commerce
- * 
- * Este script crea usuarios por defecto para:
- * - Administrador
- * - Empleado
- * 
+ * Script para crear usuarios de administrador y empleado
  * Se ejecuta automáticamente en producción
  */
 
@@ -27,8 +21,8 @@ if (!isset($_SERVER['HTTP_HOST']) || strpos($_SERVER['HTTP_HOST'], 'itemt.tech')
 // Cargar configuración
 require_once 'app/config/configuracion.php';
 
-echo "👥 Creando usuarios por defecto...\n";
-echo "==================================\n\n";
+echo "👥 Creando usuarios de administrador y empleado...\n";
+echo "================================================\n\n";
 
 try {
     // Crear conexión directa a la base de datos
@@ -41,7 +35,7 @@ try {
     echo "✅ Conexión a la base de datos establecida\n\n";
     
     // ========================================
-    // 1. CREAR USUARIO ADMINISTRADOR
+    // CREAR USUARIO ADMINISTRADOR
     // ========================================
     echo "🔄 Creando usuario administrador...\n";
     
@@ -79,7 +73,7 @@ try {
     }
     
     // ========================================
-    // 2. CREAR USUARIO EMPLEADO
+    // CREAR USUARIO EMPLEADO
     // ========================================
     echo "\n🔄 Creando usuario empleado...\n";
     
@@ -116,56 +110,16 @@ try {
         echo "  🔑 Password: $empleadoPassword\n";
     }
     
-    // ========================================
-    // 3. CREAR USUARIO CLIENTE DE PRUEBA
-    // ========================================
-    echo "\n🔄 Creando usuario cliente de prueba...\n";
-    
-    $clienteEmail = 'cliente@tennisyfragancias.com';
-    $clientePassword = 'Cliente123!';
-    $clientePasswordHash = password_hash($clientePassword, PASSWORD_DEFAULT);
-    
-    // Verificar si el cliente ya existe
-    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email = ?");
-    $stmt->execute([$clienteEmail]);
-    
-    if ($stmt->fetch()) {
-        echo "  ℹ️ Usuario cliente ya existe\n";
-    } else {
-        // Crear cliente
-        $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, apellido, email, password, password_hash, telefono, direccion, ciudad, departamento, rol, estado, activo, fecha_registro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-        $stmt->execute([
-            'Cliente',
-            'Prueba',
-            $clienteEmail,
-            $clientePassword, // Para compatibilidad
-            $clientePasswordHash,
-            '3009876543',
-            'Calle 789 #12-34',
-            'Barrancabermeja',
-            'Santander',
-            'cliente',
-            'activo',
-            1
-        ]);
-        
-        echo "  ✅ Usuario cliente creado\n";
-        echo "  📧 Email: $clienteEmail\n";
-        echo "  🔑 Password: $clientePassword\n";
-    }
-    
     // Marcar que los usuarios se crearon hoy
     file_put_contents($users_file, $today);
     
     echo "\n🎉 ¡Usuarios creados exitosamente!\n";
-    echo "==================================\n";
+    echo "================================================\n";
     echo "✅ Administrador: admin@tennisyfragancias.com\n";
     echo "✅ Empleado: empleado@tennisyfragancias.com\n";
-    echo "✅ Cliente: cliente@tennisyfragancias.com\n";
     echo "\n🔐 Credenciales de acceso:\n";
     echo "👑 Admin: Admin123!\n";
     echo "👷 Empleado: Empleado123!\n";
-    echo "🛒 Cliente: Cliente123!\n";
     echo "\n🚀 Los usuarios están listos para usar!\n";
     
 } catch (Exception $e) {
