@@ -109,6 +109,25 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Popover(popoverTriggerEl);
     });
     
+    // Activar dropdowns de Bootstrap
+    const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+    dropdownElementList.map(function (dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl);
+    });
+    
+    // Manejar clicks en dropdown items
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Si es el enlace de cerrar sesión, confirmar
+            if (this.href && this.href.includes('auth/logout')) {
+                e.preventDefault();
+                if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                    window.location.href = this.href;
+                }
+            }
+        });
+    });
+    
     // Animación de entrada para cards
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
