@@ -231,5 +231,3 @@ class EmpleadoControlador extends Controlador {
         $this->cargarVista('empleado/factura', $datos);
     }
 }
-?>
-

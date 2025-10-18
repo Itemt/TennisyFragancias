@@ -58,6 +58,9 @@ class Vista {
      * Escapar HTML
      */
     public static function escapar($texto) {
+        if ($texto === null || $texto === '') {
+            return '';
+        }
         return htmlspecialchars($texto, ENT_QUOTES, 'UTF-8');
     }
     

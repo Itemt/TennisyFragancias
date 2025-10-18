@@ -61,12 +61,12 @@
                         
                         <div class="col-md-6 mb-3">
                             <strong>Ciudad:</strong><br>
-                            <?= Vista::escapar($usuario['ciudad']) ?>
+                            <?= Vista::escapar($usuario['ciudad'] ?? 'No registrada') ?>
                         </div>
                         
                         <div class="col-md-6 mb-3">
                             <strong>Departamento:</strong><br>
-                            <?= Vista::escapar($usuario['departamento']) ?>
+                            <?= Vista::escapar($usuario['departamento'] ?? 'No registrado') ?>
                         </div>
                     </div>
                 </div>

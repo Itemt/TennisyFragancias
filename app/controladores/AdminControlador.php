@@ -350,5 +350,3 @@ class AdminControlador extends Controlador {
         ];
     }
 }
-?>
-

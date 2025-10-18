@@ -105,5 +105,3 @@ class PerfilControlador extends Controlador {
         }
     }
 }
-?>
-

@@ -13,6 +13,7 @@
                                 <thead>
                                     <tr>
                                         <th>Producto</th>
+                                        <th>Talla</th>
                                         <th>Precio</th>
                                         <th>Cantidad</th>
                                         <th>Subtotal</th>
@@ -38,6 +39,11 @@
                                                         <small class="text-muted"><?= Vista::escapar($item['categoria_nombre']) ?></small>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    <?= Vista::escapar($item['talla_nombre'] ?? 'N/A') ?>
+                                                </span>
                                             </td>
                                             <td><?= Vista::formatearPrecio($item['precio_unitario']) ?></td>
                                             <td>
@@ -125,6 +131,10 @@ document.querySelectorAll('.cantidad-input').forEach(input => {
         .then(response => response.json())
         .then(data => {
             if (data.exito) {
+                // Actualizar contador del carrito
+                if (data.total_items !== undefined) {
+                    document.getElementById('carrito-contador').textContent = data.total_items;
+                }
                 location.reload();
             } else {
                 alert(data.mensaje);
@@ -150,6 +160,10 @@ document.querySelectorAll('.eliminar-item').forEach(btn => {
         .then(response => response.json())
         .then(data => {
             if (data.exito) {
+                // Actualizar contador del carrito
+                if (data.total_items !== undefined) {
+                    document.getElementById('carrito-contador').textContent = data.total_items;
+                }
                 location.reload();
             } else {
                 alert(data.mensaje);

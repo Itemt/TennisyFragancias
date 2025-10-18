@@ -122,5 +122,3 @@ class Carrito extends Modelo {
         return $stmt->fetchAll();
     }
 }
-?>
-

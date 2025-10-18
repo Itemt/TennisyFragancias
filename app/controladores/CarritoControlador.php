@@ -78,10 +78,12 @@ class CarritoControlador extends Controlador {
         $carritoModelo = $this->cargarModelo('Carrito');
         if ($carritoModelo->actualizarCantidad($carritoId, $cantidad)) {
             $total = $carritoModelo->calcularTotal($_SESSION['usuario_id']);
+            $totalItems = $carritoModelo->contarItems($_SESSION['usuario_id']);
             $this->enviarJson([
                 'exito' => true, 
                 'mensaje' => 'Cantidad actualizada',
-                'total' => $total
+                'total' => $total,
+                'total_items' => $totalItems
             ]);
         } else {
             $this->enviarJson(['exito' => false, 'mensaje' => 'Error al actualizar']);

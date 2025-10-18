@@ -40,19 +40,11 @@
                         <h5 class="mb-3"><i class="bi bi-credit-card"></i> Método de Pago</h5>
                         
                         <div class="mb-3">
-                            <div class="form-check mb-2">
+                            <div class="form-check">
                                 <input class="form-check-input" type="radio" name="metodo_pago" id="pago_mercadopago" value="mercadopago" checked>
                                 <label class="form-check-label" for="pago_mercadopago">
                                     <strong>MercadoPago</strong>
-                                    <small class="d-block text-muted">Tarjeta de crédito/débito, PSE</small>
-                                </label>
-                            </div>
-                            
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="metodo_pago" id="pago_efectivo" value="efectivo">
-                                <label class="form-check-label" for="pago_efectivo">
-                                    <strong>Pago Contraentrega</strong>
-                                    <small class="d-block text-muted">Paga en efectivo al recibir</small>
+                                    <small class="d-block text-muted">Tarjeta de crédito/débito, PSE, Nequi, Daviplata</small>
                                 </label>
                             </div>
                         </div>

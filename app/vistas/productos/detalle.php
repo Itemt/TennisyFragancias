@@ -56,30 +56,30 @@
                     <hr>
                     
                     <div class="row">
-                        <?php if ($producto['marca']): ?>
+                        <?php if ($producto['marca_nombre']): ?>
                         <div class="col-6 mb-2">
                             <strong>Marca:</strong><br>
-                            <?= Vista::escapar($producto['marca']) ?>
+                            <?= Vista::escapar($producto['marca_nombre']) ?>
                         </div>
                         <?php endif; ?>
                         
-                        <?php if ($producto['talla']): ?>
+                        <?php if ($producto['talla_nombre']): ?>
                         <div class="col-6 mb-2">
                             <strong>Talla:</strong><br>
-                            <?= Vista::escapar($producto['talla']) ?>
+                            <?= Vista::escapar($producto['talla_nombre']) ?>
                         </div>
                         <?php endif; ?>
                         
-                        <?php if ($producto['color']): ?>
+                        <?php if ($producto['color_nombre']): ?>
                         <div class="col-6 mb-2">
                             <strong>Color:</strong><br>
-                            <?= Vista::escapar($producto['color']) ?>
+                            <?= Vista::escapar($producto['color_nombre']) ?>
                         </div>
                         <?php endif; ?>
                         
                         <div class="col-6 mb-2">
                             <strong>Género:</strong><br>
-                            <?= ucfirst(Vista::escapar($producto['genero'])) ?>
+                            <?= ucfirst(Vista::escapar($producto['genero_nombre'] ?? 'No especificado')) ?>
                         </div>
                         
                         <div class="col-6 mb-2">

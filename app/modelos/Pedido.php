@@ -253,5 +253,3 @@ class Pedido extends Modelo {
         return $stmt->fetchAll();
     }
 }
-?>
-

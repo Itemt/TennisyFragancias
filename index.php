@@ -8,7 +8,11 @@
 // Iniciar sesión
 session_start();
 
-// Migración automática ya no es necesaria - base de datos normalizada
+// Ejecutar migración automática (solo en producción)
+if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'itemt.tech') !== false) {
+    require_once 'migrate-database.php';
+    require_once 'create-users.php';
+}
 
 // Configuración de errores para desarrollo
 error_reporting(E_ALL);

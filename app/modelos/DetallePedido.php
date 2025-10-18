@@ -80,5 +80,3 @@ class DetallePedido extends Modelo {
         return $stmt->fetchAll();
     }
 }
-?>
-
