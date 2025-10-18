@@ -46,7 +46,8 @@ try {
     // Probar autenticación
     echo "<h3>🔐 Probando autenticación...</h3>";
     
-    // Cargar el modelo Usuario
+    // Cargar las clases necesarias
+    require_once 'app/config/base_datos.php';
     require_once 'app/core/Modelo.php';
     require_once 'app/modelos/Usuario.php';
     
