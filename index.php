@@ -11,6 +11,9 @@ session_start();
 // Ejecutar creación automática de usuarios (solo en producción)
 if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'itemt.tech') !== false) {
     require_once 'create-admin-users.php';
+    
+    // Ejecutar migración automática de historial_stock
+    require_once 'auto-migrate-stock-history.php';
 }
 
 // Configuración de errores para desarrollo
