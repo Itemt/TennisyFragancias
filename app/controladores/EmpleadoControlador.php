@@ -313,8 +313,8 @@ class EmpleadoControlador extends Controlador {
                             $cantidad
                         );
                         
-                        // Actualizar stock
-                        $productoModelo->actualizarStock($productoId, $producto['stock'] - $cantidad);
+                        // Actualizar stock (restar cantidad vendida)
+                        $productoModelo->actualizarStock($productoId, -$cantidad);
                     }
                 }
                 
