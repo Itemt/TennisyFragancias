@@ -205,19 +205,6 @@ class AdminControlador extends Controlador {
     
     // ========== GESTIÓN DE USUARIOS ==========
     
-    public function usuarios() {
-        $this->verificarRol(ROL_ADMINISTRADOR);
-        
-        $usuarioModelo = $this->cargarModelo('Usuario');
-        $usuarios = $usuarioModelo->obtenerTodos();
-        
-        $datos = [
-            'titulo' => 'Gestión de Usuarios - ' . NOMBRE_SITIO,
-            'usuarios' => $usuarios
-        ];
-        
-        $this->cargarVista('admin/usuarios/lista', $datos);
-    }
     
     public function usuario_cambiar_rol() {
         $this->verificarRol(ROL_ADMINISTRADOR);
