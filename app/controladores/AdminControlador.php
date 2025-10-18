@@ -328,7 +328,9 @@ class AdminControlador extends Controlador {
                 // Verificar si la categoría tiene productos
                 if ($categoriaModelo->tieneProductos($categoriaId)) {
                     // Contar productos asociados
-                    $stmt = $productoModelo->db->prepare("SELECT COUNT(*) as total FROM productos WHERE categoria_id = ?");
+                    $db = BaseDatos::obtenerInstancia();
+                    $pdo = $db->obtenerConexion();
+                    $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM productos WHERE categoria_id = ?");
                     $stmt->execute([$categoriaId]);
                     $totalProductos = $stmt->fetch()['total'];
                     
@@ -343,7 +345,7 @@ class AdminControlador extends Controlador {
                         ];
                     } else {
                         // Eliminar productos primero, luego categoría
-                        $productoModelo->db->prepare("DELETE FROM productos WHERE categoria_id = ?")->execute([$categoriaId]);
+                        $pdo->prepare("DELETE FROM productos WHERE categoria_id = ?")->execute([$categoriaId]);
                         
                         if ($categoriaModelo->eliminar($categoriaId)) {
                             $_SESSION['mensaje'] = "Categoría y $totalProductos productos eliminados correctamente";
@@ -367,6 +369,29 @@ class AdminControlador extends Controlador {
         }
         
         $this->redirigir('admin/categorias');
+    }
+    
+    // ========== ALIASES PARA RUTAS ==========
+    
+    /**
+     * Alias para actualizar stock
+     */
+    public function stockActualizar() {
+        $this->actualizarStock();
+    }
+    
+    /**
+     * Alias para historial de stock
+     */
+    public function stockHistorial() {
+        $this->historialStock();
+    }
+    
+    /**
+     * Alias para editar categoría (con guión)
+     */
+    public function categoria_editar() {
+        $this->categoriaEditar();
     }
     
     // ========== GESTIÓN DE USUARIOS ==========
