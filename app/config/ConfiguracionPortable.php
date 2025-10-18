@@ -200,4 +200,3 @@ class ConfiguracionPortable {
         return self::$configuracion;
     }
 }
-?>

@@ -129,5 +129,3 @@ class BaseDatos {
         throw new Exception("No se puede deserializar un singleton");
     }
 }
-?>
-

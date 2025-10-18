@@ -51,5 +51,3 @@ class Enrutador {
         return [];
     }
 }
-?>
-

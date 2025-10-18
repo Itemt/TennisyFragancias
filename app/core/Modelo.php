@@ -113,5 +113,3 @@ class Modelo {
         return $this->db->lastInsertId();
     }
 }
-?>
-

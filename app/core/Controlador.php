@@ -105,5 +105,3 @@ class Controlador {
         return true;
     }
 }
-?>
-
