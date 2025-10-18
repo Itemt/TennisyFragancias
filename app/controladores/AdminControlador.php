@@ -349,4 +349,122 @@ class AdminControlador extends Controlador {
             'mensaje' => 'Error al guardar la imagen. Verifique los permisos del directorio.'
         ];
     }
+    
+    /**
+     * Gestión de usuarios
+     */
+    public function usuarios() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        $usuarioModelo = $this->cargarModelo('Usuario');
+        
+        // Filtros
+        $filtros = [
+            'rol' => $_GET['rol'] ?? '',
+            'estado' => $_GET['estado'] ?? '',
+            'buscar' => $_GET['buscar'] ?? '',
+            'pagina' => (int)($_GET['pagina'] ?? 1)
+        ];
+        
+        // Obtener usuarios
+        $usuarios = $usuarioModelo->obtenerTodos($filtros);
+        
+        // Calcular paginación
+        $totalUsuarios = $usuarioModelo->contarUsuarios($filtros);
+        $usuariosPorPagina = 20;
+        $totalPaginas = ceil($totalUsuarios / $usuariosPorPagina);
+        
+        $paginacion = [
+            'pagina_actual' => $filtros['pagina'],
+            'total_paginas' => $totalPaginas,
+            'total_registros' => $totalUsuarios
+        ];
+        
+        $datos = [
+            'titulo' => 'Gestión de Usuarios - ' . NOMBRE_SITIO,
+            'usuarios' => $usuarios,
+            'paginacion' => $paginacion,
+            'filtros' => $filtros
+        ];
+        
+        $this->cargarVista('admin/usuarios', $datos);
+    }
+    
+    /**
+     * Cambiar contraseña de usuario
+     */
+    public function cambiarPassword() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $usuarioId = (int)($_POST['usuario_id'] ?? 0);
+        $nuevaPassword = $_POST['nueva_password'] ?? '';
+        $confirmarPassword = $_POST['confirmar_password'] ?? '';
+        
+        // Validar datos
+        if ($usuarioId <= 0) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
+            return;
+        }
+        
+        if (empty($nuevaPassword) || strlen($nuevaPassword) < 6) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'La contraseña debe tener al menos 6 caracteres']);
+            return;
+        }
+        
+        if ($nuevaPassword !== $confirmarPassword) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Las contraseñas no coinciden']);
+            return;
+        }
+        
+        // Cambiar contraseña
+        $usuarioModelo = $this->cargarModelo('Usuario');
+        $passwordHash = password_hash($nuevaPassword, PASSWORD_DEFAULT);
+        
+        if ($usuarioModelo->actualizarPassword($usuarioId, $passwordHash)) {
+            $this->enviarJson(['exito' => true, 'mensaje' => 'Contraseña cambiada exitosamente']);
+        } else {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error al cambiar la contraseña']);
+        }
+    }
+    
+    /**
+     * Cambiar estado de usuario
+     */
+    public function cambiarEstado() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $usuarioId = (int)($_POST['usuario_id'] ?? 0);
+        $nuevoEstado = $_POST['estado'] ?? '';
+        
+        // Validar datos
+        if ($usuarioId <= 0) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
+            return;
+        }
+        
+        $estadosValidos = ['activo', 'inactivo', 'suspendido'];
+        if (!in_array($nuevoEstado, $estadosValidos)) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Estado inválido']);
+            return;
+        }
+        
+        // Cambiar estado
+        $usuarioModelo = $this->cargarModelo('Usuario');
+        
+        if ($usuarioModelo->actualizarEstado($usuarioId, $nuevoEstado)) {
+            $this->enviarJson(['exito' => true, 'mensaje' => 'Estado del usuario actualizado exitosamente']);
+        } else {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error al actualizar el estado del usuario']);
+        }
+    }
 }

@@ -188,4 +188,96 @@ class Usuario extends Modelo {
         $stmt->execute();
         return $stmt->fetch();
     }
+    
+    /**
+     * Obtener todos los usuarios con filtros
+     */
+    public function obtenerTodos($filtros = []) {
+        $sql = "SELECT * FROM {$this->tabla} WHERE 1=1";
+        $params = [];
+        
+        if (!empty($filtros['rol'])) {
+            $sql .= " AND rol = :rol";
+            $params[':rol'] = $filtros['rol'];
+        }
+        
+        if (!empty($filtros['estado'])) {
+            $sql .= " AND estado = :estado";
+            $params[':estado'] = $filtros['estado'];
+        }
+        
+        if (!empty($filtros['buscar'])) {
+            $sql .= " AND (nombre LIKE :buscar OR apellido LIKE :buscar OR email LIKE :buscar)";
+            $params[':buscar'] = '%' . $filtros['buscar'] . '%';
+        }
+        
+        $sql .= " ORDER BY fecha_registro DESC";
+        
+        // Paginación
+        if (isset($filtros['pagina']) && $filtros['pagina'] > 0) {
+            $offset = ($filtros['pagina'] - 1) * 20;
+            $sql .= " LIMIT 20 OFFSET :offset";
+            $params[':offset'] = $offset;
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $param => $valor) {
+            $stmt->bindValue($param, $valor);
+        }
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    
+    /**
+     * Contar usuarios con filtros
+     */
+    public function contarUsuarios($filtros = []) {
+        $sql = "SELECT COUNT(*) as total FROM {$this->tabla} WHERE 1=1";
+        $params = [];
+        
+        if (!empty($filtros['rol'])) {
+            $sql .= " AND rol = :rol";
+            $params[':rol'] = $filtros['rol'];
+        }
+        
+        if (!empty($filtros['estado'])) {
+            $sql .= " AND estado = :estado";
+            $params[':estado'] = $filtros['estado'];
+        }
+        
+        if (!empty($filtros['buscar'])) {
+            $sql .= " AND (nombre LIKE :buscar OR apellido LIKE :buscar OR email LIKE :buscar)";
+            $params[':buscar'] = '%' . $filtros['buscar'] . '%';
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $param => $valor) {
+            $stmt->bindValue($param, $valor);
+        }
+        $stmt->execute();
+        $resultado = $stmt->fetch();
+        return $resultado['total'];
+    }
+    
+    /**
+     * Actualizar contraseña de usuario
+     */
+    public function actualizarPassword($usuarioId, $passwordHash) {
+        $sql = "UPDATE {$this->tabla} SET password_hash = :password_hash WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':password_hash', $passwordHash);
+        $stmt->bindParam(':id', $usuarioId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Actualizar estado de usuario
+     */
+    public function actualizarEstado($usuarioId, $estado) {
+        $sql = "UPDATE {$this->tabla} SET estado = :estado WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':estado', $estado);
+        $stmt->bindParam(':id', $usuarioId);
+        return $stmt->execute();
+    }
 }
