@@ -6,7 +6,7 @@
 
 // Verificar que estamos en producción
 if (!isset($_SERVER['HTTP_HOST']) || strpos($_SERVER['HTTP_HOST'], 'itemt.tech') === false) {
-    exit();
+    return;
 }
 
 // Verificar si ya se ejecutó hoy
@@ -15,7 +15,7 @@ $today = date('Y-m-d');
 
 if (file_exists($users_file) && file_get_contents($users_file) === $today) {
     // Ya se ejecutó hoy, no hacer nada
-    exit();
+    return;
 }
 
 // Cargar configuración
