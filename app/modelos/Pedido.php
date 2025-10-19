@@ -239,6 +239,51 @@ class Pedido extends Modelo {
     }
     
     /**
+     * Obtener todos los pedidos (método básico)
+     */
+    public function obtenerTodos($filtros = []) {
+        $sql = "SELECT p.*, 
+                u.nombre as usuario_nombre, u.apellido as usuario_apellido,
+                e.nombre as empleado_nombre, e.apellido as empleado_apellido
+                FROM {$this->tabla} p
+                INNER JOIN usuarios u ON p.usuario_id = u.id
+                LEFT JOIN usuarios e ON p.empleado_id = e.id
+                WHERE 1=1";
+        
+        $params = [];
+        
+        if (!empty($filtros['estado'])) {
+            $sql .= " AND p.estado = :estado";
+            $params[':estado'] = $filtros['estado'];
+        }
+        
+        if (!empty($filtros['buscar'])) {
+            $sql .= " AND (u.nombre LIKE :buscar OR u.apellido LIKE :buscar OR u.email LIKE :buscar)";
+            $params[':buscar'] = '%' . $filtros['buscar'] . '%';
+        }
+        
+        $sql .= " ORDER BY p.fecha_pedido DESC";
+        
+        // Paginación
+        if (!empty($filtros['pagina']) && $filtros['pagina'] > 1) {
+            $offset = ($filtros['pagina'] - 1) * 20;
+            $sql .= " LIMIT 20 OFFSET :offset";
+            $params[':offset'] = $offset;
+        } else {
+            $sql .= " LIMIT 20";
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        
+        foreach ($params as $param => &$valor) {
+            $stmt->bindParam($param, $valor);
+        }
+        
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Obtener pedidos recientes
      */
     public function obtenerRecientes($limite = 10) {
