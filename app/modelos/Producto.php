@@ -158,7 +158,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        MIN(p.imagen_principal) as imagen_principal,
+                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(c.nombre) as categoria_nombre,
                         MIN(m.nombre) as marca_nombre,
@@ -206,7 +206,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        MIN(p.imagen_principal) as imagen_principal,
+                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -220,6 +220,7 @@ class Producto extends Modelo {
                     LEFT JOIN marcas m ON p.marca_id = m.id
                     WHERE p.estado = 'activo'
                     GROUP BY p.nombre
+                    HAVING SUM(p.stock) > 0
                 ) as p_agrupado
                 ORDER BY p_agrupado.destacado DESC, p_agrupado.fecha_creacion DESC";
         
@@ -259,7 +260,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        MIN(p.imagen_principal) as imagen_principal,
+                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -272,6 +273,7 @@ class Producto extends Modelo {
                     WHERE p.estado = 'activo' 
                     AND (p.nombre LIKE :termino OR p.descripcion LIKE :termino OR m.nombre LIKE :termino)
                     GROUP BY p.nombre
+                    HAVING SUM(p.stock) > 0
                 ) as p_agrupado
                 ORDER BY p_agrupado.nombre ASC";
         
@@ -311,7 +313,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        MIN(p.imagen_principal) as imagen_principal,
+                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -365,6 +367,7 @@ class Producto extends Modelo {
         }
         
         $sql .= " GROUP BY p.nombre";
+        $sql .= " HAVING SUM(p.stock) > 0";
         
         $sql .= ") as p_agrupado";
         
@@ -414,7 +417,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        MIN(p.imagen_principal) as imagen_principal,
+                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -426,6 +429,7 @@ class Producto extends Modelo {
                     LEFT JOIN marcas m ON p.marca_id = m.id
                     WHERE p.estado = 'activo' AND p.destacado = 1
                     GROUP BY p.nombre
+                    HAVING SUM(p.stock) > 0
                 ) as p_agrupado
                 ORDER BY RAND()
                 LIMIT :limite";
@@ -440,37 +444,24 @@ class Producto extends Modelo {
      */
     public function obtenerPorCategoria($categoriaId, $limite = null) {
         $sql = "SELECT 
-                    p_agrupado.id,
-                    p_agrupado.nombre,
-                    p_agrupado.codigo_sku,
-                    p_agrupado.imagen_principal,
-                    p_agrupado.precio,
-                    p_agrupado.precio_oferta,
-                    p_agrupado.categoria_nombre,
-                    p_agrupado.marca_nombre,
-                    p_agrupado.total_variantes,
-                    p_agrupado.stock_total,
-                    p_agrupado.fecha_creacion
-                FROM (
-                    SELECT 
-                        MIN(p.id) as id,
-                        p.nombre,
-                        MIN(p.codigo_sku) as codigo_sku,
-                        MIN(p.imagen_principal) as imagen_principal,
-                        MIN(p.precio) as precio,
-                        MIN(p.precio_oferta) as precio_oferta,
-                        MIN(c.nombre) as categoria_nombre,
-                        MIN(m.nombre) as marca_nombre,
-                        COUNT(DISTINCT p.id) as total_variantes,
-                        SUM(p.stock) as stock_total,
-                        MIN(p.fecha_creacion) as fecha_creacion
-                    FROM {$this->tabla} p 
-                    INNER JOIN categorias c ON p.categoria_id = c.id 
-                    LEFT JOIN marcas m ON p.marca_id = m.id
-                    WHERE p.categoria_id = :categoria_id AND p.estado = 'activo'
-                    GROUP BY p.nombre
-                ) as p_agrupado
-                ORDER BY p_agrupado.fecha_creacion DESC";
+                    MIN(p.id) as id,
+                    p.nombre,
+                    MIN(p.codigo_sku) as codigo_sku,
+                    MIN(p.imagen_principal) as imagen_principal,
+                    MIN(p.precio) as precio,
+                    MIN(p.precio_oferta) as precio_oferta,
+                    MIN(c.nombre) as categoria_nombre,
+                    MIN(m.nombre) as marca_nombre,
+                    COUNT(DISTINCT p.id) as total_variantes,
+                    SUM(p.stock) as stock_total,
+                    MIN(p.fecha_creacion) as fecha_creacion
+                FROM {$this->tabla} p 
+                INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                WHERE p.categoria_id = :categoria_id AND p.estado = 'activo'
+                GROUP BY p.nombre
+                HAVING SUM(p.stock) > 0
+                ORDER BY MIN(p.fecha_creacion) DESC";
         
         if ($limite) {
             $sql .= " LIMIT :limite";
