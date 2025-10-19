@@ -895,13 +895,15 @@ class AdminControlador extends Controlador {
         $this->verificarRol([ROL_ADMINISTRADOR, ROL_EMPLEADO]);
         
         $productoModelo = $this->cargarModelo('Producto');
+        $tallaModelo = $this->cargarModelo('Talla');
         
         // Obtener productos agrupados por nombre
         $productosAgrupados = $productoModelo->obtenerProductosAgrupados();
         
         $datos = [
             'titulo' => 'Actualizar Stock - ' . NOMBRE_SITIO,
-            'productos' => $productosAgrupados
+            'productos' => $productosAgrupados,
+            'tallas' => $tallaModelo->obtenerTodos()
         ];
         
         $this->cargarVista('admin/stock/actualizar', $datos);
@@ -1211,6 +1213,13 @@ class AdminControlador extends Controlador {
         ];
         
         $this->cargarVista('admin/productos/agregar-variante', $datos);
+    }
+    
+    /**
+     * Alias para producto-agregar-variante (con guiones)
+     */
+    public function producto_agregar_variante_alias($productoId) {
+        $this->producto_agregar_variante($productoId);
     }
     
     /**
