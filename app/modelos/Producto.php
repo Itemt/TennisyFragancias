@@ -148,6 +148,7 @@ class Producto extends Modelo {
                     p.nombre,
                     p.codigo_sku,
                     p.imagen_principal,
+                    p.precio,
                     c.nombre as categoria_nombre,
                     m.nombre as marca_nombre,
                     COUNT(DISTINCT p.id) as total_variantes,
@@ -156,11 +157,19 @@ class Producto extends Modelo {
                 INNER JOIN categorias c ON p.categoria_id = c.id 
                 LEFT JOIN marcas m ON p.marca_id = m.id
                 WHERE p.estado = 'activo'
-                GROUP BY p.nombre, p.codigo_sku, p.imagen_principal, c.nombre, m.nombre
+                GROUP BY p.nombre
                 ORDER BY p.nombre ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
+        $resultados = $stmt->fetchAll();
+        
+        // Debug: Log para verificar los resultados
+        error_log('Productos agrupados encontrados: ' . count($resultados));
+        if (count($resultados) > 0) {
+            error_log('Primer producto: ' . json_encode($resultados[0]));
+        }
+        
+        return $resultados;
     }
     
     /**
