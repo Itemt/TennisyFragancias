@@ -546,12 +546,47 @@ class Producto extends Modelo {
     }
     
     /**
-     * Eliminar producto
+     * Eliminar producto y todas sus referencias
      */
     public function eliminar($id) {
-        $sql = "DELETE FROM {$this->tabla} WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $id);
-        return $stmt->execute();
+        try {
+            // Iniciar transacción
+            $this->db->beginTransaction();
+            
+            // 1. Eliminar del carrito
+            $sql = "DELETE FROM carrito WHERE producto_id = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            
+            // 2. Eliminar del historial de stock
+            $sql = "DELETE FROM historial_stock WHERE producto_id = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            
+            // 3. Eliminar de detalle_pedidos (esto debería ser CASCADE pero por seguridad)
+            $sql = "DELETE FROM detalle_pedidos WHERE producto_id = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            
+            // 4. Finalmente eliminar el producto
+            $sql = "DELETE FROM {$this->tabla} WHERE id = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $resultado = $stmt->execute();
+            
+            // Confirmar transacción
+            $this->db->commit();
+            
+            return $resultado;
+            
+        } catch (Exception $e) {
+            // Revertir transacción en caso de error
+            $this->db->rollBack();
+            error_log('Error al eliminar producto: ' . $e->getMessage());
+            return false;
+        }
     }
 }

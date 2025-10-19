@@ -250,11 +250,26 @@ class AdminControlador extends Controlador {
                 return;
             }
             
+            // Verificar si el producto tiene pedidos asociados
+            $db = BaseDatos::obtenerInstancia()->obtenerConexion();
+            $stmt = $db->prepare("SELECT COUNT(*) as total FROM detalle_pedidos WHERE producto_id = :id");
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            $pedidosAsociados = $stmt->fetch()['total'];
+            
+            if ($pedidosAsociados > 0) {
+                $this->enviarJson([
+                    'exito' => false, 
+                    'mensaje' => "No se puede eliminar el producto porque tiene $pedidosAsociados pedidos asociados. Se recomienda desactivar el producto en su lugar."
+                ]);
+                return;
+            }
+            
             // Eliminar el producto
             if ($productoModelo->eliminar($id)) {
                 $this->enviarJson(['exito' => true, 'mensaje' => 'Producto eliminado correctamente']);
             } else {
-                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al eliminar el producto']);
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al eliminar el producto. Verifique que no tenga dependencias.']);
             }
         } catch (Exception $e) {
             error_log('Error en producto_eliminar: ' . $e->getMessage());
