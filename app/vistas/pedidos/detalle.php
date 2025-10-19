@@ -2,7 +2,7 @@
 
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Pedido #<?= Vista::escapar($pedido['numero_pedido']) ?></h1>
+        <h1>Pedido #<?= Vista::escapar($pedido['numero_pedido'] ?? 'PED-' . str_pad($pedido['id'], 3, '0', STR_PAD_LEFT)) ?></h1>
         <a href="<?= Vista::url('pedidos') ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Volver
         </a>

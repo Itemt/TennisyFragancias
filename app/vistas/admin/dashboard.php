@@ -150,7 +150,7 @@
                             <tbody>
                                 <?php foreach ($pedidos_recientes as $pedido): ?>
                                     <tr>
-                                        <td><strong><?= Vista::escapar($pedido['numero_pedido']) ?></strong></td>
+                                        <td><strong><?= Vista::escapar($pedido['numero_pedido'] ?? 'PED-' . str_pad($pedido['id'], 3, '0', STR_PAD_LEFT)) ?></strong></td>
                                         <td><?= Vista::escapar($pedido['cliente_nombre'] . ' ' . $pedido['cliente_apellido']) ?></td>
                                         <td><?= Vista::formatearPrecio($pedido['total']) ?></td>
                                         <td><?= Vista::obtenerBadgeEstado($pedido['estado']) ?></td>

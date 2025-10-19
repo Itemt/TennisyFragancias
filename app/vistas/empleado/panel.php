@@ -98,7 +98,7 @@
                                 <tbody>
                                     <?php foreach ($pedidos_asignados as $pedido): ?>
                                         <tr>
-                                            <td><strong><?= Vista::escapar($pedido['numero_pedido']) ?></strong></td>
+                                            <td><strong><?= Vista::escapar($pedido['numero_pedido'] ?? 'PED-' . str_pad($pedido['id'], 3, '0', STR_PAD_LEFT)) ?></strong></td>
                                             <td><?= Vista::escapar($pedido['cliente_nombre'] . ' ' . $pedido['cliente_apellido']) ?></td>
                                             <td><?= Vista::formatearPrecio($pedido['total']) ?></td>
                                             <td><?= Vista::obtenerBadgeEstado($pedido['estado']) ?></td>
@@ -133,7 +133,7 @@
                                 <div class="list-group-item px-0">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <small><strong><?= Vista::escapar($pedido['numero_pedido']) ?></strong></small><br>
+                                            <small><strong><?= Vista::escapar($pedido['numero_pedido'] ?? 'PED-' . str_pad($pedido['id'], 3, '0', STR_PAD_LEFT)) ?></strong></small><br>
                                             <small class="text-muted"><?= Vista::escapar($pedido['cliente_nombre']) ?></small>
                                         </div>
                                         <a href="<?= Vista::url('empleado/ver_pedido/' . $pedido['id']) ?>" class="btn btn-sm btn-outline-primary">

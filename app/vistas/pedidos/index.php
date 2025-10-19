@@ -19,7 +19,7 @@
                 <tbody>
                     <?php foreach ($pedidos as $pedido): ?>
                         <tr>
-                            <td><strong><?= Vista::escapar($pedido['numero_pedido']) ?></strong></td>
+                            <td><strong><?= Vista::escapar($pedido['numero_pedido'] ?? 'PED-' . str_pad($pedido['id'], 3, '0', STR_PAD_LEFT)) ?></strong></td>
                             <td><?= Vista::formatearFecha($pedido['fecha_pedido']) ?></td>
                             <td><?= Vista::formatearPrecio($pedido['total']) ?></td>
                             <td><?= Vista::obtenerBadgeEstado($pedido['estado']) ?></td>
