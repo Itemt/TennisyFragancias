@@ -19,7 +19,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover table-centered">
                     <thead class="table-dark">
                         <tr>
                             <th>Producto</th>

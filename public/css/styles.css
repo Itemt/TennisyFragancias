@@ -429,6 +429,29 @@ body {
     border-color: #6c757d;
 }
 
+/* Centrado de tablas */
+.table-centered {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+}
+
+.table-centered th,
+.table-centered td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table-centered th:first-child,
+.table-centered td:first-child {
+    text-align: left;
+}
+
+.table-centered th:last-child,
+.table-centered td:last-child {
+    text-align: center;
+}
+
 /* Badges y estados modernos */
 .badge { 
     font-weight: 600; 
