@@ -240,13 +240,26 @@ class AdminControlador extends Controlador {
     public function producto_eliminar($id) {
         $this->verificarRol(ROL_ADMINISTRADOR);
         
-        $productoModelo = $this->cargarModelo('Producto');
-        if ($productoModelo->eliminar($id)) {
-            $_SESSION['exito'] = 'Producto eliminado correctamente';
-        } else {
-            $_SESSION['error'] = 'Error al eliminar el producto';
+        try {
+            $productoModelo = $this->cargarModelo('Producto');
+            
+            // Verificar que el producto existe
+            $producto = $productoModelo->obtenerPorId($id);
+            if (!$producto) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Producto no encontrado']);
+                return;
+            }
+            
+            // Eliminar el producto
+            if ($productoModelo->eliminar($id)) {
+                $this->enviarJson(['exito' => true, 'mensaje' => 'Producto eliminado correctamente']);
+            } else {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al eliminar el producto']);
+            }
+        } catch (Exception $e) {
+            error_log('Error en producto_eliminar: ' . $e->getMessage());
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error interno: ' . $e->getMessage()]);
         }
-        $this->redirigir('admin/productos');
     }
     
     // ========== GESTIÓN DE CATEGORÍAS ==========
@@ -1118,5 +1131,12 @@ class AdminControlador extends Controlador {
      */
     public function producto_vista() {
         $this->productoVista(func_get_arg(0));
+    }
+    
+    /**
+     * Alias para producto-eliminar (con guiones)
+     */
+    public function producto_eliminar_alias() {
+        $this->producto_eliminar(func_get_arg(0));
     }
 }

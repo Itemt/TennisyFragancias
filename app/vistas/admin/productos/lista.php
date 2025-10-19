@@ -255,8 +255,44 @@ function mostrarDetallesProducto(variantes) {
 
 function eliminarProducto(productoId, nombreProducto) {
     if (confirm(`¿Estás seguro de eliminar el producto "${nombreProducto}"?\n\nEsto eliminará TODAS las variantes (todas las tallas) del producto.`)) {
-        // Aquí puedes implementar la eliminación
-        alert('Función de eliminación en desarrollo');
+        // Mostrar indicador de carga
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.innerHTML = '<div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Eliminando...</span></div>Eliminando producto...';
+        loadingIndicator.style.position = 'fixed';
+        loadingIndicator.style.top = '50%';
+        loadingIndicator.style.left = '50%';
+        loadingIndicator.style.transform = 'translate(-50%, -50%)';
+        loadingIndicator.style.background = 'rgba(0,0,0,0.8)';
+        loadingIndicator.style.color = 'white';
+        loadingIndicator.style.padding = '20px';
+        loadingIndicator.style.borderRadius = '10px';
+        loadingIndicator.style.zIndex = '9999';
+        document.body.appendChild(loadingIndicator);
+        
+        // Realizar la eliminación
+        fetch('<?= Vista::url("admin/producto-eliminar/") ?>' + productoId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.body.removeChild(loadingIndicator);
+            
+            if (data.exito) {
+                alert('✅ ' + data.mensaje);
+                // Recargar la página para actualizar la lista
+                window.location.reload();
+            } else {
+                alert('❌ Error: ' + data.mensaje);
+            }
+        })
+        .catch(error => {
+            document.body.removeChild(loadingIndicator);
+            console.error('Error:', error);
+            alert('❌ Error al eliminar el producto');
+        });
     }
 }
 
