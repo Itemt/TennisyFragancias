@@ -139,8 +139,41 @@
         </div>
     </footer>
     
+    <!-- Contenedor global de toasts -->
+    <div id="app-toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080"></div>
+    
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Utilidades globales -->
+    <script>
+    // Mostrar toast no bloqueante
+    function showToast(message, variant = 'info', delay = 3000) {
+        try {
+            const container = document.getElementById('app-toast-container');
+            if (!container) return alert(message);
+            const id = 'toast-' + Date.now();
+            const bg = variant === 'success' ? 'bg-success' : variant === 'danger' ? 'bg-danger' : variant === 'warning' ? 'bg-warning text-dark' : 'bg-primary';
+            const el = document.createElement('div');
+            el.id = id;
+            el.className = 'toast align-items-center text-white ' + bg + ' border-0';
+            el.role = 'alert';
+            el.ariaLive = 'assertive';
+            el.ariaAtomic = 'true';
+            el.innerHTML = '<div class="d-flex">\
+                <div class="toast-body">' + message + '</div>\
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>\
+            </div>';
+            container.appendChild(el);
+            const toast = new bootstrap.Toast(el, { delay });
+            toast.show();
+            el.addEventListener('hidden.bs.toast', () => el.remove());
+        } catch (e) {
+            // fallback
+            alert(message);
+        }
+    }
+    </script>
     
     <!-- Script para contador de carrito -->
     <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === ROL_CLIENTE): ?>

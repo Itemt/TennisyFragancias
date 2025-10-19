@@ -322,15 +322,15 @@ function cambiarEstado(usuarioId, nuevoEstado) {
         })
         .then(data => {
             if (data.exito) {
-                alert(data.mensaje);
+                showToast(data.mensaje || 'Estado actualizado', 'success');
                 location.reload();
             } else {
-                alert('Error: ' + data.mensaje);
+                showToast('Error: ' + (data.mensaje || 'No se pudo cambiar el estado'), 'danger');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error al cambiar el estado del usuario: ' + error.message);
+            showToast('Error al cambiar el estado del usuario: ' + error.message, 'danger');
         });
     }
 }
@@ -345,12 +345,12 @@ document.getElementById('formCambiarPassword').addEventListener('submit', functi
     console.log('Datos del formulario:', data);
     
     if (data.nueva_password !== data.confirmar_password) {
-        alert('Las contraseñas no coinciden');
+        showToast('Las contraseñas no coinciden', 'warning');
         return;
     }
     
     if (data.nueva_password.length < 6) {
-        alert('La contraseña debe tener al menos 6 caracteres');
+        showToast('La contraseña debe tener al menos 6 caracteres', 'warning');
         return;
     }
     
@@ -380,21 +380,21 @@ document.getElementById('formCambiarPassword').addEventListener('submit', functi
     .then(data => {
         console.log('Respuesta recibida:', data);
         if (data.exito) {
-            alert(data.mensaje);
+            showToast(data.mensaje || 'Contraseña actualizada', 'success');
             const modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalCambiarPassword'));
             if (modalInstance) {
                 modalInstance.hide();
             }
             location.reload();
         } else {
-            alert('Error: ' + data.mensaje);
+            showToast('Error: ' + (data.mensaje || 'No se pudo cambiar la contraseña'), 'danger');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al cambiar la contraseña: ' + error.message);
+        showToast('Error al cambiar la contraseña: ' + error.message, 'danger');
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
     });
@@ -419,15 +419,15 @@ function eliminarUsuario(usuarioId, nombreUsuario) {
         })
         .then(data => {
             if (data.exito) {
-                alert(data.mensaje);
+                showToast(data.mensaje || 'Usuario eliminado', 'success');
                 location.reload();
             } else {
-                alert('Error: ' + data.mensaje);
+                showToast('Error: ' + (data.mensaje || 'No se pudo eliminar el usuario'), 'danger');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error al eliminar el usuario: ' + error.message);
+            showToast('Error al eliminar el usuario: ' + error.message, 'danger');
         });
     }
 }
@@ -443,19 +443,19 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
     
     // Validar contraseñas
     if (data.password !== data.confirmar_password) {
-        alert('Las contraseñas no coinciden');
+        showToast('Las contraseñas no coinciden', 'warning');
         return;
     }
     
     if (data.password.length < 6) {
-        alert('La contraseña debe tener al menos 6 caracteres');
+        showToast('La contraseña debe tener al menos 6 caracteres', 'warning');
         return;
     }
     
     // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {
-        alert('Por favor ingrese un email válido');
+        showToast('Por favor ingrese un email válido', 'warning');
         return;
     }
     
@@ -485,21 +485,21 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
     .then(data => {
         console.log('Respuesta recibida:', data);
         if (data.exito) {
-            alert(data.mensaje);
+            showToast(data.mensaje || 'Usuario creado exitosamente', 'success');
             const modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalCrearUsuario'));
             if (modalInstance) {
                 modalInstance.hide();
             }
             location.reload();
         } else {
-            alert('Error: ' + data.mensaje);
+            showToast('Error: ' + (data.mensaje || 'No se pudo crear el usuario'), 'danger');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al crear el usuario: ' + error.message);
+        showToast('Error al crear el usuario: ' + error.message, 'danger');
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
     });
