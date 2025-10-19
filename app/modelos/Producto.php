@@ -51,6 +51,70 @@ class Producto extends Modelo {
     }
     
     /**
+     * Obtener todas las variantes de un producto por nombre
+     */
+    public function obtenerVariantesPorNombre($nombre) {
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
+                FROM {$this->tabla} p 
+                INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
+                WHERE p.nombre = :nombre AND p.estado = 'activo'
+                ORDER BY t.orden ASC, t.nombre ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    
+    /**
+     * Obtener producto con todas sus variantes
+     */
+    public function obtenerConVariantes($id) {
+        // Primero obtener el producto base
+        $producto = $this->obtenerPorId($id);
+        
+        if (!$producto) {
+            return null;
+        }
+        
+        // Obtener todas las variantes del mismo nombre
+        $variantes = $this->obtenerVariantesPorNombre($producto['nombre']);
+        
+        // Calcular stock total
+        $stockTotal = 0;
+        foreach ($variantes as $variante) {
+            $stockTotal += $variante['stock'];
+        }
+        
+        // Agregar información de variantes al producto base
+        $producto['variantes'] = $variantes;
+        $producto['stock_total'] = $stockTotal;
+        $producto['tallas_disponibles'] = [];
+        
+        // Extraer tallas disponibles
+        foreach ($variantes as $variante) {
+            if ($variante['talla_id'] && $variante['stock'] > 0) {
+                $producto['tallas_disponibles'][] = [
+                    'id' => $variante['talla_id'],
+                    'nombre' => $variante['talla_nombre'],
+                    'stock' => $variante['stock'],
+                    'producto_id' => $variante['id']
+                ];
+            }
+        }
+        
+        return $producto;
+    }
+    
+    /**
      * Obtener productos activos para el catálogo
      */
     public function obtenerCatalogo($limite = null, $offset = 0) {

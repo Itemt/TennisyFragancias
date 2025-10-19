@@ -89,8 +89,8 @@
                         
                         <div class="col-6 mb-2">
                             <strong>Disponibilidad:</strong><br>
-                            <?php if ($producto['stock'] > 0): ?>
-                                <span class="badge bg-success">En stock (<?= $producto['stock'] ?> unidades)</span>
+                            <?php if ($producto['stock_total'] > 0): ?>
+                                <span class="badge bg-success">En stock (<?= $producto['stock_total'] ?> unidades)</span>
                             <?php else: ?>
                                 <span class="badge bg-danger">Agotado</span>
                             <?php endif; ?>
@@ -101,24 +101,26 @@
             
             <!-- Agregar al carrito -->
             <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === ROL_CLIENTE): ?>
-                <?php if ($producto['stock'] > 0): ?>
+                <?php if ($producto['stock_total'] > 0): ?>
                     <form id="form-agregar-carrito" class="mb-3">
                         <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
                         <div class="row g-2 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Talla:</label>
-                                <select class="form-select" name="talla_id" required>
+                                <select class="form-select" name="talla_id" id="select-talla" required>
                                     <option value="">Selecciona una talla</option>
-                                    <?php if ($producto['talla_nombre']): ?>
-                                        <option value="<?= $producto['talla_id'] ?>" selected>
-                                            <?= Vista::escapar($producto['talla_nombre']) ?>
-                                        </option>
+                                    <?php if (!empty($producto['tallas_disponibles'])): ?>
+                                        <?php foreach ($producto['tallas_disponibles'] as $talla): ?>
+                                            <option value="<?= $talla['producto_id'] ?>" data-stock="<?= $talla['stock'] ?>">
+                                                <?= Vista::escapar($talla['nombre']) ?> (<?= $talla['stock'] ?> disponibles)
+                                            </option>
+                                        <?php endforeach; ?>
                                     <?php endif; ?>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Cantidad:</label>
-                                <input type="number" class="form-control" name="cantidad" value="1" min="1" max="<?= $producto['stock'] ?>" required>
+                                <input type="number" class="form-control" name="cantidad" id="input-cantidad" value="1" min="1" required>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primario btn-lg w-100">
@@ -202,6 +204,21 @@ document.getElementById('form-agregar-carrito').addEventListener('submit', funct
         console.error('Error:', error);
         alert('Error al agregar el producto');
     });
+});
+
+// Manejar cambio de talla para actualizar stock máximo
+document.getElementById('select-talla').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const stock = selectedOption.getAttribute('data-stock');
+    const cantidadInput = document.getElementById('input-cantidad');
+    
+    if (stock) {
+        cantidadInput.max = stock;
+        cantidadInput.value = Math.min(parseInt(cantidadInput.value) || 1, parseInt(stock));
+    } else {
+        cantidadInput.max = '';
+        cantidadInput.value = 1;
+    }
 });
 </script>
 

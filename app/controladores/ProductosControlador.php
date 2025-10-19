@@ -50,7 +50,7 @@ class ProductosControlador extends Controlador {
     
     public function ver($id) {
         $productoModelo = $this->cargarModelo('Producto');
-        $producto = $productoModelo->obtenerPorId($id);
+        $producto = $productoModelo->obtenerConVariantes($id);
         
         if (!$producto) {
             $this->redirigir('productos');
