@@ -26,7 +26,6 @@
                             <th>Categoría</th>
                             <th>Precio</th>
                             <th>Stock Total</th>
-                            <th>Tallas</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -59,29 +58,6 @@
                                     <div class="text-center">
                                         <span class="badge bg-primary fs-6"><?= $producto['stock_total'] ?></span>
                                         <br><small class="text-muted">Total unidades</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="stock-por-tallas">
-                                        <?php 
-                                        // Obtener las variantes del producto con sus tallas y cantidades
-                                        $productoModelo = $this->cargarModelo('Producto');
-                                        $variantes = $productoModelo->obtenerVariantesPorId($producto['id']);
-                                        ?>
-                                        <?php if (!empty($variantes)): ?>
-                                            <div class="d-flex flex-wrap gap-1 justify-content-center">
-                                                <?php foreach ($variantes as $variante): ?>
-                                                    <span class="badge bg-secondary" title="Talla: <?= Vista::escapar($variante['talla_nombre']) ?>, SKU: <?= Vista::escapar($variante['codigo_sku']) ?>">
-                                                        <?= Vista::escapar($variante['talla_nombre']) ?>: <strong><?= $variante['stock'] ?></strong>
-                                                    </span>
-                                                <?php endforeach; ?>
-                                            </div>
-                                            <small class="text-muted d-block text-center mt-1">
-                                                <?= count($variantes) ?> variantes
-                                            </small>
-                                        <?php else: ?>
-                                            <span class="badge bg-warning">Sin tallas</span>
-                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>

@@ -150,97 +150,206 @@
                 </div>
             </div>
 
-            <!-- Variantes del producto -->
-            <?php if (!empty($producto['variantes']) && count($producto['variantes']) > 1): ?>
+            <!-- Stock detallado por tallas -->
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Variantes del Producto</h5>
+                            <h5 class="mb-0">
+                                <i class="bi bi-boxes"></i> Stock Detallado por Tallas
+                                <span class="badge bg-primary ms-2"><?= count($producto['variantes']) ?> variantes</span>
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Talla</th>
-                                            <th>Color</th>
-                                            <th>SKU</th>
-                                            <th class="text-end">Stock</th>
-                                            <th class="text-end">Precio</th>
-                                            <th class="text-end">Precio Oferta</th>
-                                            <th>Estado</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($producto['variantes'] as $variante): ?>
-                                        <tr>
-                                            <td><code><?= $variante['id'] ?></code></td>
-                                            <td>
-                                                <strong><?= Vista::escapar($variante['talla_nombre'] ?? 'Sin talla') ?></strong>
-                                            </td>
-                                            <td><?= Vista::escapar($variante['color_nombre'] ?? 'Sin color') ?></td>
-                                            <td><code><?= Vista::escapar($variante['codigo_sku']) ?></code></td>
-                                            <td class="text-end">
-                                                <span class="badge bg-<?= $variante['stock'] > 0 ? 'success' : 'danger' ?>">
-                                                    <?= $variante['stock'] ?>
-                                                </span>
-                                            </td>
-                                            <td class="text-end"><?= Vista::formatearPrecio($variante['precio']) ?></td>
-                                            <td class="text-end">
-                                                <?php if ($variante['precio_oferta'] && $variante['precio_oferta'] < $variante['precio']): ?>
-                                                    <span class="text-success fw-bold"><?= Vista::formatearPrecio($variante['precio_oferta']) ?></span>
-                                                <?php else: ?>
-                                                    <span class="text-muted">-</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-<?= $variante['estado'] === 'activo' ? 'success' : ($variante['estado'] === 'inactivo' ? 'warning' : 'danger') ?>">
-                                                    <?= ucfirst($variante['estado']) ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <a href="<?= Vista::url('admin/producto-editar/' . $variante['id']) ?>" 
-                                                       class="btn btn-warning btn-sm" title="Editar">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-                                                    <a href="<?= Vista::url('admin/actualizar-stock') ?>" 
-                                                       class="btn btn-info btn-sm" title="Actualizar Stock">
-                                                        <i class="bi bi-box-arrow-in-up"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <?php if (!empty($producto['variantes'])): ?>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Talla</th>
+                                                <th>Color</th>
+                                                <th>SKU</th>
+                                                <th class="text-center">Stock</th>
+                                                <th class="text-end">Precio</th>
+                                                <th class="text-end">Precio Oferta</th>
+                                                <th class="text-center">Estado</th>
+                                                <th class="text-center">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($producto['variantes'] as $variante): ?>
+                                            <tr>
+                                                <td><code><?= $variante['id'] ?></code></td>
+                                                <td>
+                                                    <strong class="text-primary"><?= Vista::escapar($variante['talla_nombre'] ?? 'Sin talla') ?></strong>
+                                                </td>
+                                                <td>
+                                                    <?php if ($variante['color_nombre']): ?>
+                                                        <span class="badge bg-light text-dark"><?= Vista::escapar($variante['color_nombre']) ?></span>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">Sin color</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><code class="small"><?= Vista::escapar($variante['codigo_sku']) ?></code></td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-<?= $variante['stock'] > 0 ? 'success' : 'danger' ?> fs-6">
+                                                        <?= $variante['stock'] ?>
+                                                    </span>
+                                                </td>
+                                                <td class="text-end fw-bold"><?= Vista::formatearPrecio($variante['precio']) ?></td>
+                                                <td class="text-end">
+                                                    <?php if ($variante['precio_oferta'] && $variante['precio_oferta'] < $variante['precio']): ?>
+                                                        <span class="text-success fw-bold"><?= Vista::formatearPrecio($variante['precio_oferta']) ?></span>
+                                                        <br><small class="text-decoration-line-through text-muted"><?= Vista::formatearPrecio($variante['precio']) ?></small>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-<?= $variante['estado'] === 'activo' ? 'success' : ($variante['estado'] === 'inactivo' ? 'warning' : 'danger') ?>">
+                                                        <?= ucfirst($variante['estado']) ?>
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="<?= Vista::url('admin/producto-editar/' . $variante['id']) ?>" 
+                                                           class="btn btn-warning btn-sm" title="Editar Variante">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <a href="<?= Vista::url('admin/actualizar-stock') ?>" 
+                                                           class="btn btn-info btn-sm" title="Actualizar Stock">
+                                                            <i class="bi bi-box-arrow-in-up"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Resumen de stock -->
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-muted">Stock Total</h6>
+                                                <h4 class="text-primary"><?= $producto['stock_total'] ?></h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-muted">Variantes Activas</h6>
+                                                <h4 class="text-success"><?= count(array_filter($producto['variantes'], function($v) { return $v['estado'] === 'activo'; })) ?></h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-muted">Con Stock</h6>
+                                                <h4 class="text-info"><?= count(array_filter($producto['variantes'], function($v) { return $v['stock'] > 0; })) ?></h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> Este producto no tiene variantes registradas.
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
 
-            <!-- Información adicional -->
+            <!-- Información técnica detallada -->
             <div class="row mt-4">
-                <div class="col-12">
+                <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Información Adicional</h5>
+                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información Técnica</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <h6>Fecha de Creación</h6>
-                                    <p class="mb-3"><?= date('d/m/Y H:i', strtotime($producto['fecha_creacion'])) ?></p>
+                                <div class="col-6">
+                                    <h6 class="text-muted">ID del Producto</h6>
+                                    <p class="mb-3"><code><?= $producto['id'] ?></code></p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="text-muted">SKU Principal</h6>
+                                    <p class="mb-3"><code><?= Vista::escapar($producto['codigo_sku']) ?></code></p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="text-muted">Categoría ID</h6>
+                                    <p class="mb-3"><code><?= $producto['categoria_id'] ?></code></p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="text-muted">Marca ID</h6>
+                                    <p class="mb-3"><code><?= $producto['marca_id'] ?? 'Sin marca' ?></code></p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="text-muted">Género ID</h6>
+                                    <p class="mb-3"><code><?= $producto['genero_id'] ?? 'Sin género' ?></code></p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="text-muted">Stock Mínimo</h6>
+                                    <p class="mb-3"><strong><?= $producto['stock_minimo'] ?> unidades</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historial y Fechas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6 class="text-muted">Fecha de Creación</h6>
+                                    <p class="mb-3">
+                                        <i class="bi bi-calendar-plus text-success"></i> 
+                                        <?= date('d/m/Y H:i:s', strtotime($producto['fecha_creacion'])) ?>
+                                    </p>
                                 </div>
                                 
-                                <div class="col-md-6">
-                                    <h6>Última Actualización</h6>
-                                    <p class="mb-3"><?= date('d/m/Y H:i', strtotime($producto['fecha_actualizacion'])) ?></p>
+                                <div class="col-12">
+                                    <h6 class="text-muted">Última Actualización</h6>
+                                    <p class="mb-3">
+                                        <i class="bi bi-calendar-check text-info"></i> 
+                                        <?= isset($producto['fecha_actualizacion']) && $producto['fecha_actualizacion'] ? date('d/m/Y H:i:s', strtotime($producto['fecha_actualizacion'])) : 'No actualizado' ?>
+                                    </p>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <h6 class="text-muted">Estado del Producto</h6>
+                                    <p class="mb-3">
+                                        <span class="badge bg-<?= $producto['estado'] === 'activo' ? 'success' : ($producto['estado'] === 'inactivo' ? 'warning' : 'danger') ?> fs-6">
+                                            <i class="bi bi-<?= $producto['estado'] === 'activo' ? 'check-circle' : ($producto['estado'] === 'inactivo' ? 'pause-circle' : 'x-circle') ?>"></i>
+                                            <?= ucfirst($producto['estado']) ?>
+                                        </span>
+                                    </p>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <h6 class="text-muted">Producto Destacado</h6>
+                                    <p class="mb-3">
+                                        <?php if ($producto['destacado']): ?>
+                                            <span class="badge bg-warning text-dark fs-6">
+                                                <i class="bi bi-star-fill"></i> Destacado
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted">
+                                                <i class="bi bi-star"></i> No destacado
+                                            </span>
+                                        <?php endif; ?>
+                                    </p>
                                 </div>
                             </div>
                         </div>
