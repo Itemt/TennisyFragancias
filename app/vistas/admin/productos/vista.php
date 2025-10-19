@@ -217,13 +217,13 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="<?= Vista::url('admin/producto_editar/' . $variante['id']) ?>" 
-                                                           class="btn btn-warning btn-sm" title="Editar Variante">
+                                                        <a href="<?= Vista::url('admin/actualizar-stock') ?>" 
+                                                           class="btn btn-warning btn-sm" title="Actualizar Stock">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <a href="<?= Vista::url('admin/actualizar-stock') ?>" 
-                                                           class="btn btn-info btn-sm" title="Actualizar Stock">
-                                                            <i class="bi bi-box-arrow-in-up"></i>
+                                                        <a href="<?= Vista::url('admin/producto_editar/' . $variante['id']) ?>" 
+                                                           class="btn btn-info btn-sm" title="Editar Variante">
+                                                            <i class="bi bi-gear"></i>
                                                         </a>
                                                     </div>
                                                 </td>

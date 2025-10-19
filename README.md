@@ -18,8 +18,13 @@ Sistema de comercio electrónico completo especializado en calzado deportivo, ca
 - 🔐 **Seguridad**: Encriptación de contraseñas, validación de datos, protección CSRF
 - 📱 **Diseño Responsive**: Compatible con dispositivos móviles y tablets
 - 🎨 **Interfaz Moderna**: Diseño atractivo con Bootstrap 5
- - 🖱️ **UX Mejorada**: Las cards de productos (catálogo, categorías e inicio) son completamente clickeables
- - 🖼️ **Branding**: Soporte de logo y favicon personalizados (ej. `public/imagenes/tacones-altos.png`)
+- 🖱️ **UX Mejorada**: Las cards de productos (catálogo, categorías e inicio) son completamente clickeables
+- 🖼️ **Branding**: Soporte de logo y favicon personalizados
+- 🏪 **Venta Presencial**: Sistema completo de punto de venta para empleados
+- 📋 **Gestión de Variantes**: Productos con múltiples tallas y colores
+- 🔍 **Búsqueda Avanzada**: Filtros por categoría, marca, talla y búsqueda de texto
+- 📊 **Historial de Stock**: Seguimiento completo de movimientos de inventario
+- 🎯 **Vista Detallada**: Páginas especializadas para administradores y clientes
 
 ---
 
@@ -39,9 +44,9 @@ cd TennisyFragancias
 # 3. Iniciar XAMPP
 # - Activar Apache y MySQL
 
-# 4. Abrir el instalador web
-# Ir a: http://localhost/tennisyfragancias/instalar.php
-# Seguir los 3 pasos del asistente
+# 4. Abrir el navegador
+# Ir a: http://localhost/tennisyfragancias/
+# El sistema se configurará automáticamente
 # ¡Listo! 🎉
 ```
 
@@ -50,8 +55,8 @@ cd TennisyFragancias
 1. **Descargar** el proyecto desde GitHub (Code → Download ZIP)
 2. **Extraer** en `C:\xampp\htdocs\tennisyfragancias\`
 3. **Iniciar XAMPP** (Apache + MySQL)
-4. **Abrir navegador**: `http://localhost/tennisyfragancias/instalar.php`
-5. **Seguir el asistente** de instalación
+4. **Abrir navegador**: `http://localhost/tennisyfragancias/`
+5. **Seguir la configuración** automática
 
 ### Requisitos del Sistema
 - ✅ PHP 7.4+ (incluido en XAMPP)
@@ -61,53 +66,9 @@ cd TennisyFragancias
 
 ---
 
-## 📋 Pasos del Instalador Automático
-
-#### 📋 Paso 1: Verificación de Requisitos
-El instalador verificará automáticamente:
-- ✅ Versión de PHP (7.4+)
-- ✅ Extensiones PHP necesarias (PDO, MySQL, cURL, mbstring, etc.)
-- ✅ Permisos de escritura en directorios
-- ✅ Archivos de configuración
-
-#### ⚙️ Paso 2: Configuración de Base de Datos
-Configurar los parámetros de conexión:
-- **Host**: `localhost` (predeterminado)
-- **Nombre de BD**: `tennisyzapatos_db` (o personalizado)
-- **Usuario**: `root` (XAMPP por defecto)
-- **Contraseña**: *(vacío en XAMPP por defecto)*
-- **Puerto**: `3306`
-
-**IMPORTANTE:** Elegir tipo de instalación:
-
-🎯 **Opción 1: Con datos de prueba (Recomendado para desarrollo)**
-- Incluye 20 productos de ejemplo variados
-- 5 categorías predefinidas
-- 3 usuarios de prueba (admin, empleado, cliente)
-- Perfecto para explorar todas las funcionalidades
-
-🔲 **Opción 2: Base de datos limpia (Para producción)**
-- Solo estructura de tablas
-- 3 usuarios básicos (admin, empleado, cliente)
-- Sin productos ni categorías
-- Ideal para empezar con datos reales
-
-#### 🔌 Paso 3: Prueba de Conexión
-El instalador:
-- Probará la conexión a MySQL
-- Creará la base de datos si no existe
-- Generará el archivo de configuración `.env`
-
-#### 🗄️ Paso 4: Instalación de Base de Datos
-El instalador creará automáticamente:
-- 15 tablas normalizadas
-- Índices y relaciones
-- Usuarios predefinidos
-- Datos de prueba (si se seleccionó)
-
 ## 🗄️ Estructura de Base de Datos Normalizada
 
-El instalador crea automáticamente las siguientes tablas normalizadas:
+El sistema crea automáticamente las siguientes tablas normalizadas:
 
 ### Tablas Principales
 1. **usuarios** - Gestión de usuarios (clientes, empleados, administradores)
@@ -118,39 +79,134 @@ El instalador crea automáticamente las siguientes tablas normalizadas:
 6. **detalle_pedidos** - Detalles de productos por pedido
 7. **carrito** - Carrito de compras persistente
 8. **facturas** - Facturación electrónica
+9. **historial_stock** - Seguimiento de movimientos de inventario
 
 ### Tablas de Referencia (Normalizadas)
-9. **marcas** - Marcas de productos
-10. **tallas** - Tallas disponibles
-11. **colores** - Colores disponibles
-12. **generos** - Géneros de productos
-13. **metodos_pago** - Métodos de pago disponibles
-14. **estados_pedido** - Estados de pedidos
-15. **estados_pago** - Estados de pagos
+10. **marcas** - Marcas de productos
+11. **tallas** - Tallas disponibles
+12. **colores** - Colores disponibles
+13. **generos** - Géneros de productos
+14. **metodos_pago** - Métodos de pago disponibles
+15. **estados_pedido** - Estados de pedidos
+16. **estados_pago** - Estados de pagos
 
-### Datos de Prueba (Opción "Con datos de prueba")
+---
 
-Si eliges instalar con datos de prueba, obtendrás:
+## 🎯 Funcionalidades por Rol
 
-**5 Categorías:**
-- 🏃 Tenis Deportivos
-- 👟 Tenis Casuales  
-- 👔 Zapatos Formales
-- 🏃‍♂️ Zapatos Deportivos
-- 🧦 Accesorios
+### 👑 Administrador
 
-**20 Productos de Ejemplo:**
-- Variedad de marcas (Nike, Adidas, Puma, Reebok, Converse, etc.)
-- Diferentes tallas y colores
-- Rangos de precio desde $19,000 hasta $329,000 COP
-- Stock variado para probar alertas
-- Productos destacados para la página principal
+**Dashboard Completo:**
+- 📊 Estadísticas de ventas, productos y usuarios
+- 📈 Gráficos de productos más vendidos
+- ⚠️ Alertas de stock bajo
+- 📦 Pedidos recientes
+- 🎨 Títulos unificados con colores oscuros
+
+**Gestión de Productos:**
+- ➕ Crear, editar y eliminar productos
+- 📸 Subir imágenes de productos (JPG, PNG, GIF, WEBP)
+- 🏷️ Asignar categorías, tallas, colores
+- 💰 Gestionar precios y ofertas
+- 📦 Control de stock y stock mínimo
+- ⭐ Marcar productos destacados
+- 🔢 Generación automática de SKU
+- 🔄 **Gestión de Variantes**: Productos con múltiples tallas y colores
+- 👁️ **Vista Completa**: Página detallada con toda la información del producto
+- ➕ **Agregar Variantes**: Crear nuevas tallas para productos existentes
+- 🗑️ **Eliminación Masiva**: Eliminar producto y todas sus variantes de una vez
+
+**Gestión de Stock:**
+- 📊 **Historial Detallado**: Seguimiento completo de movimientos
+- 🔍 **Filtros Avanzados**: Por tipo, fecha, producto
+- 📈 **Reportes**: Entradas, salidas, ajustes
+- ⚠️ **Alertas**: Stock bajo y productos agotados
+
+**Gestión de Categorías:**
+- Crear y administrar categorías
+- Activar/desactivar categorías
+
+**Gestión de Usuarios:**
+- Ver todos los usuarios
+- Cambiar roles (cliente, empleado, administrador)
+- Gestionar permisos
+
+**Reportes:**
+- Ventas por período
+- Productos más vendidos
+- Estadísticas de clientes
+
+### 👔 Empleado
+
+**Panel de Ventas:**
+- 💼 **Venta Presencial**: Sistema completo de punto de venta
+- 🔍 **Búsqueda Avanzada**: Por nombre, SKU, descripción
+- 🎨 **Interfaz Mejorada**: Colores oscuros para mejor legibilidad
+- 🛒 **Carrito Dinámico**: Gestión en tiempo real
+- 🧾 **Generar Facturas**: Sistema completo de facturación
+- 📋 **Ver Pedidos**: Gestión de órdenes
+- 👥 **Atención al Cliente**: Herramientas de soporte
+
+### 🛒 Cliente
+
+**Experiencia de Compra:**
+- 🔍 **Navegación Mejorada**: Catálogo con productos agrupados por variantes
+- 🛒 **Carrito Inteligente**: Gestión de variantes por talla
+- 💳 **Checkout Seguro**: Integración con MercadoPago
+- 📦 **Seguimiento**: Estado de pedidos en tiempo real
+- 👤 **Perfil Completo**: Gestión de datos personales
+- 🔒 **Seguridad**: Cambio de contraseñas seguro
+
+**Catálogo de Productos:**
+- 🏷️ **Productos Agrupados**: Una entrada por producto, múltiples variantes
+- 🎯 **Selección de Talla**: Al entrar al detalle del producto
+- 📊 **Estado de Stock**: "Disponible" o "Agotado" (sin números específicos)
+- 🖼️ **Imágenes Optimizadas**: Placeholders cuando no hay imagen
+- 🔍 **Búsqueda Inteligente**: Filtros por categoría, marca, talla
+
+---
+
+## 🛠️ Nuevas Funcionalidades Implementadas
+
+### 📦 Gestión de Variantes de Productos
+- **Productos Agrupados**: Los productos con múltiples tallas aparecen una sola vez en el catálogo
+- **Selección de Talla**: Al entrar al detalle, se puede elegir la talla específica
+- **Stock por Variante**: Control individual de stock por cada talla/color
+- **Eliminación Masiva**: Al eliminar un producto, se eliminan todas sus variantes
+
+### 🔍 Sistema de Búsqueda Mejorado
+- **Búsqueda Multi-campo**: Busca en nombre, SKU y descripción
+- **Filtros Avanzados**: Por categoría, marca, talla
+- **Búsqueda en Tiempo Real**: Filtra productos mientras escribes
+- **Indicadores Visuales**: Mensajes cuando no hay resultados
+
+### 📊 Gestión de Stock Avanzada
+- **Historial Completo**: Seguimiento de todos los movimientos
+- **Filtros por Fecha**: Rango de fechas personalizable
+- **Filtros por Tipo**: Entradas, salidas, ajustes
+- **Búsqueda de Productos**: Por nombre o SKU
+- **Reportes Detallados**: Estadísticas de movimientos
+
+### 🎨 Mejoras de Interfaz
+- **Colores Unificados**: Títulos con colores oscuros para mejor legibilidad
+- **Placeholders Inteligentes**: Imágenes de respaldo cuando no hay foto
+- **Botones Contextuales**: Acciones específicas según la vista
+- **Responsive Mejorado**: Mejor experiencia en móviles
+
+### 🏪 Sistema de Venta Presencial
+- **Punto de Venta Completo**: Interfaz dedicada para empleados
+- **Búsqueda de Productos**: Sistema robusto de búsqueda
+- **Carrito Dinámico**: Gestión en tiempo real
+- **Cálculo Automático**: Subtotal, descuentos, total
+- **Facturación**: Generación automática de facturas
+
+---
 
 ## 🔧 Configuración
 
 ### Archivo de Configuración (.env)
 
-El instalador genera automáticamente este archivo, pero puedes editarlo manualmente:
+El sistema genera automáticamente este archivo:
 
 ```env
 # Base de Datos
@@ -188,72 +244,11 @@ EMAIL_REMITENTE=info@tennisyfragancias.com
 EMAIL_REMITENTE_NOMBRE=Tennis y Fragancias
 ```
 
-### ⚡ Sin Archivos SQL Necesarios
-
-El instalador **NO requiere archivos SQL**. Todo se genera mediante código PHP:
-- ✅ Crea la base de datos si no existe
-- ✅ Crea todas las tablas con estructura completa
-- ✅ Añade índices y relaciones (Foreign Keys)
-- ✅ Inserta usuarios predefinidos
-- ✅ Carga datos de prueba (opcional)
-- ✅ Soporta reinstalación sin errores
-
-## 🎯 Funcionalidades por Rol
-
-### 👑 Administrador
-**Dashboard Completo:**
-- 📊 Estadísticas de ventas, productos y usuarios
-- 📈 Gráficos de productos más vendidos
-- ⚠️ Alertas de stock bajo
-- 📦 Pedidos recientes
-
-**Gestión de Productos:**
-- ➕ Crear, editar y eliminar productos
-- 📸 Subir imágenes de productos (JPG, PNG, GIF, WEBP)
-- 🏷️ Asignar categorías, tallas, colores
-- 💰 Gestionar precios y ofertas
-- 📦 Control de stock y stock mínimo
-- ⭐ Marcar productos destacados
-- 🔢 Generación automática de SKU
-
-**Gestión de Categorías:**
-- Crear y administrar categorías
-- Activar/desactivar categorías
-
-**Gestión de Usuarios:**
-- Ver todos los usuarios
-- Cambiar roles (cliente, empleado, administrador)
-- Gestionar permisos
-
-**Reportes:**
-- Ventas por período
-- Productos más vendidos
-- Estadísticas de clientes
-
-### 👔 Empleado
-- 💼 Panel de ventas
-- 🧾 Generar facturas
-- 📋 Ver pedidos
-- 👥 Atención al cliente
-
-### 🛒 Cliente
-- 🔍 Navegar catálogo de productos
-- 🛒 Agregar productos al carrito
-- 💳 Realizar compras con MercadoPago
-- 📦 Seguimiento de pedidos
-- 👤 Gestionar perfil y direcciones
-- 🔒 Cambiar contraseña
-
-## 🔄 Sistema de Respaldo
-
-- **Crear respaldo**: `http://localhost/tennisyfragancias/database/backup.php`
-- **Respaldos automáticos** con fecha y hora
-- **Restauración fácil** entre entornos
-- **Historial completo** de respaldos
+---
 
 ## 👥 Usuarios Predefinidos
 
-El instalador crea automáticamente 3 usuarios de prueba:
+El sistema crea automáticamente 3 usuarios de prueba:
 
 ### 👑 Administrador (Control Total)
 - **Email**: `admin@tennisyfragancias.com`
@@ -276,6 +271,7 @@ El instalador crea automáticamente 3 usuarios de prueba:
   - ✅ Gestionar ventas y facturación
   - ✅ Ver pedidos y clientes
   - ✅ Atención al cliente
+  - ✅ Sistema de venta presencial
   - ❌ No puede modificar productos ni usuarios
 - **Datos**:
   - Nombre: Empleado Ventas
@@ -304,6 +300,8 @@ El instalador crea automáticamente 3 usuarios de prueba:
 - **Actualizar** datos de contacto del admin y empleado
 - Las contraseñas están encriptadas con `password_hash()` de PHP
 
+---
+
 ## 🛠️ Tecnologías
 
 - **Backend**: PHP 7.4+
@@ -311,6 +309,10 @@ El instalador crea automáticamente 3 usuarios de prueba:
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Pagos**: MercadoPago API
 - **Servidor**: Apache (XAMPP)
+- **Framework**: MVC personalizado
+- **UI**: Bootstrap 5 + Bootstrap Icons
+
+---
 
 ## 📁 Estructura del Proyecto
 
@@ -320,15 +322,22 @@ tennisyfragancias/
 │   ├── config/          # Configuración
 │   ├── controladores/  # Lógica de negocio
 │   ├── modelos/        # Modelos de datos
-│   └── vistas/         # Plantillas HTML
+│   ├── vistas/         # Plantillas HTML
+│   │   ├── admin/      # Vistas administrativas
+│   │   ├── empleado/  # Vistas de empleados
+│   │   ├── productos/ # Vistas de productos
+│   │   └── layout/    # Layouts comunes
+│   └── helpers/        # Funciones auxiliares
 ├── database/           # Scripts de base de datos
 ├── public/            # Archivos públicos
 │   ├── css/           # Estilos
 │   ├── js/            # JavaScript
 │   └── imagenes/      # Imágenes
-├── instalar.php       # Instalador automático
-└── index.php         # Punto de entrada
+├── index.php          # Punto de entrada
+└── README.md          # Documentación
 ```
+
+---
 
 ## 🔒 Seguridad
 
@@ -337,49 +346,8 @@ tennisyfragancias/
 - ✅ Protección CSRF
 - ✅ Sanitización de inputs
 - ✅ Headers de seguridad
-
-## 🔄 Reinstalación
-
-Si necesitas reinstalar el sistema:
-
-1. **Opción A - Mantener datos:**
-   - Simplemente ejecuta `instalar.php` nuevamente
-   - El instalador detectará tablas existentes
-   - Elige "Base limpia" para no duplicar datos
-
-2. **Opción B - Instalación limpia:**
-   - Elimina la base de datos en phpMyAdmin
-   - Ejecuta `instalar.php`
-   - Elige tu opción preferida
-
----
-
-## 🔒 Configuración de Seguridad para GitHub
-
-### Archivos que NO se suben a GitHub (.gitignore)
-
-El proyecto está configurado para **NO subir** archivos sensibles:
-
-✅ **Archivos excluidos automáticamente:**
-- `app/config/.env` (credenciales de base de datos)
-- `public/imagenes/productos/*` (imágenes subidas por usuarios)
-- `public/imagenes/categorias/*` (imágenes de categorías)
-- `database/backups/*` (respaldos de base de datos)
-- Archivos temporales, logs y cache
-
-✅ **Archivos incluidos en el repositorio:**
-- `env.example` (plantilla de configuración)
-- `.gitkeep` (mantiene carpetas vacías)
-- Todo el código fuente
-- Documentación
-
-### Para Desarrolladores
-
-Si clonas el repositorio:
-1. El archivo `.env` **NO estará presente** (es correcto)
-2. El instalador lo creará automáticamente
-3. Nunca hagas `git add app/config/.env`
-4. Usa `env.example` como referencia
+- ✅ Validación de archivos
+- ✅ Control de acceso por roles
 
 ---
 
@@ -417,62 +385,16 @@ APP_SECRET_KEY=genera_clave_unica_aqui
 
 ---
 
-## 📚 Guía de Uso Rápida
-
-### 🔑 Credenciales Predefinidas
-
-El instalador crea 3 usuarios automáticamente:
-
-| Rol | Email | Contraseña | Permisos |
-|-----|-------|------------|----------|
-| 👑 **Admin** | `admin@tennisyfragancias.com` | `admin123` | Control total del sistema |
-| 👔 **Empleado** | `empleado@tennisyfragancias.com` | `empleado123` | Ventas y facturación |
-| 🛒 **Cliente** | `cliente@example.com` | `cliente123` | Compras online |
-
-⚠️ **IMPORTANTE**: Cambiar estas contraseñas en producción
-
-### 🎯 Funcionalidades por Rol
-
-**👑 Administrador:**
-- Dashboard con estadísticas
-- Gestión completa de productos y categorías
-- Control de usuarios y roles
-- Reportes y análisis
-- Configuración del sistema
-
-**👔 Empleado:**
-- Panel de ventas
-- Generación de facturas
-- Gestión de pedidos
-- Atención al cliente
-
-**🛒 Cliente:**
-- Navegación del catálogo
-- Carrito de compras
-- Proceso de checkout
-- Seguimiento de pedidos
-- Gestión de perfil
-
----
-
-## 🔗 Recursos Útiles
-
-- **MercadoPago Developers**: https://www.mercadopago.com.co/developers
-- **Bootstrap 5**: https://getbootstrap.com/docs/5.3/
-- **PHP 7.4 Docs**: https://www.php.net/manual/es/
-- **MySQL Docs**: https://dev.mysql.com/doc/
-
 ## 🧰 Solución de Problemas Comunes
 
 ### ❌ Error: "Access denied for user 'root'@'localhost'"
 **Solución:**
 - En XAMPP, el usuario `root` tiene contraseña vacía por defecto
-- En el instalador, deja el campo contraseña en blanco
-- Si cambiaste la contraseña de MySQL, úsala en el instalador
+- Si cambiaste la contraseña de MySQL, úsala en la configuración
 
 ### ❌ Error: "Table already exists"
 **Solución:**
-- El instalador usa `CREATE TABLE IF NOT EXISTS`
+- El sistema usa `CREATE TABLE IF NOT EXISTS`
 - Puedes reinstalar sin problemas
 - Para instalación limpia, elimina la base de datos primero en phpMyAdmin
 
@@ -492,7 +414,6 @@ El instalador crea 3 usuarios automáticamente:
 **Solución:**
 - Asegúrate que `public/imagenes/productos/` tenga permisos de escritura
 - En Windows, propiedades → Seguridad → Permitir escritura
-- El instalador verifica estos permisos automáticamente
 
 ### ❌ Error: "URL redirection issues"
 **Solución:**
@@ -504,7 +425,6 @@ El instalador crea 3 usuarios automáticamente:
 **Solución:**
 - Si instalaste con "Base limpia", debes crear productos manualmente
 - Como administrador: Dashboard → Productos → Nuevo Producto
-- O reinstala con "Datos de prueba"
 
 ### ❌ Error en subida de imágenes: "Unsupported image type"
 **Solución:**
@@ -512,6 +432,12 @@ El instalador crea 3 usuarios automáticamente:
 - Máximo 5MB por imagen
 - El sistema valida tipo MIME real del archivo
 - Evita archivos corruptos o con extensión incorrecta
+
+### ❌ Error: "Column not found" en base de datos
+**Solución:**
+- Ejecuta el instalador nuevamente
+- El sistema actualizará la estructura de la base de datos
+- No se perderán los datos existentes
 
 ---
 
@@ -526,6 +452,10 @@ Desarrollado como proyecto académico en Barrancabermeja, Santander, Colombia.
 - ✅ Autenticación y autorización por roles
 - ✅ 100% portable y fácil de instalar
 - ✅ Código limpio y bien documentado
+- ✅ Sistema de variantes de productos
+- ✅ Gestión avanzada de stock
+- ✅ Sistema de venta presencial
+- ✅ Búsqueda y filtros inteligentes
 
 ---
 
