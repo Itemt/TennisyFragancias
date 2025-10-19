@@ -361,17 +361,51 @@ class BaseDatos {
             ];
         }
 
-        $stmt = $this->conexion->prepare("INSERT INTO pedidos (numero_pedido, usuario_id, empleado_id, total, subtotal, metodo_pago_id, estado_pedido_id, tipo_pedido, fecha_pedido, fecha_envio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        foreach ($pedidos as $pedido) {
-            try {
-                $stmt->execute($pedido);
-            } catch (PDOException $e) {
-                // Ignorar errores de duplicados
-                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
-                    continue;
+        // Verificar estructura de la tabla pedidos y adaptar la inserción
+        try {
+            $stmt = $this->conexion->query("DESCRIBE pedidos");
+            $columnas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $nombresColumnas = array_column($columnas, 'Field');
+            error_log("DEBUG: Columnas disponibles en pedidos: " . implode(', ', $nombresColumnas));
+            
+            // Verificar si numero_pedido existe
+            if (in_array('numero_pedido', $nombresColumnas)) {
+                error_log("DEBUG: Columna numero_pedido encontrada, usando inserción completa");
+                $stmt = $this->conexion->prepare("INSERT INTO pedidos (numero_pedido, usuario_id, empleado_id, total, subtotal, metodo_pago_id, estado_pedido_id, tipo_pedido, fecha_pedido, fecha_envio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                
+                foreach ($pedidos as $pedido) {
+                    try {
+                        $stmt->execute($pedido);
+                        error_log("DEBUG: Pedido insertado: " . $pedido[0]);
+                    } catch (PDOException $e) {
+                        error_log("ERROR insertando pedido: " . $e->getMessage());
+                        if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                            continue;
+                        }
+                    }
+                }
+            } else {
+                error_log("DEBUG: Columna numero_pedido NO encontrada, usando inserción sin número");
+                // Insertar sin numero_pedido (usar ID auto-increment)
+                $stmt = $this->conexion->prepare("INSERT INTO pedidos (usuario_id, empleado_id, total, subtotal, metodo_pago_id, estado_pedido_id, tipo_pedido, fecha_pedido, fecha_envio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                
+                foreach ($pedidos as $pedido) {
+                    // Remover el primer elemento (numero_pedido) del array
+                    $pedidoSinNumero = array_slice($pedido, 1);
+                    try {
+                        $stmt->execute($pedidoSinNumero);
+                        error_log("DEBUG: Pedido insertado sin número");
+                    } catch (PDOException $e) {
+                        error_log("ERROR insertando pedido sin número: " . $e->getMessage());
+                        if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                            continue;
+                        }
+                    }
                 }
             }
+        } catch (PDOException $e) {
+            error_log("ERROR: No se puede describir tabla pedidos: " . $e->getMessage());
+            return; // Salir si no se puede acceder a la tabla
         }
         
         // Insertar detalles de pedidos
