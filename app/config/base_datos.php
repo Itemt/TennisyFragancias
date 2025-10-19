@@ -133,12 +133,19 @@ class BaseDatos {
             $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
             $clientes = $stmt->fetch()['total'];
             
+            // Log para debug
+            error_log("DEBUG: Clientes encontrados: $clientes");
+            
             // Si hay menos de 10 clientes, llenar con datos de producción
             if ($clientes < 10) {
+                error_log("DEBUG: Iniciando llenado de datos de producción");
                 $this->llenarDatosProduccion();
+                error_log("DEBUG: Llenado de datos completado");
+            } else {
+                error_log("DEBUG: Ya hay suficientes clientes, no se llenan datos");
             }
         } catch (Throwable $t) {
-            // En caso de error silencioso, no bloquear la app
+            error_log("ERROR en verificarYDatosIniciales: " . $t->getMessage());
         }
     }
 
@@ -147,43 +154,260 @@ class BaseDatos {
      */
     private function llenarDatosProduccion() {
         try {
-            $sqlFile = (defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2)) . '/database/llenar_produccion.sql';
-            if (!file_exists($sqlFile)) {
-                return;
-            }
+            error_log("DEBUG: Iniciando llenarDatosProduccion");
             
-            $sql = file_get_contents($sqlFile);
-            if ($sql === false) {
-                return;
-            }
+            // Desactivar restricciones temporalmente
+            $this->conexion->exec("SET FOREIGN_KEY_CHECKS = 0");
             
-            // Normalizar saltos de línea
-            $sql = str_replace(["\r\n", "\r"], "\n", $sql);
+            // Insertar clientes
+            error_log("DEBUG: Insertando clientes");
+            $this->insertarClientes();
             
-            // Dividir en comandos
-            $comandos = explode(';', $sql);
-            foreach ($comandos as $comando) {
-                $comando = trim($comando);
-                if ($comando === '' || strpos($comando, '--') === 0) {
+            // Insertar productos adicionales
+            error_log("DEBUG: Insertando productos adicionales");
+            $this->insertarProductosAdicionales();
+            
+            // Insertar pedidos
+            error_log("DEBUG: Insertando pedidos");
+            $this->insertarPedidos();
+            
+            // Insertar facturas
+            error_log("DEBUG: Insertando facturas");
+            $this->insertarFacturas();
+            
+            // Insertar historial de stock
+            error_log("DEBUG: Insertando historial de stock");
+            $this->insertarHistorialStock();
+            
+            // Insertar productos en carrito
+            error_log("DEBUG: Insertando carrito");
+            $this->insertarCarrito();
+            
+            // Reactivar restricciones
+            $this->conexion->exec("SET FOREIGN_KEY_CHECKS = 1");
+            
+            error_log("DEBUG: llenarDatosProduccion completado exitosamente");
+            
+        } catch (Throwable $t) {
+            error_log("ERROR en llenarDatosProduccion: " . $t->getMessage());
+            $this->conexion->exec("SET FOREIGN_KEY_CHECKS = 1");
+        }
+    }
+
+    /**
+     * Inserta clientes de prueba
+     */
+    private function insertarClientes() {
+        $clientes = [
+            ['María', 'González Rodríguez', 'maria.gonzalez@email.com', '+57 310 123 4567'],
+            ['Carlos', 'Martínez López', 'carlos.martinez@email.com', '+57 311 234 5678'],
+            ['Ana', 'Fernández Silva', 'ana.fernandez@email.com', '+57 312 345 6789'],
+            ['Luis', 'Ramírez Torres', 'luis.ramirez@email.com', '+57 313 456 7890'],
+            ['Sofia', 'Herrera Jiménez', 'sofia.herrera@email.com', '+57 314 567 8901'],
+            ['Diego', 'Vargas Morales', 'diego.vargas@email.com', '+57 315 678 9012'],
+            ['Valentina', 'Castro Ruiz', 'valentina.castro@email.com', '+57 316 789 0123'],
+            ['Andrés', 'Mendoza Peña', 'andres.mendoza@email.com', '+57 317 890 1234'],
+            ['Camila', 'Rojas Gutiérrez', 'camila.rojas@email.com', '+57 318 901 2345'],
+            ['Sebastián', 'Moreno Vega', 'sebastian.moreno@email.com', '+57 319 012 3456'],
+            ['Isabella', 'Díaz Castillo', 'isabella.diaz@email.com', '+57 320 123 4567'],
+            ['Mateo', 'Sánchez Aguilar', 'mateo.sanchez@email.com', '+57 321 234 5678'],
+            ['Natalia', 'Cruz Herrera', 'natalia.cruz@email.com', '+57 322 345 6789'],
+            ['Alejandro', 'Flores Medina', 'alejandro.flores@email.com', '+57 323 456 7890'],
+            ['Gabriela', 'Ortega Ramos', 'gabriela.ortega@email.com', '+57 324 567 8901']
+        ];
+
+        $stmt = $this->conexion->prepare("INSERT INTO usuarios (nombre, apellido, email, password, telefono, rol, estado) VALUES (?, ?, ?, ?, ?, 'cliente', 'activo')");
+        
+        foreach ($clientes as $cliente) {
+            try {
+                $stmt->execute([
+                    $cliente[0], 
+                    $cliente[1], 
+                    $cliente[2], 
+                    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password hash
+                    $cliente[3]
+                ]);
+            } catch (PDOException $e) {
+                // Ignorar errores de duplicados
+                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
                     continue;
                 }
-                
-                try {
-                    $this->conexion->exec($comando);
-                } catch (PDOException $e) {
-                    // Ignorar errores de objetos ya existentes o duplicados
-                    $mensaje = $e->getMessage();
-                    if (stripos($mensaje, 'already exists') !== false || 
-                        stripos($mensaje, 'Duplicate entry') !== false ||
-                        stripos($mensaje, 'Integrity constraint violation') !== false) {
-                        continue;
-                    }
-                    // Re-lanzar otros errores críticos
-                    throw $e;
+            }
+        }
+    }
+
+    /**
+     * Inserta productos adicionales
+     */
+    private function insertarProductosAdicionales() {
+        $productos = [
+            ['Air Force 1', 'Zapatillas clásicas Nike Air Force 1 en cuero blanco', 280000.00, 250000.00, 1, 1, 13, 1, 1, 20, 'TF-NK-001-40-0001', 1],
+            ['Air Max 90', 'Zapatillas Nike Air Max 90 con tecnología de amortiguación', 320000.00, NULL, 1, 1, 14, 1, 1, 15, 'TF-NK-002-41-0001', 1],
+            ['Dunk Low', 'Zapatillas Nike Dunk Low estilo retro', 250000.00, 220000.00, 2, 1, 12, 3, 3, 18, 'TF-NK-003-39-0001', 0],
+            ['React Element 55', 'Zapatillas Nike React con tecnología React', 300000.00, NULL, 1, 1, 15, 2, 1, 12, 'TF-NK-004-42-0001', 0],
+            ['Blazer Mid', 'Zapatillas Nike Blazer Mid clásicas', 200000.00, 180000.00, 2, 1, 11, 1, 3, 25, 'TF-NK-005-38-0001', 0],
+            ['Ultraboost 22', 'Zapatillas Adidas Ultraboost 22 con Boost', 450000.00, 400000.00, 1, 2, 13, 1, 1, 10, 'TF-AD-001-40-0001', 1],
+            ['Gazelle', 'Zapatillas Adidas Gazelle clásicas', 180000.00, NULL, 2, 2, 12, 4, 3, 22, 'TF-AD-002-39-0001', 0],
+            ['NMD R1', 'Zapatillas Adidas NMD R1 con Boost', 350000.00, 320000.00, 1, 2, 14, 2, 1, 16, 'TF-AD-003-41-0001', 1],
+            ['Samba', 'Zapatillas Adidas Samba icónicas', 160000.00, 140000.00, 2, 2, 10, 1, 3, 30, 'TF-AD-004-37-0001', 0],
+            ['Yeezy Boost 350', 'Zapatillas Adidas Yeezy Boost 350', 800000.00, NULL, 1, 2, 15, 1, 1, 5, 'TF-AD-005-42-0001', 1],
+            ['RS-X Reinvention', 'Zapatillas Puma RS-X con tecnología RS', 220000.00, 200000.00, 1, 3, 13, 3, 1, 18, 'TF-PM-001-40-0001', 0],
+            ['Suede Classic', 'Zapatillas Puma Suede Classic', 150000.00, NULL, 2, 3, 12, 2, 3, 25, 'TF-PM-002-39-0001', 0],
+            ['Thunder Spectra', 'Zapatillas Puma Thunder Spectra', 280000.00, 250000.00, 1, 3, 14, 1, 1, 14, 'TF-PM-003-41-0001', 0],
+            ['Cali Sport', 'Zapatillas Puma Cali Sport', 190000.00, 170000.00, 2, 3, 11, 4, 2, 20, 'TF-PM-004-38-0001', 0],
+            ['Future Rider', 'Zapatillas Puma Future Rider', 200000.00, NULL, 1, 3, 15, 2, 1, 16, 'TF-PM-005-42-0001', 0],
+            ['Chuck Taylor All Star High', 'Zapatillas Converse Chuck Taylor All Star High', 120000.00, 100000.00, 2, 5, 12, 1, 3, 35, 'TF-CV-001-39-0001', 1],
+            ['Chuck Taylor All Star Low', 'Zapatillas Converse Chuck Taylor All Star Low', 110000.00, 95000.00, 2, 5, 11, 2, 3, 40, 'TF-CV-002-38-0001', 1],
+            ['One Star', 'Zapatillas Converse One Star', 140000.00, NULL, 2, 5, 13, 3, 3, 28, 'TF-CV-003-40-0001', 0],
+            ['Jack Purcell', 'Zapatillas Converse Jack Purcell', 130000.00, 115000.00, 2, 5, 14, 1, 3, 22, 'TF-CV-004-41-0001', 0],
+            ['Chuck 70', 'Zapatillas Converse Chuck 70', 160000.00, 140000.00, 2, 5, 15, 2, 3, 18, 'TF-CV-005-42-0001', 0],
+            ['Old Skool Classic', 'Zapatillas Vans Old Skool Classic', 150000.00, 130000.00, 2, 6, 12, 1, 3, 30, 'TF-VN-001-39-0001', 1],
+            ['Authentic', 'Zapatillas Vans Authentic', 120000.00, NULL, 2, 6, 11, 2, 3, 35, 'TF-VN-002-38-0001', 1],
+            ['Sk8-Hi', 'Zapatillas Vans Sk8-Hi', 160000.00, 140000.00, 2, 6, 13, 3, 3, 25, 'TF-VN-003-40-0001', 0],
+            ['Era', 'Zapatillas Vans Era', 130000.00, 115000.00, 2, 6, 14, 1, 3, 28, 'TF-VN-004-41-0001', 0],
+            ['Slip-On', 'Zapatillas Vans Slip-On', 140000.00, NULL, 2, 6, 15, 2, 3, 32, 'TF-VN-005-42-0001', 0],
+            ['574 Core', 'Zapatillas New Balance 574 Core', 200000.00, 180000.00, 1, 7, 13, 1, 1, 20, 'TF-NB-001-40-0001', 1],
+            ['990v5', 'Zapatillas New Balance 990v5', 450000.00, NULL, 1, 7, 14, 2, 1, 8, 'TF-NB-002-41-0001', 1],
+            ['327', 'Zapatillas New Balance 327', 180000.00, 160000.00, 2, 7, 12, 3, 3, 25, 'TF-NB-003-39-0001', 0],
+            ['1080v12', 'Zapatillas New Balance 1080v12', 380000.00, 350000.00, 1, 7, 15, 1, 1, 12, 'TF-NB-004-42-0001', 0],
+            ['530', 'Zapatillas New Balance 530', 160000.00, NULL, 2, 7, 11, 2, 3, 30, 'TF-NB-005-38-0001', 0],
+            ['Classic Leather', 'Zapatillas Reebok Classic Leather', 170000.00, 150000.00, 2, 4, 13, 1, 3, 25, 'TF-RB-001-40-0001', 0],
+            ['Club C 85', 'Zapatillas Reebok Club C 85', 160000.00, NULL, 2, 4, 12, 2, 3, 28, 'TF-RB-002-39-0001', 0],
+            ['Nano X1', 'Zapatillas Reebok Nano X1', 300000.00, 280000.00, 1, 4, 14, 3, 1, 15, 'TF-RB-003-41-0001', 0],
+            ['Zig Kinetica', 'Zapatillas Reebok Zig Kinetica', 250000.00, 220000.00, 1, 4, 15, 1, 1, 18, 'TF-RB-004-42-0001', 0],
+            ['Floatride Energy', 'Zapatillas Reebok Floatride Energy', 200000.00, 180000.00, 1, 4, 11, 2, 1, 20, 'TF-RB-005-38-0001', 0],
+            ['Charged Assert 9', 'Zapatillas Under Armour Charged Assert 9', 180000.00, NULL, 1, 8, 13, 1, 1, 22, 'TF-UA-001-40-0001', 0],
+            ['HOVR Phantom 2', 'Zapatillas Under Armour HOVR Phantom 2', 280000.00, 250000.00, 1, 8, 14, 2, 1, 16, 'TF-UA-002-41-0001', 0],
+            ['Charged Bandit 6', 'Zapatillas Under Armour Charged Bandit 6', 200000.00, 180000.00, 1, 8, 15, 3, 1, 18, 'TF-UA-003-42-0001', 0],
+            ['HOVR Sonic 4', 'Zapatillas Under Armour HOVR Sonic 4', 240000.00, NULL, 1, 8, 12, 1, 1, 20, 'TF-UA-004-39-0001', 0],
+            ['Charged Pursuit 2', 'Zapatillas Under Armour Charged Pursuit 2', 160000.00, 140000.00, 1, 8, 11, 2, 1, 25, 'TF-UA-005-38-0001', 0]
+        ];
+
+        $stmt = $this->conexion->prepare("INSERT INTO productos (nombre, descripcion, precio, precio_oferta, categoria_id, marca_id, talla_id, color_id, genero_id, stock, stock_minimo, codigo_sku, destacado, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 5, ?, ?, 'activo')");
+        
+        foreach ($productos as $producto) {
+            try {
+                $stmt->execute($producto);
+            } catch (PDOException $e) {
+                // Ignorar errores de duplicados
+                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                    continue;
                 }
             }
-        } catch (Throwable $t) {
-            // En caso de error silencioso, no bloquear la app
+        }
+    }
+
+    /**
+     * Inserta pedidos de ejemplo
+     */
+    private function insertarPedidos() {
+        $pedidos = [
+            ['PED-2024-001', 3, 2, 450000.00, 450000.00, 2, 5, 'online', '2024-01-15 10:30:00', '2024-01-16 14:00:00', '2024-01-18 16:30:00'],
+            ['PED-2024-002', 4, 2, 320000.00, 320000.00, 1, 5, 'presencial', '2024-01-16 15:45:00', NULL, '2024-01-16 15:45:00'],
+            ['PED-2024-003', 5, 2, 280000.00, 280000.00, 3, 4, 'online', '2024-01-17 09:20:00', '2024-01-18 10:00:00', NULL],
+            ['PED-2024-004', 6, 2, 180000.00, 180000.00, 2, 3, 'online', '2024-01-18 14:15:00', NULL, NULL],
+            ['PED-2024-005', 7, 2, 550000.00, 550000.00, 4, 5, 'online', '2024-01-19 11:30:00', '2024-01-20 09:00:00', '2024-01-22 14:20:00'],
+            ['PED-2024-006', 8, 2, 240000.00, 240000.00, 1, 5, 'presencial', '2024-01-20 16:00:00', NULL, '2024-01-20 16:00:00'],
+            ['PED-2024-007', 9, 2, 380000.00, 380000.00, 2, 4, 'online', '2024-01-21 08:45:00', '2024-01-22 11:30:00', NULL],
+            ['PED-2024-008', 10, 2, 160000.00, 160000.00, 3, 3, 'online', '2024-01-22 13:20:00', NULL, NULL],
+            ['PED-2024-009', 11, 2, 420000.00, 420000.00, 2, 5, 'online', '2024-01-23 10:15:00', '2024-01-24 15:00:00', '2024-01-26 10:30:00'],
+            ['PED-2024-010', 12, 2, 200000.00, 200000.00, 1, 5, 'presencial', '2024-01-24 14:30:00', NULL, '2024-01-24 14:30:00']
+        ];
+
+        $stmt = $this->conexion->prepare("INSERT INTO pedidos (numero_pedido, usuario_id, empleado_id, total, subtotal, metodo_pago_id, estado_pedido_id, tipo_pedido, fecha_pedido, fecha_envio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        
+        foreach ($pedidos as $pedido) {
+            try {
+                $stmt->execute($pedido);
+            } catch (PDOException $e) {
+                // Ignorar errores de duplicados
+                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    /**
+     * Inserta facturas de ejemplo
+     */
+    private function insertarFacturas() {
+        $facturas = [
+            ['FAC-2024-001', 1, 3, 2, 450000.00, '2024-01-15 10:30:00', '2024-01-22 10:30:00', 'pagada'],
+            ['FAC-2024-002', 2, 4, 2, 320000.00, '2024-01-16 15:45:00', '2024-01-16 15:45:00', 'pagada'],
+            ['FAC-2024-003', 3, 5, 2, 280000.00, '2024-01-17 09:20:00', '2024-01-24 09:20:00', 'pendiente'],
+            ['FAC-2024-004', 4, 6, 2, 180000.00, '2024-01-18 14:15:00', '2024-01-25 14:15:00', 'pendiente'],
+            ['FAC-2024-005', 5, 7, 2, 550000.00, '2024-01-19 11:30:00', '2024-01-26 11:30:00', 'pagada'],
+            ['FAC-2024-006', 6, 8, 2, 240000.00, '2024-01-20 16:00:00', '2024-01-20 16:00:00', 'pagada'],
+            ['FAC-2024-007', 7, 9, 2, 380000.00, '2024-01-21 08:45:00', '2024-01-28 08:45:00', 'pendiente'],
+            ['FAC-2024-008', 8, 10, 2, 160000.00, '2024-01-22 13:20:00', '2024-01-29 13:20:00', 'pendiente'],
+            ['FAC-2024-009', 9, 11, 2, 420000.00, '2024-01-23 10:15:00', '2024-01-30 10:15:00', 'pagada'],
+            ['FAC-2024-010', 10, 12, 2, 200000.00, '2024-01-24 14:30:00', '2024-01-24 14:30:00', 'pagada']
+        ];
+
+        $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, usuario_id, empleado_id, total, fecha_emision, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        
+        foreach ($facturas as $factura) {
+            try {
+                $stmt->execute($factura);
+            } catch (PDOException $e) {
+                // Ignorar errores de duplicados
+                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    /**
+     * Inserta historial de stock
+     */
+    private function insertarHistorialStock() {
+        // Obtener productos recién insertados
+        $stmt = $this->conexion->query("SELECT id FROM productos WHERE id > 5 ORDER BY id");
+        $productos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        $stmt = $this->conexion->prepare("INSERT INTO historial_stock (producto_id, usuario_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo) VALUES (?, 1, 'entrada', ?, 0, ?, 'Stock inicial')");
+        
+        foreach ($productos as $productoId) {
+            try {
+                // Obtener stock del producto
+                $stockStmt = $this->conexion->prepare("SELECT stock FROM productos WHERE id = ?");
+                $stockStmt->execute([$productoId]);
+                $stock = $stockStmt->fetchColumn();
+                
+                if ($stock > 0) {
+                    $stmt->execute([$productoId, $stock, $stock]);
+                }
+            } catch (PDOException $e) {
+                continue;
+            }
+        }
+    }
+
+    /**
+     * Inserta productos en carrito
+     */
+    private function insertarCarrito() {
+        $carrito = [
+            [3, 1, 1, 329000.00],
+            [4, 2, 1, 180000.00],
+            [5, 3, 2, 120000.00],
+            [6, 4, 1, 150000.00],
+            [7, 5, 1, 200000.00]
+        ];
+
+        $stmt = $this->conexion->prepare("INSERT INTO carrito (usuario_id, producto_id, cantidad, precio) VALUES (?, ?, ?, ?)");
+        
+        foreach ($carrito as $item) {
+            try {
+                $stmt->execute($item);
+            } catch (PDOException $e) {
+                // Ignorar errores de duplicados
+                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                    continue;
+                }
+            }
         }
     }
     
