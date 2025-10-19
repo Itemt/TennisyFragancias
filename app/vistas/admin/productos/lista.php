@@ -73,7 +73,7 @@
                                 <td>
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                onclick="verDetallesProducto(<?= $producto['id'] ?>, '<?= Vista::escapar($producto['nombre']) ?>')"
+                                                onclick="verDetallesProducto(<?= $producto['id'] ?>, <?= json_encode($producto['nombre']) ?>)"
                                                 title="Ver detalles">
                                             <i class="bi bi-eye"></i>
                                         </button>
@@ -82,7 +82,7 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-danger" 
-                                                onclick="eliminarProducto(<?= $producto['id'] ?>, '<?= Vista::escapar($producto['nombre']) ?>')"
+                                                onclick="eliminarProducto(<?= $producto['id'] ?>, <?= json_encode($producto['nombre']) ?>)"
                                                 title="Eliminar">
                                             <i class="bi bi-trash"></i>
                                         </button>

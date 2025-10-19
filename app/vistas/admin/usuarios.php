@@ -104,7 +104,7 @@
                                     <td>
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-sm btn-outline-primary" 
-                                                    onclick="cambiarPassword(<?= $usuario['id'] ?>, '<?= Vista::escapar($usuario['nombre'] . ' ' . $usuario['apellido']) ?>')">
+                                                    onclick="cambiarPassword(<?= $usuario['id'] ?>, <?= json_encode($usuario['nombre'] . ' ' . $usuario['apellido']) ?>)">
                                                 <i class="bi bi-key"></i> Cambiar Password
                                             </button>
                                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
@@ -127,7 +127,7 @@
                                                 </li>
                                                 <li>
                                                     <a class="dropdown-item text-danger" href="#" 
-                                                       onclick="eliminarUsuario(<?= $usuario['id'] ?>, '<?= Vista::escapar($usuario['nombre'] . ' ' . $usuario['apellido']) ?>')">
+                                                       onclick="eliminarUsuario(<?= $usuario['id'] ?>, <?= json_encode($usuario['nombre'] . ' ' . $usuario['apellido']) ?>)">
                                                         <i class="bi bi-trash"></i> Eliminar
                                                     </a>
                                                 </li>

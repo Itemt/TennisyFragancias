@@ -666,6 +666,13 @@ class AdminControlador extends Controlador {
     }
     
     /**
+     * Alias para crear-usuario (con guiones)
+     */
+    public function crear_usuario() {
+        $this->crearUsuario();
+    }
+    
+    /**
      * Cambiar contraseña de usuario
      */
     public function cambiarPassword() {
