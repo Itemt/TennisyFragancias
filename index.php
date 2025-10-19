@@ -8,10 +8,7 @@
 // Iniciar sesión
 session_start();
 
-// Configuración automática completa para producción
-if (isset($_SERVER['HTTP_HOST']) && strpos($_SERVER['HTTP_HOST'], 'itemt.tech') !== false) {
-    require_once 'auto-setup-production.php';
-}
+// Configuración automática para producción (archivo eliminado - ya no necesario)
 
 // Configuración de errores para desarrollo
 error_reporting(E_ALL);
