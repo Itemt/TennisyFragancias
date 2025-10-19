@@ -270,7 +270,7 @@ function eliminarProducto(productoId, nombreProducto) {
         document.body.appendChild(loadingIndicator);
         
         // Realizar la eliminación
-        fetch('<?= Vista::url("admin/producto-eliminar/") ?>' + productoId, {
+        fetch('<?= Vista::url("admin/producto_eliminar/") ?>' + productoId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

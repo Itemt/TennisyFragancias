@@ -544,4 +544,14 @@ class Producto extends Modelo {
         
         return $sku;
     }
+    
+    /**
+     * Eliminar producto
+     */
+    public function eliminar($id) {
+        $sql = "DELETE FROM {$this->tabla} WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
 }
