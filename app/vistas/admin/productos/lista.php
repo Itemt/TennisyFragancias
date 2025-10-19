@@ -66,7 +66,7 @@
                                         <?php 
                                         // Obtener las variantes del producto con sus tallas y cantidades
                                         $productoModelo = $this->cargarModelo('Producto');
-                                        $variantes = $productoModelo->obtenerVariantesPorProducto($producto['id']);
+                                        $variantes = $productoModelo->obtenerVariantesPorId($producto['id']);
                                         ?>
                                         <?php if (!empty($variantes)): ?>
                                             <div class="d-flex flex-wrap gap-1 justify-content-center">
