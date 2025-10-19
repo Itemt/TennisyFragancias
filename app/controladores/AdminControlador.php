@@ -1212,4 +1212,67 @@ class AdminControlador extends Controlador {
         
         $this->cargarVista('admin/productos/agregar-variante', $datos);
     }
+    
+    /**
+     * Crear nueva variante desde la página de stock
+     */
+    public function crear_variante_stock() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Obtener datos del JSON
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            $productoBaseId = $input['producto_base_id'] ?? null;
+            $tallaId = $input['talla_id'] ?? null;
+            
+            if (!$productoBaseId || !$tallaId) {
+                echo json_encode(['exito' => false, 'mensaje' => 'Datos incompletos']);
+                return;
+            }
+            
+            $productoModelo = $this->cargarModelo('Producto');
+            
+            // Obtener datos del producto base
+            $productoBase = $productoModelo->obtenerPorId($productoBaseId);
+            if (!$productoBase) {
+                echo json_encode(['exito' => false, 'mensaje' => 'Producto no encontrado']);
+                return;
+            }
+            
+            // Verificar si ya existe una variante con esta talla
+            $varianteExistente = $productoModelo->obtenerVariantePorTalla($productoBaseId, $tallaId);
+            if ($varianteExistente) {
+                echo json_encode(['exito' => false, 'mensaje' => 'Ya existe una variante con esta talla']);
+                return;
+            }
+            
+            // Crear nueva variante
+            $datosVariante = [
+                'nombre' => $productoBase['nombre'],
+                'descripcion' => $productoBase['descripcion'],
+                'precio' => $productoBase['precio'],
+                'precio_oferta' => $productoBase['precio_oferta'],
+                'categoria_id' => $productoBase['categoria_id'],
+                'marca_id' => $productoBase['marca_id'],
+                'talla_id' => (int)$tallaId,
+                'color_id' => $productoBase['color_id'],
+                'genero_id' => $productoBase['genero_id'],
+                'stock' => 0,
+                'stock_minimo' => $productoBase['stock_minimo'],
+                'codigo_sku' => $productoModelo->generarCodigoSKU($productoBase['categoria_id'], $tallaId),
+                'estado' => 'activo',
+                'destacado' => 0,
+                'imagen_principal' => $productoBase['imagen_principal']
+            ];
+            
+            if ($productoModelo->crear($datosVariante)) {
+                echo json_encode(['exito' => true, 'mensaje' => 'Nueva variante creada exitosamente']);
+            } else {
+                echo json_encode(['exito' => false, 'mensaje' => 'Error al crear la variante']);
+            }
+        } else {
+            echo json_encode(['exito' => false, 'mensaje' => 'Método no permitido']);
+        }
+    }
 }

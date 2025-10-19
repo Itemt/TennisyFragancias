@@ -61,6 +61,24 @@
                                     <div class="form-text">Selecciona la talla específica a actualizar</div>
                                 </div>
                                 
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label"><strong>O Crear Nueva Variante</strong></label>
+                                    <div class="input-group">
+                                        <select class="form-select" id="nueva_talla_id">
+                                            <option value="">Seleccionar talla...</option>
+                                            <?php if (!empty($tallas)): ?>
+                                                <?php foreach ($tallas as $talla): ?>
+                                                    <option value="<?= $talla['id'] ?>"><?= Vista::escapar($talla['nombre']) ?></option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                        <button type="button" class="btn btn-success" id="btn-crear-variante">
+                                            <i class="bi bi-plus-circle"></i> Crear
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Crear una nueva variante con esta talla</div>
+                                </div>
+                                
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label"><strong>Stock Actual</strong></label>
                                     <input type="text" class="form-control" id="stock_actual" readonly 
@@ -286,6 +304,61 @@ document.getElementById('formActualizarStock').addEventListener('submit', functi
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     });
+});
+
+// Crear nueva variante
+document.getElementById('btn-crear-variante').addEventListener('click', function() {
+    const productoBaseId = document.getElementById('producto_base_id').value;
+    const nuevaTallaId = document.getElementById('nueva_talla_id').value;
+    
+    if (!productoBaseId) {
+        alert('❌ Primero debes seleccionar un producto');
+        return;
+    }
+    
+    if (!nuevaTallaId) {
+        alert('❌ Debes seleccionar una talla para la nueva variante');
+        return;
+    }
+    
+    // Verificar si ya existe una variante con esta talla
+    const existeVariante = variantesActuales.some(v => v.talla_id == nuevaTallaId);
+    if (existeVariante) {
+        alert('❌ Ya existe una variante con esta talla para este producto');
+        return;
+    }
+    
+    if (confirm('¿Crear nueva variante con esta talla?')) {
+        // Crear la nueva variante
+        fetch('<?= Vista::url("admin/crear-variante-stock") ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                producto_base_id: productoBaseId,
+                talla_id: nuevaTallaId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exito) {
+                alert('✅ ' + data.mensaje);
+                
+                // Recargar variantes para mostrar la nueva
+                document.getElementById('producto_base_id').dispatchEvent(new Event('change'));
+                
+                // Limpiar selección de nueva talla
+                document.getElementById('nueva_talla_id').value = '';
+            } else {
+                alert('❌ Error: ' + data.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Error al crear la variante');
+        });
+    }
 });
 
 function limpiarFormulario() {
