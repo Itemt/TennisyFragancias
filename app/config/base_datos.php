@@ -65,7 +65,7 @@ class BaseDatos {
 
     /**
      * Verifica la existencia de tablas críticas y ejecuta el script SQL
-     * para crear el esquema si no existen.
+     * para crear el esquema si no existen. También verifica si hay datos.
      */
     private function asegurarEsquemaInstalado() {
         try {
@@ -75,6 +75,9 @@ class BaseDatos {
             
             if (!$existeProductos) {
                 $this->importarEsquemaDesdeSql();
+            } else {
+                // Verificar si hay datos en la base de datos
+                $this->verificarYDatosIniciales();
             }
         } catch (Throwable $t) {
             // En caso de error silencioso, no bloquear la app
@@ -86,7 +89,7 @@ class BaseDatos {
      * Maneja bloques con DELIMITER para triggers convirtiéndolos a ';'.
      */
     private function importarEsquemaDesdeSql() {
-        $sqlFile = (defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2)) . '/database/tennisyzapatos_db.sql';
+        $sqlFile = (defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2)) . '/database/tennisyzapatos_db_simple.sql';
         if (!file_exists($sqlFile)) {
             return;
         }
@@ -118,6 +121,69 @@ class BaseDatos {
                 // Re-lanzar otros errores críticos
                 throw $e;
             }
+        }
+    }
+
+    /**
+     * Verifica si hay datos iniciales y los inserta si es necesario
+     */
+    private function verificarYDatosIniciales() {
+        try {
+            // Verificar si hay clientes (excluyendo admin y empleado)
+            $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
+            $clientes = $stmt->fetch()['total'];
+            
+            // Si hay menos de 10 clientes, llenar con datos de producción
+            if ($clientes < 10) {
+                $this->llenarDatosProduccion();
+            }
+        } catch (Throwable $t) {
+            // En caso de error silencioso, no bloquear la app
+        }
+    }
+
+    /**
+     * Llena la base de datos con datos de producción
+     */
+    private function llenarDatosProduccion() {
+        try {
+            $sqlFile = (defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2)) . '/database/llenar_produccion.sql';
+            if (!file_exists($sqlFile)) {
+                return;
+            }
+            
+            $sql = file_get_contents($sqlFile);
+            if ($sql === false) {
+                return;
+            }
+            
+            // Normalizar saltos de línea
+            $sql = str_replace(["\r\n", "\r"], "\n", $sql);
+            
+            // Dividir en comandos
+            $comandos = explode(';', $sql);
+            foreach ($comandos as $comando) {
+                $comando = trim($comando);
+                if ($comando === '' || strpos($comando, '--') === 0) {
+                    continue;
+                }
+                
+                try {
+                    $this->conexion->exec($comando);
+                } catch (PDOException $e) {
+                    // Ignorar errores de objetos ya existentes o duplicados
+                    $mensaje = $e->getMessage();
+                    if (stripos($mensaje, 'already exists') !== false || 
+                        stripos($mensaje, 'Duplicate entry') !== false ||
+                        stripos($mensaje, 'Integrity constraint violation') !== false) {
+                        continue;
+                    }
+                    // Re-lanzar otros errores críticos
+                    throw $e;
+                }
+            }
+        } catch (Throwable $t) {
+            // En caso de error silencioso, no bloquear la app
         }
     }
     
