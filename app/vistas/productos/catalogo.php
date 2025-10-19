@@ -109,13 +109,18 @@
                         <div class="col-md-4">
                             <a href="<?= Vista::url('productos/ver/' . $producto['id']) ?>" class="text-decoration-none text-dark d-block">
                             <div class="card h-100 producto-card">
-                                <?php if ($producto['imagen_principal']): ?>
-                                    <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
+                                <?php 
+                                $rutaImagen = $producto['imagen_principal'] ? 'imagenes/productos/' . $producto['imagen_principal'] : null;
+                                $imagenExiste = $rutaImagen && file_exists('public/' . $rutaImagen);
+                                ?>
+                                <?php if ($imagenExiste): ?>
+                                    <img src="<?= Vista::urlPublica($rutaImagen) ?>" 
                                          class="card-img-top" alt="<?= Vista::escapar($producto['nombre']) ?>" 
                                          style="height: 250px; object-fit: cover;">
                                 <?php else: ?>
-                                    <div class="bg-light" style="height: 250px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="bi bi-image fs-1 text-muted"></i>
+                                    <div class="bg-light d-flex flex-column align-items-center justify-content-center" style="height: 250px;">
+                                        <i class="bi bi-image fs-1 text-muted mb-2"></i>
+                                        <h6 class="text-muted text-center"><?= Vista::escapar($producto['nombre']) ?></h6>
                                     </div>
                                 <?php endif; ?>
                                 <div class="card-body">

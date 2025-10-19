@@ -42,18 +42,26 @@ class CarritoControlador extends Controlador {
             return;
         }
         
-        // Verificar stock
+        // Obtener el producto específico de la variante (producto + talla)
         $productoModelo = $this->cargarModelo('Producto');
-        if (!$productoModelo->verificarStock($productoId, $cantidad)) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'Stock insuficiente']);
+        $variante = $productoModelo->obtenerVariantePorTalla($productoId, $tallaId);
+        
+        if (!$variante) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Variante no encontrada']);
             return;
         }
         
-        $producto = $productoModelo->obtenerPorId($productoId);
-        $precio = $producto['precio_oferta'] ?? $producto['precio'];
+        // Verificar stock de la variante específica
+        if ($variante['stock'] < $cantidad) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Stock insuficiente para esta talla']);
+            return;
+        }
+        
+        $precio = $variante['precio_oferta'] ?? $variante['precio'];
+        $productoVarianteId = $variante['id']; // ID de la variante específica
         
         $carritoModelo = $this->cargarModelo('Carrito');
-        if ($carritoModelo->agregarProducto($_SESSION['usuario_id'], $productoId, $cantidad, $precio, $tallaId)) {
+        if ($carritoModelo->agregarProducto($_SESSION['usuario_id'], $productoVarianteId, $cantidad, $precio, $tallaId)) {
             $totalItems = $carritoModelo->contarItems($_SESSION['usuario_id']);
             $this->enviarJson([
                 'exito' => true, 

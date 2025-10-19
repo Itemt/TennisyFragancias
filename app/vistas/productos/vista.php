@@ -16,17 +16,20 @@
         <div class="col-lg-6 mb-4">
             <div class="card">
                 <div class="card-body p-0">
-                    <?php if ($producto['imagen_principal']): ?>
-                        <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
+                    <?php 
+                    $rutaImagen = $producto['imagen_principal'] ? 'imagenes/productos/' . $producto['imagen_principal'] : null;
+                    $imagenExiste = $rutaImagen && file_exists('public/' . $rutaImagen);
+                    ?>
+                    <?php if ($imagenExiste): ?>
+                        <img src="<?= Vista::urlPublica($rutaImagen) ?>" 
                              alt="<?= Vista::escapar($producto['nombre']) ?>" 
                              class="img-fluid w-100" 
                              style="max-height: 500px; object-fit: cover;">
                     <?php else: ?>
-                        <div class="d-flex align-items-center justify-content-center bg-light" style="height: 400px;">
-                            <div class="text-center text-muted">
-                                <i class="bi bi-image" style="font-size: 4rem;"></i>
-                                <p class="mt-2">Sin imagen</p>
-                            </div>
+                        <div class="d-flex flex-column align-items-center justify-content-center bg-light" style="height: 400px;">
+                            <i class="bi bi-image fs-1 text-muted mb-3"></i>
+                            <h5 class="text-muted"><?= Vista::escapar($producto['nombre']) ?></h5>
+                            <p class="text-muted small">Imagen no disponible</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -216,14 +219,19 @@
                 <?php foreach ($productos_relacionados as $productoRelacionado): ?>
                 <div class="col-md-3 mb-4">
                     <div class="card h-100">
-                        <?php if ($productoRelacionado['imagen_principal']): ?>
-                            <img src="<?= Vista::urlPublica('imagenes/productos/' . $productoRelacionado['imagen_principal']) ?>" 
+                        <?php 
+                        $rutaImagenRel = $productoRelacionado['imagen_principal'] ? 'imagenes/productos/' . $productoRelacionado['imagen_principal'] : null;
+                        $imagenExisteRel = $rutaImagenRel && file_exists('public/' . $rutaImagenRel);
+                        ?>
+                        <?php if ($imagenExisteRel): ?>
+                            <img src="<?= Vista::urlPublica($rutaImagenRel) ?>" 
                                  alt="<?= Vista::escapar($productoRelacionado['nombre']) ?>" 
                                  class="card-img-top" 
                                  style="height: 200px; object-fit: cover;">
                         <?php else: ?>
-                            <div class="d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
-                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                            <div class="d-flex flex-column align-items-center justify-content-center bg-light" style="height: 200px;">
+                                <i class="bi bi-image text-muted mb-2" style="font-size: 2rem;"></i>
+                                <h6 class="text-muted text-center"><?= Vista::escapar($productoRelacionado['nombre']) ?></h6>
                             </div>
                         <?php endif; ?>
                         

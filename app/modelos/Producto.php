@@ -158,7 +158,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
+                        MIN(p.imagen_principal) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(c.nombre) as categoria_nombre,
                         MIN(m.nombre) as marca_nombre,
@@ -206,7 +206,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
+                        MIN(p.imagen_principal) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -260,7 +260,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
+                        MIN(p.imagen_principal) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -313,7 +313,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
+                        MIN(p.imagen_principal) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -417,7 +417,7 @@ class Producto extends Modelo {
                         MIN(p.id) as id,
                         p.nombre,
                         MIN(p.codigo_sku) as codigo_sku,
-                        (SELECT imagen_principal FROM {$this->tabla} p2 WHERE p2.nombre = p.nombre AND p2.estado = 'activo' AND p2.stock > 0 AND p2.imagen_principal IS NOT NULL AND p2.imagen_principal != '' LIMIT 1) as imagen_principal,
+                        MIN(p.imagen_principal) as imagen_principal,
                         MIN(p.precio) as precio,
                         MIN(p.precio_oferta) as precio_oferta,
                         MIN(c.nombre) as categoria_nombre,
@@ -548,6 +548,31 @@ class Producto extends Modelo {
         $producto = $stmt->fetch();
         
         return $producto && $producto['stock'] >= $cantidad;
+    }
+    
+    /**
+     * Obtener variante específica por talla
+     */
+    public function obtenerVariantePorTalla($productoId, $tallaId) {
+        // Primero obtener el nombre del producto principal
+        $sql = "SELECT nombre FROM {$this->tabla} WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $productoId);
+        $stmt->execute();
+        $producto = $stmt->fetch();
+        
+        if (!$producto) {
+            return false;
+        }
+        
+        // Buscar la variante específica con el mismo nombre y la talla especificada
+        $sql = "SELECT * FROM {$this->tabla} WHERE nombre = :nombre AND talla_id = :talla_id AND estado = 'activo'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':nombre', $producto['nombre']);
+        $stmt->bindParam(':talla_id', $tallaId);
+        $stmt->execute();
+        
+        return $stmt->fetch();
     }
     
     /**
