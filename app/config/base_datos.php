@@ -385,18 +385,26 @@ class BaseDatos {
                     }
                 }
             } else {
-                error_log("DEBUG: Columna numero_pedido NO encontrada, usando inserción sin número");
-                // Insertar sin numero_pedido (usar ID auto-increment)
-                $stmt = $this->conexion->prepare("INSERT INTO pedidos (usuario_id, empleado_id, total, subtotal, metodo_pago_id, estado_pedido_id, tipo_pedido, fecha_pedido, fecha_envio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                error_log("DEBUG: Columna numero_pedido NO encontrada, usando inserción simplificada");
+                // Insertar solo con las columnas que existen: usuario_id, empleado_id, total, estado, tipo_pedido, fecha_pedido
+                $stmt = $this->conexion->prepare("INSERT INTO pedidos (usuario_id, empleado_id, total, estado, tipo_pedido, fecha_pedido) VALUES (?, ?, ?, ?, ?, ?)");
                 
                 foreach ($pedidos as $pedido) {
-                    // Remover el primer elemento (numero_pedido) del array
-                    $pedidoSinNumero = array_slice($pedido, 1);
+                    // Crear array simplificado: usuario_id, empleado_id, total, estado, tipo_pedido, fecha_pedido
+                    $pedidoSimplificado = [
+                        $pedido[1], // usuario_id
+                        $pedido[2], // empleado_id  
+                        $pedido[3], // total
+                        'entregado', // estado (hardcoded por ahora)
+                        $pedido[7], // tipo_pedido
+                        $pedido[8]  // fecha_pedido
+                    ];
+                    
                     try {
-                        $stmt->execute($pedidoSinNumero);
-                        error_log("DEBUG: Pedido insertado sin número");
+                        $stmt->execute($pedidoSimplificado);
+                        error_log("DEBUG: Pedido insertado simplificado");
                     } catch (PDOException $e) {
-                        error_log("ERROR insertando pedido sin número: " . $e->getMessage());
+                        error_log("ERROR insertando pedido simplificado: " . $e->getMessage());
                         if (stripos($e->getMessage(), 'Duplicate entry') === false) {
                             continue;
                         }
@@ -460,46 +468,98 @@ class BaseDatos {
      * Inserta facturas de ejemplo (para todos los pedidos)
      */
     private function insertarFacturas() {
-        // Obtener todos los pedidos
-        $stmt = $this->conexion->query("SELECT id, usuario_id, total, fecha_pedido FROM pedidos ORDER BY id");
-        $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, usuario_id, empleado_id, total, fecha_emision, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        $contadorFactura = 1;
-        
-        foreach ($pedidos as $pedido) {
-            $numeroFactura = 'FAC-2024-' . str_pad($contadorFactura, 3, '0', STR_PAD_LEFT);
-            $contadorFactura++;
+        // Verificar estructura de la tabla facturas
+        try {
+            $stmt = $this->conexion->query("DESCRIBE facturas");
+            $columnas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $nombresColumnas = array_column($columnas, 'Field');
+            error_log("DEBUG: Columnas disponibles en facturas: " . implode(', ', $nombresColumnas));
             
-            // Estado de factura (más pagadas que pendientes)
-            $estadosFactura = ['pagada', 'pagada', 'pagada', 'pagada', 'pagada', 'pendiente', 'pendiente', 'vencida'];
-            $estadoFactura = $estadosFactura[array_rand($estadosFactura)];
+            // Obtener todos los pedidos
+            $stmt = $this->conexion->query("SELECT id, total, fecha_pedido FROM pedidos ORDER BY id");
+            $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Fecha de emisión = fecha del pedido
-            $fechaEmision = $pedido['fecha_pedido'];
-            
-            // Fecha de vencimiento (7 días después para pagadas, 30 días para pendientes)
-            $diasVencimiento = $estadoFactura === 'pagada' ? 7 : 30;
-            $fechaVencimiento = date('Y-m-d H:i:s', strtotime($fechaEmision) + ($diasVencimiento * 86400));
-            
-            try {
-                $stmt->execute([
-                    $numeroFactura,
-                    $pedido['id'],
-                    $pedido['usuario_id'],
-                    2, // empleado_id
-                    $pedido['total'],
-                    $fechaEmision,
-                    $fechaVencimiento,
-                    $estadoFactura
-                ]);
-            } catch (PDOException $e) {
-                // Ignorar errores de duplicados
-                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
-                    continue;
+            if (in_array('usuario_id', $nombresColumnas)) {
+                error_log("DEBUG: Columna usuario_id encontrada en facturas, usando inserción completa");
+                $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, usuario_id, empleado_id, total, fecha_emision, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                
+                $contadorFactura = 1;
+                
+                foreach ($pedidos as $pedido) {
+                    $numeroFactura = 'FAC-2024-' . str_pad($contadorFactura, 3, '0', STR_PAD_LEFT);
+                    $contadorFactura++;
+                    
+                    // Estado de factura (más pagadas que pendientes)
+                    $estadosFactura = ['pagada', 'pagada', 'pagada', 'pagada', 'pagada', 'pendiente', 'pendiente', 'vencida'];
+                    $estadoFactura = $estadosFactura[array_rand($estadosFactura)];
+                    
+                    // Fecha de emisión = fecha del pedido
+                    $fechaEmision = $pedido['fecha_pedido'];
+                    
+                    // Fecha de vencimiento (7 días después para pagadas, 30 días para pendientes)
+                    $diasVencimiento = $estadoFactura === 'pagada' ? 7 : 30;
+                    $fechaVencimiento = date('Y-m-d H:i:s', strtotime($fechaEmision) + ($diasVencimiento * 86400));
+                    
+                    try {
+                        $stmt->execute([
+                            $numeroFactura,
+                            $pedido['id'],
+                            rand(3, 17), // usuario_id aleatorio
+                            2, // empleado_id
+                            $pedido['total'],
+                            $fechaEmision,
+                            $fechaVencimiento,
+                            $estadoFactura
+                        ]);
+                    } catch (PDOException $e) {
+                        error_log("ERROR insertando factura: " . $e->getMessage());
+                        if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                            continue;
+                        }
+                    }
+                }
+            } else {
+                error_log("DEBUG: Columna usuario_id NO encontrada en facturas, usando inserción simplificada");
+                $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, empleado_id, total, fecha_emision, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                
+                $contadorFactura = 1;
+                
+                foreach ($pedidos as $pedido) {
+                    $numeroFactura = 'FAC-2024-' . str_pad($contadorFactura, 3, '0', STR_PAD_LEFT);
+                    $contadorFactura++;
+                    
+                    // Estado de factura (más pagadas que pendientes)
+                    $estadosFactura = ['pagada', 'pagada', 'pagada', 'pagada', 'pagada', 'pendiente', 'pendiente', 'vencida'];
+                    $estadoFactura = $estadosFactura[array_rand($estadosFactura)];
+                    
+                    // Fecha de emisión = fecha del pedido
+                    $fechaEmision = $pedido['fecha_pedido'];
+                    
+                    // Fecha de vencimiento (7 días después para pagadas, 30 días para pendientes)
+                    $diasVencimiento = $estadoFactura === 'pagada' ? 7 : 30;
+                    $fechaVencimiento = date('Y-m-d H:i:s', strtotime($fechaEmision) + ($diasVencimiento * 86400));
+                    
+                    try {
+                        $stmt->execute([
+                            $numeroFactura,
+                            $pedido['id'],
+                            2, // empleado_id
+                            $pedido['total'],
+                            $fechaEmision,
+                            $fechaVencimiento,
+                            $estadoFactura
+                        ]);
+                    } catch (PDOException $e) {
+                        error_log("ERROR insertando factura simplificada: " . $e->getMessage());
+                        if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                            continue;
+                        }
+                    }
                 }
             }
+        } catch (PDOException $e) {
+            error_log("ERROR: No se puede describir tabla facturas: " . $e->getMessage());
+            return;
         }
     }
 
