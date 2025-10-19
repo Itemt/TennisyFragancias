@@ -142,23 +142,35 @@ class Producto extends Modelo {
      * Obtener productos agrupados por nombre para gestión de stock
      */
     public function obtenerProductosAgrupados() {
-        // Obtener productos únicos por nombre
+        // Obtener productos únicos por nombre usando subconsulta
         $sql = "SELECT 
-                    MIN(p.id) as id,
-                    p.nombre,
-                    p.codigo_sku,
-                    p.imagen_principal,
-                    p.precio,
-                    c.nombre as categoria_nombre,
-                    m.nombre as marca_nombre,
-                    COUNT(DISTINCT p.id) as total_variantes,
-                    SUM(p.stock) as stock_total
-                FROM {$this->tabla} p 
-                INNER JOIN categorias c ON p.categoria_id = c.id 
-                LEFT JOIN marcas m ON p.marca_id = m.id
-                WHERE p.estado = 'activo'
-                GROUP BY p.nombre
-                ORDER BY p.nombre ASC";
+                    p_agrupado.id,
+                    p_agrupado.nombre,
+                    p_agrupado.codigo_sku,
+                    p_agrupado.imagen_principal,
+                    p_agrupado.precio,
+                    p_agrupado.categoria_nombre,
+                    p_agrupado.marca_nombre,
+                    p_agrupado.total_variantes,
+                    p_agrupado.stock_total
+                FROM (
+                    SELECT 
+                        MIN(p.id) as id,
+                        p.nombre,
+                        MIN(p.codigo_sku) as codigo_sku,
+                        MIN(p.imagen_principal) as imagen_principal,
+                        MIN(p.precio) as precio,
+                        MIN(c.nombre) as categoria_nombre,
+                        MIN(m.nombre) as marca_nombre,
+                        COUNT(DISTINCT p.id) as total_variantes,
+                        SUM(p.stock) as stock_total
+                    FROM {$this->tabla} p 
+                    INNER JOIN categorias c ON p.categoria_id = c.id 
+                    LEFT JOIN marcas m ON p.marca_id = m.id
+                    WHERE p.estado = 'activo'
+                    GROUP BY p.nombre
+                ) as p_agrupado
+                ORDER BY p_agrupado.nombre ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $resultados = $stmt->fetchAll();
