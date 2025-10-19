@@ -829,21 +829,16 @@ class AdminControlador extends Controlador {
      * Vista de actualización de stock
      */
     public function actualizarStock() {
-        // Debug temporal
-        error_log("🔍 actualizarStock() llamado");
-        error_log("🔍 Usuario autenticado: " . (isset($_SESSION['usuario_id']) ? 'Sí' : 'No'));
-        error_log("🔍 Rol usuario: " . ($_SESSION['usuario_rol'] ?? 'No definido'));
-        
         $this->verificarRol([ROL_ADMINISTRADOR, ROL_EMPLEADO]);
         
         $productoModelo = $this->cargarModelo('Producto');
         
-        // Obtener productos con información de tallas
-        $productos = $productoModelo->obtenerTodos();
+        // Obtener productos agrupados por nombre
+        $productosAgrupados = $productoModelo->obtenerProductosAgrupados();
         
         $datos = [
             'titulo' => 'Actualizar Stock - ' . NOMBRE_SITIO,
-            'productos' => $productos
+            'productos' => $productosAgrupados
         ];
         
         $this->cargarVista('admin/stock/actualizar', $datos);
@@ -902,6 +897,45 @@ class AdminControlador extends Controlador {
         } else {
             $this->enviarJson(['exito' => false, 'mensaje' => 'Error al actualizar el stock']);
         }
+    }
+    
+    /**
+     * Obtener variantes de un producto (AJAX)
+     */
+    public function obtenerVariantesProducto() {
+        $this->verificarRol([ROL_ADMINISTRADOR, ROL_EMPLEADO]);
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        $productoId = (int)($_GET['producto_id'] ?? 0);
+        
+        if ($productoId <= 0) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de producto inválido']);
+            return;
+        }
+        
+        $productoModelo = $this->cargarModelo('Producto');
+        $producto = $productoModelo->obtenerPorId($productoId);
+        
+        if (!$producto) {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Producto no encontrado']);
+            return;
+        }
+        
+        // Obtener todas las variantes del producto
+        $variantes = $productoModelo->obtenerVariantesPorNombre($producto['nombre']);
+        
+        $this->enviarJson(['exito' => true, 'variantes' => $variantes]);
+    }
+    
+    /**
+     * Alias para obtener-variantes-producto (con guiones)
+     */
+    public function obtener_variantes_producto() {
+        $this->obtenerVariantesProducto();
     }
     
     /**

@@ -20,102 +20,119 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-plus-circle"></i> Agregar Stock
+                        <i class="bi bi-plus-circle"></i> Actualizar Stock por Talla
                     </h5>
                 </div>
                 <div class="card-body">
                     <form id="formActualizarStock">
+                        <!-- Paso 1: Seleccionar Producto -->
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Seleccionar Producto *</label>
-                                <select class="form-select" id="producto_id" name="producto_id" required>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label"><strong>1. Seleccionar Producto *</strong></label>
+                                <select class="form-select" id="producto_base_id" required>
                                     <option value="">Buscar y seleccionar producto...</option>
                                     <?php if (!empty($productos)): ?>
                                         <?php foreach ($productos as $producto): ?>
                                             <option value="<?= $producto['id'] ?>" 
-                                                    data-stock="<?= $producto['stock'] ?>"
-                                                    data-sku="<?= Vista::escapar($producto['codigo_sku']) ?>"
-                                                    data-talla="<?= Vista::escapar($producto['talla_nombre'] ?? 'Sin talla') ?>">
-                                                <?= Vista::escapar($producto['nombre']) ?> 
-                                                (<?= Vista::escapar($producto['codigo_sku']) ?>)
-                                                <?php if ($producto['talla_nombre']): ?>
-                                                    - Talla: <?= Vista::escapar($producto['talla_nombre']) ?>
+                                                    data-nombre="<?= Vista::escapar($producto['nombre']) ?>"
+                                                    data-stock-total="<?= $producto['stock_total'] ?>"
+                                                    data-variantes="<?= $producto['total_variantes'] ?>">
+                                                <?= Vista::escapar($producto['nombre']) ?>
+                                                <?php if ($producto['marca_nombre']): ?>
+                                                    - <?= Vista::escapar($producto['marca_nombre']) ?>
                                                 <?php endif; ?>
-                                                - Stock: <?= $producto['stock'] ?>
+                                                (<?= $producto['total_variantes'] ?> tallas, Stock total: <?= $producto['stock_total'] ?>)
                                             </option>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </select>
-                            </div>
-                            
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Tipo de Movimiento *</label>
-                                <select class="form-select" id="tipo" name="tipo" required>
-                                    <option value="entrada">Entrada (+)</option>
-                                    <option value="salida">Salida (-)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Cantidad *</label>
-                                <input type="number" class="form-control" id="cantidad" name="cantidad" 
-                                       min="1" required placeholder="0">
+                                <div class="form-text">Selecciona el producto al que deseas actualizar el stock</div>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label class="form-label">Motivo</label>
-                                <input type="text" class="form-control" id="motivo" name="motivo" 
-                                       placeholder="Ej: Compra de proveedor, Devolución, Ajuste de inventario...">
+
+                        <!-- Paso 2: Seleccionar Talla (se muestra dinámicamente) -->
+                        <div id="seccion-tallas" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label"><strong>2. Seleccionar Talla *</strong></label>
+                                    <select class="form-select" id="producto_id" name="producto_id" required>
+                                        <option value="">Selecciona una talla...</option>
+                                    </select>
+                                    <div class="form-text">Selecciona la talla específica a actualizar</div>
+                                </div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label"><strong>Stock Actual</strong></label>
+                                    <input type="text" class="form-control" id="stock_actual" readonly 
+                                           placeholder="-">
+                                </div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label"><strong>Nuevo Stock</strong></label>
+                                    <input type="text" class="form-control" id="nuevo_stock" readonly 
+                                           placeholder="-">
+                                </div>
+                            </div>
+
+                            <!-- Paso 3: Configurar Movimiento -->
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label"><strong>3. Tipo de Movimiento *</strong></label>
+                                    <select class="form-select" id="tipo" name="tipo" required>
+                                        <option value="entrada">➕ Entrada (Agregar)</option>
+                                        <option value="salida">➖ Salida (Quitar)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label"><strong>4. Cantidad *</strong></label>
+                                    <input type="number" class="form-control" id="cantidad" name="cantidad" 
+                                           min="1" required placeholder="0">
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label"><strong>Motivo</strong></label>
+                                    <input type="text" class="form-control" id="motivo" name="motivo" 
+                                           placeholder="Ej: Compra, Devolución...">
+                                </div>
                             </div>
                             
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Stock Actual</label>
-                                <input type="text" class="form-control" id="stock_actual" readonly 
-                                       placeholder="Selecciona un producto">
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-check-circle"></i> Actualizar Stock
-                                </button>
-                                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
-                                    <i class="bi bi-arrow-clockwise"></i> Limpiar
-                                </button>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-check-circle"></i> Actualizar Stock
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-lg" onclick="limpiarFormulario()">
+                                        <i class="bi bi-arrow-clockwise"></i> Limpiar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Información del producto seleccionado -->
-            <div class="card" id="info-producto" style="display: none;">
+            <!-- Información de Variantes -->
+            <div class="card" id="info-variantes" style="display: none;">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-info-circle"></i> Información del Producto
+                        <i class="bi bi-info-circle"></i> <span id="nombre-producto">-</span>
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <strong>SKU:</strong>
-                            <span id="info-sku">-</span>
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Talla:</strong>
-                            <span id="info-talla">-</span>
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Stock Actual:</strong>
-                            <span id="info-stock" class="badge bg-info">-</span>
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Nuevo Stock:</strong>
-                            <span id="info-nuevo-stock" class="badge bg-success">-</span>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Talla</th>
+                                    <th>SKU</th>
+                                    <th class="text-end">Stock Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-variantes">
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -124,25 +141,84 @@
 </div>
 
 <script>
-// Actualizar información del producto al seleccionar
+let variantesActuales = [];
+
+// Al seleccionar un producto base, cargar sus variantes
+document.getElementById('producto_base_id').addEventListener('change', function() {
+    const productoId = this.value;
+    const nombreProducto = this.options[this.selectedIndex].getAttribute('data-nombre');
+    
+    if (!productoId) {
+        document.getElementById('seccion-tallas').style.display = 'none';
+        document.getElementById('info-variantes').style.display = 'none';
+        return;
+    }
+    
+    // Cargar variantes del producto
+    fetch('<?= Vista::url("admin/obtener-variantes-producto") ?>?producto_id=' + productoId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exito && data.variantes) {
+                variantesActuales = data.variantes;
+                mostrarVariantes(data.variantes, nombreProducto);
+                document.getElementById('seccion-tallas').style.display = 'block';
+            } else {
+                alert('Error al cargar las variantes del producto');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar las variantes');
+        });
+});
+
+function mostrarVariantes(variantes, nombreProducto) {
+    // Actualizar selector de tallas
+    const selectTalla = document.getElementById('producto_id');
+    selectTalla.innerHTML = '<option value="">Selecciona una talla...</option>';
+    
+    variantes.forEach(variante => {
+        const option = document.createElement('option');
+        option.value = variante.id;
+        option.setAttribute('data-stock', variante.stock);
+        option.setAttribute('data-sku', variante.codigo_sku);
+        option.textContent = `${variante.talla_nombre || 'Sin talla'} - Stock: ${variante.stock}`;
+        selectTalla.appendChild(option);
+    });
+    
+    // Actualizar tabla de información
+    document.getElementById('nombre-producto').textContent = nombreProducto;
+    const tablaVariantes = document.getElementById('tabla-variantes');
+    tablaVariantes.innerHTML = '';
+    
+    variantes.forEach(variante => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${variante.talla_nombre || 'Sin talla'}</strong></td>
+            <td><code>${variante.codigo_sku}</code></td>
+            <td class="text-end">
+                <span class="badge ${variante.stock > 0 ? 'bg-success' : 'bg-danger'}">
+                    ${variante.stock}
+                </span>
+            </td>
+        `;
+        tablaVariantes.appendChild(tr);
+    });
+    
+    document.getElementById('info-variantes').style.display = 'block';
+}
+
+// Al seleccionar una talla, actualizar stock actual
 document.getElementById('producto_id').addEventListener('change', function() {
     const option = this.options[this.selectedIndex];
-    const stockActual = option.getAttribute('data-stock');
-    const sku = option.getAttribute('data-sku');
-    const talla = option.getAttribute('data-talla');
+    const stock = option.getAttribute('data-stock');
     
     if (this.value) {
-        document.getElementById('stock_actual').value = stockActual;
-        document.getElementById('info-sku').textContent = sku;
-        document.getElementById('info-talla').textContent = talla;
-        document.getElementById('info-stock').textContent = stockActual;
-        document.getElementById('info-producto').style.display = 'block';
-        
-        // Calcular nuevo stock
+        document.getElementById('stock_actual').value = stock;
         calcularNuevoStock();
     } else {
-        document.getElementById('info-producto').style.display = 'none';
         document.getElementById('stock_actual').value = '';
+        document.getElementById('nuevo_stock').value = '';
     }
 });
 
@@ -162,15 +238,7 @@ function calcularNuevoStock() {
         nuevoStock = Math.max(0, stockActual - cantidad);
     }
     
-    document.getElementById('info-nuevo-stock').textContent = nuevoStock;
-    
-    // Cambiar color según el tipo
-    const badge = document.getElementById('info-nuevo-stock');
-    if (tipo === 'entrada') {
-        badge.className = 'badge bg-success';
-    } else {
-        badge.className = nuevoStock < stockActual ? 'badge bg-warning' : 'badge bg-danger';
-    }
+    document.getElementById('nuevo_stock').value = nuevoStock;
 }
 
 // Enviar formulario
@@ -178,6 +246,11 @@ document.getElementById('formActualizarStock').addEventListener('submit', functi
     e.preventDefault();
     
     const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Actualizando...';
     
     fetch('<?= Vista::url("admin/procesar-actualizacion-stock") ?>', {
         method: 'POST',
@@ -186,47 +259,43 @@ document.getElementById('formActualizarStock').addEventListener('submit', functi
     .then(response => response.json())
     .then(data => {
         if (data.exito) {
-            alert(data.mensaje);
+            alert('✅ ' + data.mensaje);
             
-            // Actualizar stock en la interfaz
-            const stockActual = document.getElementById('stock_actual');
-            stockActual.value = data.stock_nuevo;
-            document.getElementById('info-stock').textContent = data.stock_nuevo;
+            // Recargar variantes para actualizar la información
+            const productoBaseId = document.getElementById('producto_base_id').value;
+            if (productoBaseId) {
+                document.getElementById('producto_base_id').dispatchEvent(new Event('change'));
+            }
             
-            // Limpiar formulario
-            limpiarFormulario();
+            // Limpiar solo los campos de movimiento
+            document.getElementById('producto_id').value = '';
+            document.getElementById('cantidad').value = '';
+            document.getElementById('motivo').value = '';
+            document.getElementById('stock_actual').value = '';
+            document.getElementById('nuevo_stock').value = '';
         } else {
-            alert('Error: ' + data.mensaje);
+            alert('❌ Error: ' + data.mensaje);
         }
+        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al actualizar el stock');
+        alert('❌ Error al actualizar el stock');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
     });
 });
 
 function limpiarFormulario() {
     document.getElementById('formActualizarStock').reset();
-    document.getElementById('info-producto').style.display = 'none';
+    document.getElementById('seccion-tallas').style.display = 'none';
+    document.getElementById('info-variantes').style.display = 'none';
     document.getElementById('stock_actual').value = '';
+    document.getElementById('nuevo_stock').value = '';
+    variantesActuales = [];
 }
-
-// Búsqueda en tiempo real
-document.getElementById('producto_id').addEventListener('input', function() {
-    const filter = this.value.toLowerCase();
-    const options = this.querySelectorAll('option');
-    
-    options.forEach(option => {
-        if (option.value === '') return; // No filtrar la opción vacía
-        
-        const text = option.textContent.toLowerCase();
-        if (text.includes(filter)) {
-            option.style.display = '';
-        } else {
-            option.style.display = 'none';
-        }
-    });
-});
 </script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>

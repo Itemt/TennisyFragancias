@@ -115,6 +115,31 @@ class Producto extends Modelo {
     }
     
     /**
+     * Obtener productos agrupados por nombre para gestión de stock
+     */
+    public function obtenerProductosAgrupados() {
+        // Obtener productos únicos por nombre
+        $sql = "SELECT 
+                    MIN(p.id) as id,
+                    p.nombre,
+                    p.codigo_sku,
+                    p.imagen_principal,
+                    c.nombre as categoria_nombre,
+                    m.nombre as marca_nombre,
+                    COUNT(DISTINCT p.id) as total_variantes,
+                    SUM(p.stock) as stock_total
+                FROM {$this->tabla} p 
+                INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                WHERE p.estado = 'activo'
+                GROUP BY p.nombre, p.codigo_sku, p.imagen_principal, c.nombre, m.nombre
+                ORDER BY p.nombre ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    
+    /**
      * Obtener productos activos para el catálogo
      */
     public function obtenerCatalogo($limite = null, $offset = 0) {
