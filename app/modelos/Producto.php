@@ -294,19 +294,38 @@ class Producto extends Modelo {
      * Filtrar productos
      */
     public function filtrar($filtros = []) {
-        $sql = "SELECT p.*, 
-                       c.nombre as categoria_nombre,
-                       m.nombre as marca_nombre,
-                       t.nombre as talla_nombre,
-                       co.nombre as color_nombre,
-                       g.nombre as genero_nombre
-                FROM {$this->tabla} p 
-                INNER JOIN categorias c ON p.categoria_id = c.id 
-                LEFT JOIN marcas m ON p.marca_id = m.id
-                LEFT JOIN tallas t ON p.talla_id = t.id
-                LEFT JOIN colores co ON p.color_id = co.id
-                LEFT JOIN generos g ON p.genero_id = g.id
-                WHERE p.estado = 'activo'";
+        $sql = "SELECT 
+                    p_agrupado.id,
+                    p_agrupado.nombre,
+                    p_agrupado.codigo_sku,
+                    p_agrupado.imagen_principal,
+                    p_agrupado.precio,
+                    p_agrupado.precio_oferta,
+                    p_agrupado.categoria_nombre,
+                    p_agrupado.marca_nombre,
+                    p_agrupado.total_variantes,
+                    p_agrupado.stock_total,
+                    p_agrupado.fecha_creacion
+                FROM (
+                    SELECT 
+                        MIN(p.id) as id,
+                        p.nombre,
+                        MIN(p.codigo_sku) as codigo_sku,
+                        MIN(p.imagen_principal) as imagen_principal,
+                        MIN(p.precio) as precio,
+                        MIN(p.precio_oferta) as precio_oferta,
+                        MIN(c.nombre) as categoria_nombre,
+                        MIN(m.nombre) as marca_nombre,
+                        COUNT(DISTINCT p.id) as total_variantes,
+                        SUM(p.stock) as stock_total,
+                        MIN(p.fecha_creacion) as fecha_creacion
+                    FROM {$this->tabla} p 
+                    INNER JOIN categorias c ON p.categoria_id = c.id 
+                    LEFT JOIN marcas m ON p.marca_id = m.id
+                    LEFT JOIN tallas t ON p.talla_id = t.id
+                    LEFT JOIN colores co ON p.color_id = co.id
+                    LEFT JOIN generos g ON p.genero_id = g.id
+                    WHERE p.estado = 'activo'";
         
         $params = [];
         
@@ -345,21 +364,25 @@ class Producto extends Modelo {
             $params[':precio_max'] = $filtros['precio_max'];
         }
         
+        $sql .= " GROUP BY p.nombre";
+        
         // Ordenamiento
         $orden = $filtros['orden'] ?? 'reciente';
         switch ($orden) {
             case 'precio_asc':
-                $sql .= " ORDER BY p.precio ASC";
+                $sql .= " ORDER BY p_agrupado.precio ASC";
                 break;
             case 'precio_desc':
-                $sql .= " ORDER BY p.precio DESC";
+                $sql .= " ORDER BY p_agrupado.precio DESC";
                 break;
             case 'nombre':
-                $sql .= " ORDER BY p.nombre ASC";
+                $sql .= " ORDER BY p_agrupado.nombre ASC";
                 break;
             default:
-                $sql .= " ORDER BY p.fecha_creacion DESC";
+                $sql .= " ORDER BY p_agrupado.fecha_creacion DESC";
         }
+        
+        $sql .= ") as p_agrupado";
         
         $stmt = $this->db->prepare($sql);
         
@@ -621,29 +644,54 @@ class Producto extends Modelo {
             // Iniciar transacción
             $this->db->beginTransaction();
             
-            // 1. Eliminar del carrito
-            $sql = "DELETE FROM carrito WHERE producto_id = :id";
+            // 1. Obtener el nombre del producto para eliminar todas sus variantes
+            $sql = "SELECT nombre FROM {$this->tabla} WHERE id = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
+            $producto = $stmt->fetch();
             
-            // 2. Eliminar del historial de stock
-            $sql = "DELETE FROM historial_stock WHERE producto_id = :id";
+            if (!$producto) {
+                $this->db->rollBack();
+                return false;
+            }
+            
+            $nombreProducto = $producto['nombre'];
+            
+            // 2. Obtener todos los IDs de productos con el mismo nombre (todas las variantes)
+            $sql = "SELECT id FROM {$this->tabla} WHERE nombre = :nombre";
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':nombre', $nombreProducto);
             $stmt->execute();
+            $productosIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
-            // 3. Eliminar de detalle_pedidos (esto debería ser CASCADE pero por seguridad)
-            $sql = "DELETE FROM detalle_pedidos WHERE producto_id = :id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id', $id);
-            $stmt->execute();
+            if (empty($productosIds)) {
+                $this->db->rollBack();
+                return false;
+            }
             
-            // 4. Finalmente eliminar el producto
-            $sql = "DELETE FROM {$this->tabla} WHERE id = :id";
+            // 3. Crear placeholders para la consulta IN
+            $placeholders = str_repeat('?,', count($productosIds) - 1) . '?';
+            
+            // 4. Eliminar del carrito todas las variantes
+            $sql = "DELETE FROM carrito WHERE producto_id IN ($placeholders)";
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id', $id);
-            $resultado = $stmt->execute();
+            $stmt->execute($productosIds);
+            
+            // 5. Eliminar del historial de stock todas las variantes
+            $sql = "DELETE FROM historial_stock WHERE producto_id IN ($placeholders)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($productosIds);
+            
+            // 6. Eliminar de detalle_pedidos todas las variantes
+            $sql = "DELETE FROM detalle_pedidos WHERE producto_id IN ($placeholders)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($productosIds);
+            
+            // 7. Finalmente eliminar todas las variantes del producto
+            $sql = "DELETE FROM {$this->tabla} WHERE nombre = ?";
+            $stmt = $this->db->prepare($sql);
+            $resultado = $stmt->execute([$nombreProducto]);
             
             // Confirmar transacción
             $this->db->commit();

@@ -250,10 +250,28 @@ class AdminControlador extends Controlador {
                 return;
             }
             
-            // Verificar si el producto tiene pedidos asociados
+            // Verificar si el producto tiene pedidos asociados (todas las variantes)
             $db = BaseDatos::obtenerInstancia()->obtenerConexion();
-            $stmt = $db->prepare("SELECT COUNT(*) as total FROM detalle_pedidos WHERE producto_id = :id");
+            
+            // Primero obtener el nombre del producto
+            $stmt = $db->prepare("SELECT nombre FROM productos WHERE id = :id");
             $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            $producto = $stmt->fetch();
+            
+            if (!$producto) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Producto no encontrado']);
+                return;
+            }
+            
+            // Verificar pedidos asociados a todas las variantes del producto
+            $stmt = $db->prepare("
+                SELECT COUNT(*) as total 
+                FROM detalle_pedidos dp 
+                INNER JOIN productos p ON dp.producto_id = p.id 
+                WHERE p.nombre = :nombre
+            ");
+            $stmt->bindParam(':nombre', $producto['nombre']);
             $stmt->execute();
             $pedidosAsociados = $stmt->fetch()['total'];
             
