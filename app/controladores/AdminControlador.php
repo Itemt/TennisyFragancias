@@ -1086,4 +1086,37 @@ class AdminControlador extends Controlador {
             <?php unset($_SESSION['mensaje'], $_SESSION['tipo_mensaje']); ?>
         <?php endif;
     }
+    
+    /**
+     * Vista completa del producto para administrador
+     */
+    public function productoVista($id) {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        $productoModelo = $this->cargarModelo('Producto');
+        $producto = $productoModelo->obtenerConVariantes($id);
+        
+        if (!$producto) {
+            $this->redirigir('admin/productos');
+            return;
+        }
+        
+        // Obtener productos relacionados de la misma categoría
+        $productosRelacionados = $productoModelo->obtenerPorCategoria($producto['categoria_id'], 4);
+        
+        $datos = [
+            'titulo' => 'Vista Completa - ' . $producto['nombre'] . ' - ' . NOMBRE_SITIO,
+            'producto' => $producto,
+            'productos_relacionados' => $productosRelacionados
+        ];
+        
+        $this->cargarVista('admin/productos/vista', $datos);
+    }
+    
+    /**
+     * Alias para producto-vista (con guiones)
+     */
+    public function producto_vista() {
+        $this->productoVista(func_get_arg(0));
+    }
 }

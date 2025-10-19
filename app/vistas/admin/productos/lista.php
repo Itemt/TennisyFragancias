@@ -89,6 +89,10 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
+                                        <a href="<?= Vista::url('admin/producto-vista/' . $producto['id']) ?>" 
+                                           class="btn btn-sm btn-info" title="Vista Completa">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
                                         <a href="<?= Vista::url('admin/producto_editar/' . $producto['id']) ?>" 
                                            class="btn btn-sm btn-warning" title="Editar">
                                             <i class="bi bi-pencil"></i>
