@@ -188,10 +188,10 @@ class AdminControlador extends Controlador {
                 'categoria_id' => (int)$_POST['categoria_id'],
                 'stock' => (int)$_POST['stock'],
                 'stock_minimo' => (int)($_POST['stock_minimo'] ?? 5),
-                'marca' => $this->limpiarDatos($_POST['marca']),
-                'talla' => $this->limpiarDatos($_POST['talla'] ?? ''),
-                'color' => $this->limpiarDatos($_POST['color'] ?? ''),
-                'genero' => $this->limpiarDatos($_POST['genero']),
+                'marca_id' => !empty($_POST['marca_id']) ? (int)$_POST['marca_id'] : null,
+                'talla_id' => !empty($_POST['talla_id']) ? (int)$_POST['talla_id'] : null,
+                'color_id' => !empty($_POST['color_id']) ? (int)$_POST['color_id'] : null,
+                'genero_id' => !empty($_POST['genero_id']) ? (int)$_POST['genero_id'] : null,
                 'destacado' => isset($_POST['destacado']) ? 1 : 0,
                 'estado' => $this->limpiarDatos($_POST['estado'])
             ];
@@ -220,6 +220,7 @@ class AdminControlador extends Controlador {
         $categorias = $categoriaModelo->obtenerActivas();
         
         // Cargar datos para los dropdowns
+        $marcaModelo = $this->cargarModelo('Marca');
         $tallaModelo = $this->cargarModelo('Talla');
         $colorModelo = $this->cargarModelo('Color');
         $generoModelo = $this->cargarModelo('Genero');
@@ -228,6 +229,7 @@ class AdminControlador extends Controlador {
             'titulo' => 'Editar Producto - ' . NOMBRE_SITIO,
             'producto' => $producto,
             'categorias' => $categorias,
+            'marcas' => $marcaModelo->obtenerTodos(),
             'tallas' => $tallaModelo->obtenerTodos(),
             'colores' => $colorModelo->obtenerTodos(),
             'generos' => $generoModelo->obtenerTodos()
@@ -575,6 +577,95 @@ class AdminControlador extends Controlador {
     }
     
     /**
+     * Crear nuevo usuario
+     */
+    public function crearUsuario() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Método no permitido'], 405);
+            return;
+        }
+        
+        try {
+            // Leer datos JSON del body
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al decodificar los datos JSON']);
+                return;
+            }
+            
+            // Validar campos requeridos
+            $camposRequeridos = ['nombre', 'apellido', 'email', 'password', 'rol', 'estado'];
+            foreach ($camposRequeridos as $campo) {
+                if (empty($data[$campo])) {
+                    $this->enviarJson(['exito' => false, 'mensaje' => "El campo {$campo} es requerido"]);
+                    return;
+                }
+            }
+            
+            // Validar email
+            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Email inválido']);
+                return;
+            }
+            
+            // Validar longitud de contraseña
+            if (strlen($data['password']) < 6) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'La contraseña debe tener al menos 6 caracteres']);
+                return;
+            }
+            
+            // Validar rol
+            $rolesValidos = [ROL_CLIENTE, ROL_EMPLEADO, ROL_ADMINISTRADOR];
+            if (!in_array($data['rol'], $rolesValidos)) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Rol inválido']);
+                return;
+            }
+            
+            // Validar estado
+            $estadosValidos = ['activo', 'inactivo'];
+            if (!in_array($data['estado'], $estadosValidos)) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Estado inválido']);
+                return;
+            }
+            
+            $usuarioModelo = $this->cargarModelo('Usuario');
+            
+            // Verificar si el email ya existe
+            if ($usuarioModelo->emailExiste($data['email'])) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'El email ya está registrado']);
+                return;
+            }
+            
+            // Preparar datos del usuario
+            $datosUsuario = [
+                'nombre' => $this->limpiarDatos($data['nombre']),
+                'apellido' => $this->limpiarDatos($data['apellido']),
+                'email' => $this->limpiarDatos($data['email']),
+                'telefono' => $this->limpiarDatos($data['telefono'] ?? ''),
+                'password_hash' => password_hash($data['password'], PASSWORD_DEFAULT),
+                'rol' => $data['rol'],
+                'estado' => $data['estado']
+            ];
+            
+            // Crear usuario
+            $usuarioId = $usuarioModelo->crear($datosUsuario);
+            
+            if ($usuarioId) {
+                $this->enviarJson(['exito' => true, 'mensaje' => 'Usuario creado exitosamente', 'usuario_id' => $usuarioId]);
+            } else {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al crear el usuario']);
+            }
+        } catch (Exception $e) {
+            error_log('Error en crearUsuario: ' . $e->getMessage());
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error interno: ' . $e->getMessage()]);
+        }
+    }
+    
+    /**
      * Cambiar contraseña de usuario
      */
     public function cambiarPassword() {
@@ -585,38 +676,48 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        // Leer datos JSON del body
-        $json = file_get_contents('php://input');
-        $data = json_decode($json, true);
-        
-        $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
-        $nuevaPassword = $data['nueva_password'] ?? $_POST['nueva_password'] ?? '';
-        $confirmarPassword = $data['confirmar_password'] ?? $_POST['confirmar_password'] ?? '';
-        
-        // Validar datos
-        if ($usuarioId <= 0) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
-            return;
-        }
-        
-        if (empty($nuevaPassword) || strlen($nuevaPassword) < 6) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'La contraseña debe tener al menos 6 caracteres']);
-            return;
-        }
-        
-        if ($nuevaPassword !== $confirmarPassword) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'Las contraseñas no coinciden']);
-            return;
-        }
-        
-        // Cambiar contraseña
-        $usuarioModelo = $this->cargarModelo('Usuario');
-        $passwordHash = password_hash($nuevaPassword, PASSWORD_DEFAULT);
-        
-        if ($usuarioModelo->actualizarPassword($usuarioId, $passwordHash)) {
-            $this->enviarJson(['exito' => true, 'mensaje' => 'Contraseña cambiada exitosamente']);
-        } else {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'Error al cambiar la contraseña']);
+        try {
+            // Leer datos JSON del body
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al decodificar los datos JSON']);
+                return;
+            }
+            
+            $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
+            $nuevaPassword = $data['nueva_password'] ?? $_POST['nueva_password'] ?? '';
+            $confirmarPassword = $data['confirmar_password'] ?? $_POST['confirmar_password'] ?? '';
+            
+            // Validar datos
+            if ($usuarioId <= 0) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
+                return;
+            }
+            
+            if (empty($nuevaPassword) || strlen($nuevaPassword) < 6) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'La contraseña debe tener al menos 6 caracteres']);
+                return;
+            }
+            
+            if ($nuevaPassword !== $confirmarPassword) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Las contraseñas no coinciden']);
+                return;
+            }
+            
+            // Cambiar contraseña
+            $usuarioModelo = $this->cargarModelo('Usuario');
+            $passwordHash = password_hash($nuevaPassword, PASSWORD_DEFAULT);
+            
+            if ($usuarioModelo->actualizarPassword($usuarioId, $passwordHash)) {
+                $this->enviarJson(['exito' => true, 'mensaje' => 'Contraseña cambiada exitosamente']);
+            } else {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al cambiar la contraseña']);
+            }
+        } catch (Exception $e) {
+            error_log('Error en cambiarPassword: ' . $e->getMessage());
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error interno: ' . $e->getMessage()]);
         }
     }
     
@@ -631,32 +732,47 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        // Leer datos JSON del body
-        $json = file_get_contents('php://input');
-        $data = json_decode($json, true);
-        
-        $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
-        $nuevoEstado = $data['estado'] ?? $_POST['estado'] ?? '';
-        
-        // Validar datos
-        if ($usuarioId <= 0) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
-            return;
-        }
-        
-        $estadosValidos = ['activo', 'inactivo', 'suspendido'];
-        if (!in_array($nuevoEstado, $estadosValidos)) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'Estado inválido']);
-            return;
-        }
-        
-        // Cambiar estado
-        $usuarioModelo = $this->cargarModelo('Usuario');
-        
-        if ($usuarioModelo->actualizarEstado($usuarioId, $nuevoEstado)) {
-            $this->enviarJson(['exito' => true, 'mensaje' => 'Estado del usuario actualizado exitosamente']);
-        } else {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'Error al actualizar el estado del usuario']);
+        try {
+            // Leer datos JSON del body
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al decodificar los datos JSON']);
+                return;
+            }
+            
+            $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
+            $nuevoEstado = $data['estado'] ?? $_POST['estado'] ?? '';
+            
+            // Validar datos
+            if ($usuarioId <= 0) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
+                return;
+            }
+            
+            if ($usuarioId === (int)$_SESSION['usuario_id']) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'No puedes cambiar tu propio estado']);
+                return;
+            }
+            
+            $estadosValidos = ['activo', 'inactivo', 'suspendido'];
+            if (!in_array($nuevoEstado, $estadosValidos)) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Estado inválido']);
+                return;
+            }
+            
+            // Cambiar estado
+            $usuarioModelo = $this->cargarModelo('Usuario');
+            
+            if ($usuarioModelo->actualizarEstado($usuarioId, $nuevoEstado)) {
+                $this->enviarJson(['exito' => true, 'mensaje' => 'Estado del usuario actualizado exitosamente']);
+            } else {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al actualizar el estado del usuario']);
+            }
+        } catch (Exception $e) {
+            error_log('Error en cambiarEstado: ' . $e->getMessage());
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error interno: ' . $e->getMessage()]);
         }
     }
     
@@ -671,31 +787,41 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        // Leer datos JSON del body
-        $json = file_get_contents('php://input');
-        $data = json_decode($json, true);
-        
-        $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
-        
-        // Validar datos
-        if ($usuarioId <= 0) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
-            return;
-        }
-        
-        // No permitir eliminar el propio usuario
-        if ($usuarioId === (int)$_SESSION['usuario_id']) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'No puedes eliminar tu propia cuenta']);
-            return;
-        }
-        
-        // Eliminar usuario
-        $usuarioModelo = $this->cargarModelo('Usuario');
-        
-        if ($usuarioModelo->eliminar($usuarioId)) {
-            $this->enviarJson(['exito' => true, 'mensaje' => 'Usuario eliminado exitosamente']);
-        } else {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'Error al eliminar el usuario']);
+        try {
+            // Leer datos JSON del body
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al decodificar los datos JSON']);
+                return;
+            }
+            
+            $usuarioId = (int)($data['usuario_id'] ?? $_POST['usuario_id'] ?? 0);
+            
+            // Validar datos
+            if ($usuarioId <= 0) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'ID de usuario inválido']);
+                return;
+            }
+            
+            // No permitir eliminar el propio usuario
+            if ($usuarioId === (int)$_SESSION['usuario_id']) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'No puedes eliminar tu propia cuenta']);
+                return;
+            }
+            
+            // Eliminar usuario
+            $usuarioModelo = $this->cargarModelo('Usuario');
+            
+            if ($usuarioModelo->eliminar($usuarioId)) {
+                $this->enviarJson(['exito' => true, 'mensaje' => 'Usuario eliminado exitosamente']);
+            } else {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Error al eliminar el usuario']);
+            }
+        } catch (Exception $e) {
+            error_log('Error en eliminarUsuario: ' . $e->getMessage());
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Error interno: ' . $e->getMessage()]);
         }
     }
     

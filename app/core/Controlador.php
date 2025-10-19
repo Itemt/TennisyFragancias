@@ -75,6 +75,9 @@ class Controlador {
      * Limpiar datos de entrada
      */
     protected function limpiarDatos($datos) {
+        if ($datos === null) {
+            return '';
+        }
         return htmlspecialchars(strip_tags(trim($datos)));
     }
     

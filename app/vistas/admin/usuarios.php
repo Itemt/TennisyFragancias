@@ -10,6 +10,11 @@
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Gestión de Usuarios</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario">
+                            <i class="bi bi-person-plus"></i> Crear Usuario
+                        </button>
+                    </div>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCambiarPassword">
                         <i class="bi bi-key"></i> Cambiar Contraseña
                     </button>
@@ -179,7 +184,7 @@
                 <h5 class="modal-title">Cambiar Contraseña</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formCambiarPassword" action="<?= Vista::url('admin/usuarios/cambiar-password') ?>" method="POST">
+            <form id="formCambiarPassword" action="<?= Vista::url('admin/cambiar-password') ?>" method="POST">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="usuario_id" class="form-label">Usuario</label>
@@ -205,6 +210,67 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear usuario -->
+<div class="modal fade" id="modalCrearUsuario" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Nuevo Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formCrearUsuario" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="crear_nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="crear_nombre" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crear_apellido" class="form-label">Apellido *</label>
+                        <input type="text" class="form-control" id="crear_apellido" name="apellido" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crear_email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="crear_email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crear_telefono" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="crear_telefono" name="telefono">
+                    </div>
+                    <div class="mb-3">
+                        <label for="crear_password" class="form-label">Contraseña *</label>
+                        <input type="password" class="form-control" id="crear_password" name="password" required>
+                        <div class="form-text">La contraseña debe tener al menos 6 caracteres.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crear_confirmar_password" class="form-label">Confirmar Contraseña *</label>
+                        <input type="password" class="form-control" id="crear_confirmar_password" name="confirmar_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crear_rol" class="form-label">Rol *</label>
+                        <select class="form-select" id="crear_rol" name="rol" required>
+                            <option value="">Seleccionar rol...</option>
+                            <option value="cliente">Cliente</option>
+                            <option value="empleado">Empleado</option>
+                            <option value="administrador">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="crear_estado" class="form-label">Estado *</label>
+                        <select class="form-select" id="crear_estado" name="estado" required>
+                            <option value="activo" selected>Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Crear Usuario</button>
                 </div>
             </form>
         </div>
@@ -241,7 +307,7 @@ function cambiarPassword(usuarioId, nombreUsuario) {
 
 function cambiarEstado(usuarioId, nuevoEstado) {
     if (confirm(`¿Estás seguro de cambiar el estado del usuario a "${nuevoEstado}"?`)) {
-        fetch('<?= Vista::url("admin/usuarios/cambiar-estado") ?>', {
+        fetch('<?= Vista::url("admin/cambiar-estado") ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -251,7 +317,12 @@ function cambiarEstado(usuarioId, nuevoEstado) {
                 estado: nuevoEstado
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.exito) {
                 alert(data.mensaje);
@@ -262,7 +333,7 @@ function cambiarEstado(usuarioId, nuevoEstado) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error al cambiar el estado del usuario');
+            alert('Error al cambiar el estado del usuario: ' + error.message);
         });
     }
 }
@@ -284,14 +355,25 @@ document.getElementById('formCambiarPassword').addEventListener('submit', functi
         return;
     }
     
-    fetch('<?= Vista::url("admin/usuarios/cambiar-password") ?>', {
+    // Deshabilitar el botón de envío para evitar múltiples envíos
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Cambiando...';
+    
+    fetch('<?= Vista::url("admin/cambiar-password") ?>', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.exito) {
             alert(data.mensaje);
@@ -299,17 +381,21 @@ document.getElementById('formCambiarPassword').addEventListener('submit', functi
             location.reload();
         } else {
             alert('Error: ' + data.mensaje);
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al cambiar la contraseña');
+        alert('Error al cambiar la contraseña: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
     });
 });
 
 function eliminarUsuario(usuarioId, nombreUsuario) {
     if (confirm(`¿Estás seguro de que deseas eliminar al usuario "${nombreUsuario}"?\n\nEsta acción no se puede deshacer y eliminará todos los datos del usuario.`)) {
-        fetch('<?= Vista::url("admin/usuarios/eliminar") ?>', {
+        fetch('<?= Vista::url("admin/eliminar-usuario") ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -318,7 +404,12 @@ function eliminarUsuario(usuarioId, nombreUsuario) {
                 usuario_id: usuarioId
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.exito) {
                 alert(data.mensaje);
@@ -329,10 +420,73 @@ function eliminarUsuario(usuarioId, nombreUsuario) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error al eliminar el usuario');
+            alert('Error al eliminar el usuario: ' + error.message);
         });
     }
 }
+
+// Manejar envío del formulario de crear usuario
+document.getElementById('formCrearUsuario').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    // Validar contraseñas
+    if (data.password !== data.confirmar_password) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+    
+    if (data.password.length < 6) {
+        alert('La contraseña debe tener al menos 6 caracteres');
+        return;
+    }
+    
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+        alert('Por favor ingrese un email válido');
+        return;
+    }
+    
+    // Deshabilitar el botón de envío
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creando...';
+    
+    fetch('<?= Vista::url("admin/crear-usuario") ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.exito) {
+            alert(data.mensaje);
+            bootstrap.Modal.getInstance(document.getElementById('modalCrearUsuario')).hide();
+            location.reload();
+        } else {
+            alert('Error: ' + data.mensaje);
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear el usuario: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+});
 </script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
