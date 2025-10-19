@@ -366,6 +366,8 @@ class Producto extends Modelo {
         
         $sql .= " GROUP BY p.nombre";
         
+        $sql .= ") as p_agrupado";
+        
         // Ordenamiento
         $orden = $filtros['orden'] ?? 'reciente';
         switch ($orden) {
@@ -381,8 +383,6 @@ class Producto extends Modelo {
             default:
                 $sql .= " ORDER BY p_agrupado.fecha_creacion DESC";
         }
-        
-        $sql .= ") as p_agrupado";
         
         $stmt = $this->db->prepare($sql);
         
