@@ -90,4 +90,28 @@ class ProductosControlador extends Controlador {
         
         $this->cargarVista('productos/categoria', $datos);
     }
+    
+    /**
+     * Vista completa del producto con toda la información
+     */
+    public function vista($id) {
+        $productoModelo = $this->cargarModelo('Producto');
+        $producto = $productoModelo->obtenerConVariantes($id);
+        
+        if (!$producto) {
+            $this->redirigir('productos');
+            return;
+        }
+        
+        // Obtener productos relacionados de la misma categoría
+        $productosRelacionados = $productoModelo->obtenerPorCategoria($producto['categoria_id'], 4);
+        
+        $datos = [
+            'titulo' => 'Vista Completa - ' . $producto['nombre'] . ' - ' . NOMBRE_SITIO,
+            'producto' => $producto,
+            'productos_relacionados' => $productosRelacionados
+        ];
+        
+        $this->cargarVista('productos/vista', $datos);
+    }
 }

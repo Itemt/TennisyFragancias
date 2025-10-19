@@ -99,43 +99,68 @@
                 </div>
             </div>
             
-            <!-- Agregar al carrito -->
-            <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === ROL_CLIENTE): ?>
-                <?php if ($producto['stock_total'] > 0): ?>
-                    <form id="form-agregar-carrito" class="mb-3">
-                        <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Talla:</label>
-                                <select class="form-select" name="talla_id" id="select-talla" required>
-                                    <option value="">Selecciona una talla</option>
-                                    <?php if (!empty($producto['tallas_disponibles'])): ?>
-                                        <?php foreach ($producto['tallas_disponibles'] as $talla): ?>
-                                            <option value="<?= $talla['producto_id'] ?>" data-stock="<?= $talla['stock'] ?>">
-                                                <?= Vista::escapar($talla['nombre']) ?>: <?= $talla['stock'] ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Cantidad:</label>
-                                <input type="number" class="form-control" name="cantidad" id="input-cantidad" value="1" min="1" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primario btn-lg w-100">
+            <!-- Botones de acción -->
+            <div class="d-grid gap-2 mb-3">
+                <a href="<?= Vista::url('productos/vista/' . $producto['id']) ?>" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-eye"></i> Ver Vista Completa
+                </a>
+                
+                <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === ROL_CLIENTE): ?>
+                    <?php if ($producto['stock_total'] > 0): ?>
+                        <button type="button" class="btn btn-primario btn-lg" onclick="mostrarSeleccionTallas()">
                             <i class="bi bi-cart-plus"></i> Agregar al Carrito
                         </button>
-                    </form>
+                    <?php else: ?>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Producto actualmente agotado
+                        </div>
+                    <?php endif; ?>
                 <?php else: ?>
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle"></i> Producto actualmente agotado
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <a href="<?= Vista::url('auth/login') ?>">Inicia sesión</a> para agregar productos al carrito
                     </div>
                 <?php endif; ?>
-            <?php else: ?>
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> 
-                    <a href="<?= Vista::url('auth/login') ?>">Inicia sesión</a> para agregar productos al carrito
+            </div>
+
+            <!-- Formulario de selección de tallas (oculto inicialmente) -->
+            <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === ROL_CLIENTE && $producto['stock_total'] > 0): ?>
+                <div id="seleccion-tallas" style="display: none;" class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Seleccionar Talla y Cantidad</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-agregar-carrito">
+                            <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Talla:</label>
+                                    <select class="form-select" name="talla_id" id="select-talla" required>
+                                        <option value="">Selecciona una talla</option>
+                                        <?php if (!empty($producto['tallas_disponibles'])): ?>
+                                            <?php foreach ($producto['tallas_disponibles'] as $talla): ?>
+                                                <option value="<?= $talla['producto_id'] ?>" data-stock="<?= $talla['stock'] ?>">
+                                                    <?= Vista::escapar($talla['nombre']) ?>: <?= $talla['stock'] ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Cantidad:</label>
+                                    <input type="number" class="form-control" name="cantidad" id="input-cantidad" value="1" min="1" required>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primario">
+                                    <i class="bi bi-cart-plus"></i> Agregar al Carrito
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="ocultarSeleccionTallas()">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
@@ -179,45 +204,70 @@
 </div>
 
 <script>
-document.getElementById('form-agregar-carrito').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    
-    fetch('<?= Vista::url("carrito/agregar") ?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.exito) {
-            alert(data.mensaje);
-            if (data.total_items) {
-                document.getElementById('carrito-contador').textContent = data.total_items;
-                document.getElementById('carrito-contador').style.display = 'inline-block';
-            }
-        } else {
-            alert(data.mensaje);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al agregar el producto');
-    });
-});
+// Funciones para mostrar/ocultar selección de tallas
+function mostrarSeleccionTallas() {
+    document.getElementById('seleccion-tallas').style.display = 'block';
+}
 
-// Manejar cambio de talla para actualizar stock máximo
-document.getElementById('select-talla').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const stock = selectedOption.getAttribute('data-stock');
-    const cantidadInput = document.getElementById('input-cantidad');
-    
-    if (stock) {
-        cantidadInput.max = stock;
-        cantidadInput.value = Math.min(parseInt(cantidadInput.value) || 1, parseInt(stock));
-    } else {
-        cantidadInput.max = '';
-        cantidadInput.value = 1;
+function ocultarSeleccionTallas() {
+    document.getElementById('seleccion-tallas').style.display = 'none';
+    // Limpiar formulario
+    document.getElementById('form-agregar-carrito').reset();
+}
+
+// Manejar envío del formulario de carrito
+document.addEventListener('DOMContentLoaded', function() {
+    const formAgregarCarrito = document.getElementById('form-agregar-carrito');
+    if (formAgregarCarrito) {
+        formAgregarCarrito.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('<?= Vista::url("carrito/agregar") ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.exito) {
+                    alert(data.mensaje);
+                    if (data.total_items) {
+                        const carritoContador = document.getElementById('carrito-contador');
+                        if (carritoContador) {
+                            carritoContador.textContent = data.total_items;
+                            carritoContador.style.display = 'inline-block';
+                        }
+                    }
+                    // Ocultar formulario después de agregar
+                    ocultarSeleccionTallas();
+                } else {
+                    alert(data.mensaje);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar el producto');
+            });
+        });
+    }
+
+    // Manejar cambio de talla para actualizar stock máximo
+    const selectTalla = document.getElementById('select-talla');
+    if (selectTalla) {
+        selectTalla.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const stock = selectedOption.getAttribute('data-stock');
+            const cantidadInput = document.getElementById('input-cantidad');
+            
+            if (stock) {
+                cantidadInput.max = stock;
+                cantidadInput.value = Math.min(parseInt(cantidadInput.value) || 1, parseInt(stock));
+            } else {
+                cantidadInput.max = '';
+                cantidadInput.value = 1;
+            }
+        });
     }
 });
 </script>
