@@ -449,7 +449,8 @@ class Producto extends Modelo {
                     p_agrupado.categoria_nombre,
                     p_agrupado.marca_nombre,
                     p_agrupado.total_variantes,
-                    p_agrupado.stock_total
+                    p_agrupado.stock_total,
+                    p_agrupado.fecha_creacion
                 FROM (
                     SELECT 
                         MIN(p.id) as id,
@@ -461,7 +462,8 @@ class Producto extends Modelo {
                         MIN(c.nombre) as categoria_nombre,
                         MIN(m.nombre) as marca_nombre,
                         COUNT(DISTINCT p.id) as total_variantes,
-                        SUM(p.stock) as stock_total
+                        SUM(p.stock) as stock_total,
+                        MIN(p.fecha_creacion) as fecha_creacion
                     FROM {$this->tabla} p 
                     INNER JOIN categorias c ON p.categoria_id = c.id 
                     LEFT JOIN marcas m ON p.marca_id = m.id
