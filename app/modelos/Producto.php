@@ -220,7 +220,7 @@ class Producto extends Modelo {
                     LEFT JOIN marcas m ON p.marca_id = m.id
                     WHERE p.estado = 'activo'
                     GROUP BY p.nombre
-                    HAVING SUM(p.stock) > 0
+                    HAVING SUM(p.stock) > 0 AND SUM(CASE WHEN p.talla_id IS NOT NULL THEN 1 ELSE 0 END) > 0
                 ) as p_agrupado
                 ORDER BY p_agrupado.destacado DESC, p_agrupado.fecha_creacion DESC";
         
@@ -273,7 +273,7 @@ class Producto extends Modelo {
                     WHERE p.estado = 'activo' 
                     AND (p.nombre LIKE :termino OR p.descripcion LIKE :termino OR m.nombre LIKE :termino)
                     GROUP BY p.nombre
-                    HAVING SUM(p.stock) > 0
+                    HAVING SUM(p.stock) > 0 AND SUM(CASE WHEN p.talla_id IS NOT NULL THEN 1 ELSE 0 END) > 0
                 ) as p_agrupado
                 ORDER BY p_agrupado.nombre ASC";
         
@@ -367,7 +367,7 @@ class Producto extends Modelo {
         }
         
         $sql .= " GROUP BY p.nombre";
-        $sql .= " HAVING SUM(p.stock) > 0";
+        $sql .= " HAVING SUM(p.stock) > 0 AND SUM(CASE WHEN p.talla_id IS NOT NULL THEN 1 ELSE 0 END) > 0";
         
         $sql .= ") as p_agrupado";
         
@@ -429,7 +429,7 @@ class Producto extends Modelo {
                     LEFT JOIN marcas m ON p.marca_id = m.id
                     WHERE p.estado = 'activo' AND p.destacado = 1
                     GROUP BY p.nombre
-                    HAVING SUM(p.stock) > 0
+                    HAVING SUM(p.stock) > 0 AND SUM(CASE WHEN p.talla_id IS NOT NULL THEN 1 ELSE 0 END) > 0
                 ) as p_agrupado
                 ORDER BY RAND()
                 LIMIT :limite";
@@ -460,7 +460,7 @@ class Producto extends Modelo {
                 LEFT JOIN marcas m ON p.marca_id = m.id
                 WHERE p.categoria_id = :categoria_id AND p.estado = 'activo'
                 GROUP BY p.nombre
-                HAVING SUM(p.stock) > 0
+                HAVING SUM(p.stock) > 0 AND SUM(CASE WHEN p.talla_id IS NOT NULL THEN 1 ELSE 0 END) > 0
                 ORDER BY MIN(p.fecha_creacion) DESC";
         
         if ($limite) {
