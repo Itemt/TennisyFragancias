@@ -62,7 +62,7 @@ $currentSection = explode('/', $currentPage)[0] ?? '';
             <!-- Gestión de Stock -->
             <li class="nav-item">
                 <a class="nav-link <?= strpos($currentPage, 'stock') !== false ? 'active' : '' ?>" 
-                   href="<?= Vista::url('admin/stock/actualizar') ?>">
+                   href="<?= Vista::url('admin/actualizar-stock') ?>">
                     <i class="bi bi-boxes"></i> Stock
                 </a>
             </li>
@@ -70,7 +70,7 @@ $currentSection = explode('/', $currentPage)[0] ?? '';
             <!-- Historial de Stock -->
             <li class="nav-item">
                 <a class="nav-link <?= strpos($currentPage, 'historial') !== false ? 'active' : '' ?>" 
-                   href="<?= Vista::url('admin/stock/historial') ?>">
+                   href="<?= Vista::url('admin/historial-stock') ?>">
                     <i class="bi bi-clock-history"></i> Historial Stock
                 </a>
             </li>
@@ -95,7 +95,7 @@ $currentSection = explode('/', $currentPage)[0] ?? '';
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= Vista::url('admin/stock/actualizar') ?>">
+                <a class="nav-link" href="<?= Vista::url('admin/actualizar-stock') ?>">
                     <i class="bi bi-arrow-up-circle"></i> Actualizar Stock
                 </a>
             </li>

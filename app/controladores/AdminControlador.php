@@ -905,6 +905,13 @@ class AdminControlador extends Controlador {
     }
     
     /**
+     * Alias para procesar-actualizacion-stock (con guiones)
+     */
+    public function procesar_actualizacion_stock() {
+        $this->procesarActualizacionStock();
+    }
+    
+    /**
      * Historial de movimientos de stock
      */
     public function historialStock() {
