@@ -277,4 +277,3 @@ document.getElementById('btn-editar-producto').addEventListener('click', functio
 </script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
-
