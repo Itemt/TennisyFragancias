@@ -50,7 +50,7 @@ class AdminControlador extends Controlador {
         $this->verificarRol(ROL_ADMINISTRADOR);
         
         $productoModelo = $this->cargarModelo('Producto');
-        $productos = $productoModelo->obtenerTodos();
+        $productos = $productoModelo->obtenerProductosAgrupados();
         
         $datos = [
             'titulo' => 'Gestión de Productos - ' . NOMBRE_SITIO,
@@ -824,6 +824,7 @@ class AdminControlador extends Controlador {
             $this->enviarJson(['exito' => false, 'mensaje' => 'Error interno: ' . $e->getMessage()]);
         }
     }
+    
     
     /**
      * Vista de actualización de stock

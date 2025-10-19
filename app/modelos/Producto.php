@@ -75,6 +75,30 @@ class Producto extends Modelo {
     }
     
     /**
+     * Obtener todas las variantes de un producto por su ID
+     */
+    public function obtenerVariantesPorId($productoId) {
+        $sql = "SELECT p.*, 
+                       c.nombre as categoria_nombre,
+                       m.nombre as marca_nombre,
+                       t.nombre as talla_nombre,
+                       co.nombre as color_nombre,
+                       g.nombre as genero_nombre
+                FROM {$this->tabla} p 
+                INNER JOIN categorias c ON p.categoria_id = c.id 
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN tallas t ON p.talla_id = t.id
+                LEFT JOIN colores co ON p.color_id = co.id
+                LEFT JOIN generos g ON p.genero_id = g.id
+                WHERE p.id = :producto_id AND p.estado = 'activo'
+                ORDER BY t.orden ASC, t.nombre ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':producto_id', $productoId);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    
+    /**
      * Obtener producto con todas sus variantes
      */
     public function obtenerConVariantes($id) {

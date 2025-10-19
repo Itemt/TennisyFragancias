@@ -22,11 +22,11 @@
                 <table class="table table-hover">
                     <thead class="table-dark">
                         <tr>
-                            <th>SKU</th>
                             <th>Producto</th>
                             <th>Categoría</th>
                             <th>Precio</th>
-                            <th>Stock</th>
+                            <th>Stock Total</th>
+                            <th>Tallas</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -34,49 +34,59 @@
                     <tbody>
                         <?php foreach ($productos as $producto): ?>
                             <tr>
-                                <td><small><?= Vista::escapar($producto['codigo_sku']) ?></small></td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <?php if ($producto['imagen_principal']): ?>
                                             <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
                                                  alt="<?= Vista::escapar($producto['nombre']) ?>" 
-                                                 style="width: 40px; height: 40px; object-fit: cover;" 
-                                                 class="me-2">
+                                                 style="width: 50px; height: 50px; object-fit: cover;" 
+                                                 class="me-3 rounded">
                                         <?php endif; ?>
                                         <div>
-                                            <?= Vista::escapar($producto['nombre']) ?>
-                                            <?php if ($producto['destacado']): ?>
-                                                <span class="badge bg-warning text-dark ms-1">Destacado</span>
+                                            <strong><?= Vista::escapar($producto['nombre']) ?></strong>
+                                            <?php if ($producto['marca_nombre']): ?>
+                                                <br><small class="text-muted"><?= Vista::escapar($producto['marca_nombre']) ?></small>
                                             <?php endif; ?>
+                                            <br><small class="text-muted">SKU: <?= Vista::escapar($producto['codigo_sku']) ?></small>
                                         </div>
                                     </div>
                                 </td>
                                 <td><?= Vista::escapar($producto['categoria_nombre']) ?></td>
-                                <td><?= Vista::formatearPrecio($producto['precio']) ?></td>
                                 <td>
-                                    <?php if ($producto['stock'] <= $producto['stock_minimo']): ?>
-                                        <span class="badge bg-danger"><?= $producto['stock'] ?></span>
-                                    <?php else: ?>
-                                        <span class="badge bg-success"><?= $producto['stock'] ?></span>
-                                    <?php endif; ?>
+                                    <strong><?= Vista::formatearPrecio($producto['precio']) ?></strong>
                                 </td>
                                 <td>
-                                    <?php if ($producto['estado'] === 'activo'): ?>
-                                        <span class="badge bg-success">Activo</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary"><?= ucfirst($producto['estado']) ?></span>
-                                    <?php endif; ?>
+                                    <div class="text-center">
+                                        <span class="badge bg-primary fs-6"><?= $producto['stock_total'] ?></span>
+                                        <br><small class="text-muted">Total unidades</small>
+                                    </div>
                                 </td>
                                 <td>
-                                    <a href="<?= Vista::url('admin/producto_editar/' . $producto['id']) ?>" 
-                                       class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a href="<?= Vista::url('admin/producto_eliminar/' . $producto['id']) ?>" 
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('¿Estás seguro de eliminar este producto?')">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                    <div class="text-center">
+                                        <span class="badge bg-info"><?= $producto['total_variantes'] ?> tallas</span>
+                                        <br><small class="text-muted">Variantes</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Activo</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                onclick="verDetallesProducto(<?= $producto['id'] ?>, '<?= Vista::escapar($producto['nombre']) ?>')"
+                                                title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <a href="<?= Vista::url('admin/producto_editar/' . $producto['id']) ?>" 
+                                           class="btn btn-sm btn-warning" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                onclick="eliminarProducto(<?= $producto['id'] ?>, '<?= Vista::escapar($producto['nombre']) ?>')"
+                                                title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -88,6 +98,128 @@
         </main>
     </div>
 </div>
+
+<!-- Modal para ver detalles del producto -->
+<div class="modal fade" id="modalDetallesProducto" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-info-circle"></i> <span id="nombre-producto-modal">-</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Stock Total:</strong>
+                        <span id="stock-total-modal" class="badge bg-primary fs-6 ms-2">-</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Total de Tallas:</strong>
+                        <span id="total-tallas-modal" class="badge bg-info ms-2">-</span>
+                    </div>
+                </div>
+                
+                <h6>Detalle por Tallas:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Talla</th>
+                                <th>SKU</th>
+                                <th class="text-end">Stock</th>
+                                <th class="text-end">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-tallas-modal">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-editar-producto">
+                    <i class="bi bi-pencil"></i> Editar Producto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let productoActualId = null;
+
+function verDetallesProducto(productoId, nombreProducto) {
+    productoActualId = productoId;
+    document.getElementById('nombre-producto-modal').textContent = nombreProducto;
+    
+    // Cargar variantes del producto
+    fetch('<?= Vista::url("admin/obtener-variantes-producto") ?>?producto_id=' + productoId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exito && data.variantes) {
+                mostrarDetallesProducto(data.variantes);
+                const modal = new bootstrap.Modal(document.getElementById('modalDetallesProducto'));
+                modal.show();
+            } else {
+                alert('Error al cargar los detalles del producto');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar los detalles');
+        });
+}
+
+function mostrarDetallesProducto(variantes) {
+    // Calcular totales
+    const stockTotal = variantes.reduce((sum, v) => sum + parseInt(v.stock), 0);
+    const totalTallas = variantes.length;
+    
+    // Actualizar información general
+    document.getElementById('stock-total-modal').textContent = stockTotal;
+    document.getElementById('total-tallas-modal').textContent = totalTallas;
+    
+    // Llenar tabla de tallas
+    const tablaTallas = document.getElementById('tabla-tallas-modal');
+    tablaTallas.innerHTML = '';
+    
+    variantes.forEach(variante => {
+        const tr = document.createElement('tr');
+        const estadoStock = variante.stock > 0 ? 
+            `<span class="badge bg-success">En Stock</span>` : 
+            `<span class="badge bg-danger">Agotado</span>`;
+        
+        tr.innerHTML = `
+            <td><strong>${variante.talla_nombre || 'Sin talla'}</strong></td>
+            <td><code>${variante.codigo_sku}</code></td>
+            <td class="text-end">
+                <span class="badge ${variante.stock > 0 ? 'bg-success' : 'bg-danger'}">
+                    ${variante.stock}
+                </span>
+            </td>
+            <td class="text-end">${estadoStock}</td>
+        `;
+        tablaTallas.appendChild(tr);
+    });
+}
+
+function eliminarProducto(productoId, nombreProducto) {
+    if (confirm(`¿Estás seguro de eliminar el producto "${nombreProducto}"?\n\nEsto eliminará TODAS las variantes (todas las tallas) del producto.`)) {
+        // Aquí puedes implementar la eliminación
+        alert('Función de eliminación en desarrollo');
+    }
+}
+
+// Configurar botón de editar en el modal
+document.getElementById('btn-editar-producto').addEventListener('click', function() {
+    if (productoActualId) {
+        window.location.href = '<?= Vista::url("admin/producto_editar/") ?>' + productoActualId;
+    }
+});
+</script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
 
