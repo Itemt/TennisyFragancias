@@ -115,38 +115,12 @@
                             </div>
                         </div>
                         
-                        <!-- Selección de Tallas con Cantidades -->
-                        <div class="mb-4">
-                            <label class="form-label">Tallas Disponibles</label>
-                            <div class="row" id="tallas-container">
-                                <?php if (isset($tallas)): ?>
-                                    <?php foreach ($tallas as $talla): ?>
-                                        <div class="col-md-3 col-sm-4 col-6 mb-2">
-                                            <div class="card h-100">
-                                                <div class="card-body p-2 text-center">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" 
-                                                               name="tallas_seleccionadas[]" 
-                                                               value="<?= $talla['id'] ?>" 
-                                                               id="talla_<?= $talla['id'] ?>"
-                                                               onchange="toggleTallaCantidad(<?= $talla['id'] ?>)">
-                                                        <label class="form-check-label fw-bold" for="talla_<?= $talla['id'] ?>">
-                                                            <?= Vista::escapar($talla['nombre']) ?>
-                                                        </label>
-                                                    </div>
-                                                    <div class="mt-2" id="cantidad_<?= $talla['id'] ?>" style="display: none;">
-                                                        <label class="form-label small">Cantidad:</label>
-                                                        <input type="number" class="form-control form-control-sm" 
-                                                               name="cantidad_talla_<?= $talla['id'] ?>" 
-                                                               min="0" value="0" 
-                                                               placeholder="0">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </div>
+                        <!-- Nota sobre gestión de tallas -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Gestión de Tallas:</strong> Para agregar o modificar tallas y stock, utiliza la sección 
+                            <a href="<?= Vista::url('admin/stock') ?>" class="alert-link">"Actualizar Stock"</a> 
+                            después de guardar el producto.
                         </div>
                         
                         <div class="row">
@@ -197,47 +171,21 @@
 </div>
 
 <script>
-function toggleTallaCantidad(tallaId) {
-    const checkbox = document.getElementById('talla_' + tallaId);
-    const cantidadDiv = document.getElementById('cantidad_' + tallaId);
-    const cantidadInput = document.querySelector('input[name="cantidad_talla_' + tallaId + '"]');
-    
-    if (checkbox.checked) {
-        cantidadDiv.style.display = 'block';
-        cantidadInput.required = true;
-        cantidadInput.focus();
-    } else {
-        cantidadDiv.style.display = 'none';
-        cantidadInput.required = false;
-        cantidadInput.value = 0;
-    }
-}
-
-// Validar que al menos una talla esté seleccionada
+// JavaScript para validaciones básicas del formulario
 document.querySelector('form').addEventListener('submit', function(e) {
-    const tallasSeleccionadas = document.querySelectorAll('input[name="tallas_seleccionadas[]"]:checked');
+    // Validaciones básicas del formulario
+    const nombre = document.querySelector('input[name="nombre"]').value.trim();
+    const precio = document.querySelector('input[name="precio"]').value;
     
-    if (tallasSeleccionadas.length === 0) {
+    if (!nombre) {
         e.preventDefault();
-        alert('Debe seleccionar al menos una talla para el producto.');
+        alert('El nombre del producto es obligatorio.');
         return false;
     }
     
-    // Validar que todas las tallas seleccionadas tengan cantidad > 0
-    let cantidadValida = true;
-    tallasSeleccionadas.forEach(function(checkbox) {
-        const tallaId = checkbox.value;
-        const cantidadInput = document.querySelector('input[name="cantidad_talla_' + tallaId + '"]');
-        
-        if (parseInt(cantidadInput.value) <= 0) {
-            cantidadValida = false;
-            cantidadInput.focus();
-        }
-    });
-    
-    if (!cantidadValida) {
+    if (!precio || parseFloat(precio) <= 0) {
         e.preventDefault();
-        alert('Todas las tallas seleccionadas deben tener una cantidad mayor a 0.');
+        alert('El precio debe ser mayor a 0.');
         return false;
     }
 });

@@ -136,7 +136,7 @@
                                         <?php if (!empty($producto['tallas_disponibles'])): ?>
                                             <?php foreach ($producto['tallas_disponibles'] as $talla): ?>
                                                 <option value="<?= $talla['producto_id'] ?>" data-stock="<?= $talla['stock'] ?>">
-                                                    <?= Vista::escapar($talla['nombre']) ?>: <?= $talla['stock'] ?>
+                                                    <?= Vista::escapar($talla['nombre']) ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         <?php endif; ?>

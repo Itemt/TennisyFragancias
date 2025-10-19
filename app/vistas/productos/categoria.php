@@ -33,7 +33,7 @@
                                     <span class="fs-5 fw-bold"><?= Vista::formatearPrecio($producto['precio']) ?></span>
                                 <?php endif; ?>
                             </div>
-                            <?php if ($producto['stock'] > 0): ?>
+                            <?php if ($producto['stock_total'] > 0): ?>
                                 <span class="badge bg-success small">Disponible</span>
                             <?php else: ?>
                                 <span class="badge bg-danger small">Agotado</span>

@@ -237,7 +237,7 @@
                             
                             <!-- Badge de stock -->
                             <div class="position-absolute top-0 end-0 m-3">
-                                <?php if ($producto['stock'] > 0): ?>
+                                <?php if ($producto['stock_total'] > 0): ?>
                                     <span class="badge bg-success shadow-sm">
                                         <i class="bi bi-check-circle-fill me-1"></i>Disponible
                                     </span>

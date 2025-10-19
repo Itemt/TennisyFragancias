@@ -81,9 +81,9 @@
                                 <tbody>
                                     <?php foreach ($historial as $movimiento): ?>
                                         <tr>
-                                            <td><?= date('d/m/Y H:i', strtotime($movimiento['fecha'])) ?></td>
+                                            <td><?= isset($movimiento['fecha']) && $movimiento['fecha'] ? date('d/m/Y H:i', strtotime($movimiento['fecha'])) : 'Sin fecha' ?></td>
                                             <td><?= Vista::escapar($movimiento['producto_nombre']) ?></td>
-                                            <td><code><?= Vista::escapar($movimiento['sku']) ?></code></td>
+                                            <td><code><?= Vista::escapar($movimiento['sku'] ?? 'Sin SKU') ?></code></td>
                                             <td>
                                                 <span class="badge bg-<?= $movimiento['tipo'] === 'entrada' ? 'success' : 'warning' ?>">
                                                     <?= ucfirst($movimiento['tipo']) ?>
@@ -118,45 +118,6 @@
                 </div>
             </div>
 
-            <!-- Resumen de movimientos -->
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card bg-success text-white">
-                        <div class="card-body text-center">
-                            <i class="bi bi-arrow-up-circle fs-1"></i>
-                            <h4 class="mt-2" id="total-entradas">0</h4>
-                            <p class="mb-0">Entradas</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-warning text-white">
-                        <div class="card-body text-center">
-                            <i class="bi bi-arrow-down-circle fs-1"></i>
-                            <h4 class="mt-2" id="total-salidas">0</h4>
-                            <p class="mb-0">Salidas</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-info text-white">
-                        <div class="card-body text-center">
-                            <i class="bi bi-box fs-1"></i>
-                            <h4 class="mt-2" id="total-movimientos">0</h4>
-                            <p class="mb-0">Total Movimientos</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body text-center">
-                            <i class="bi bi-graph-up fs-1"></i>
-                            <h4 class="mt-2" id="balance-stock">0</h4>
-                            <p class="mb-0">Balance Neto</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
     </div>
 </div>
@@ -188,28 +149,6 @@ function limpiarFiltros() {
     window.location.href = window.location.pathname;
 }
 
-// Calcular resumen de movimientos
-document.addEventListener('DOMContentLoaded', function() {
-    const filas = document.querySelectorAll('tbody tr');
-    let totalEntradas = 0;
-    let totalSalidas = 0;
-    
-    filas.forEach(fila => {
-        const tipo = fila.querySelector('td:nth-child(4) .badge').textContent.toLowerCase();
-        const cantidad = parseInt(fila.querySelector('td:nth-child(5)').textContent.replace(/[+\-]/g, ''));
-        
-        if (tipo === 'entrada') {
-            totalEntradas += cantidad;
-        } else {
-            totalSalidas += cantidad;
-        }
-    });
-    
-    document.getElementById('total-entradas').textContent = totalEntradas;
-    document.getElementById('total-salidas').textContent = totalSalidas;
-    document.getElementById('total-movimientos').textContent = filas.length;
-    document.getElementById('balance-stock').textContent = totalEntradas - totalSalidas;
-});
 </script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>

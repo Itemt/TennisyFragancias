@@ -185,7 +185,7 @@
                                     <td><code><?= Vista::escapar($variante['codigo_sku']) ?></code></td>
                                     <td class="text-end">
                                         <span class="badge bg-<?= $variante['stock'] > 0 ? 'success' : 'danger' ?>">
-                                            <?= $variante['stock'] ?>
+                                            <?= $variante['stock'] > 0 ? 'Disponible' : 'Agotado' ?>
                                         </span>
                                     </td>
                                     <td class="text-end">
