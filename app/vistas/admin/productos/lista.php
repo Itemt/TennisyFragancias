@@ -72,11 +72,10 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                onclick="verDetallesProducto(<?= $producto['id'] ?>, <?= htmlspecialchars(json_encode($producto['nombre'])) ?>)"
-                                                title="Ver detalles">
+                                        <a href="<?= Vista::url('admin/producto_editar/' . $producto['id']) ?>" 
+                                           class="btn btn-sm btn-outline-primary" title="Ver/Editar">
                                             <i class="bi bi-eye"></i>
-                                        </button>
+                                        </a>
                                         <a href="<?= Vista::url('admin/producto_editar/' . $producto['id']) ?>" 
                                            class="btn btn-sm btn-warning" title="Editar">
                                             <i class="bi bi-pencil"></i>

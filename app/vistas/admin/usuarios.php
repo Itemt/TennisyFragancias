@@ -490,7 +490,9 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
             if (modalInstance) {
                 modalInstance.hide();
             }
-            location.reload();
+            setTimeout(() => {
+                window.location.href = '<?= Vista::url("admin/usuarios") ?>';
+            }, 500);
         } else {
             showToast('Error: ' + (data.mensaje || 'No se pudo crear el usuario'), 'danger');
             submitBtn.disabled = false;

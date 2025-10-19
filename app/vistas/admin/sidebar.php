@@ -61,7 +61,7 @@ $currentSection = explode('/', $currentPage)[0] ?? '';
             
             <!-- Gestión de Stock -->
             <li class="nav-item">
-                <a class="nav-link <?= strpos($currentPage, 'stock') !== false ? 'active' : '' ?>" 
+                <a class="nav-link <?= strpos($currentPage, 'actualizar-stock') !== false ? 'active' : '' ?>" 
                    href="<?= Vista::url('admin/actualizar-stock') ?>">
                     <i class="bi bi-boxes"></i> Stock
                 </a>
@@ -69,7 +69,7 @@ $currentSection = explode('/', $currentPage)[0] ?? '';
             
             <!-- Historial de Stock -->
             <li class="nav-item">
-                <a class="nav-link <?= strpos($currentPage, 'historial') !== false ? 'active' : '' ?>" 
+                <a class="nav-link <?= strpos($currentPage, 'historial-stock') !== false ? 'active' : '' ?>" 
                    href="<?= Vista::url('admin/historial-stock') ?>">
                     <i class="bi bi-clock-history"></i> Historial Stock
                 </a>
@@ -90,7 +90,7 @@ $currentSection = explode('/', $currentPage)[0] ?? '';
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= Vista::url('admin/categoria_crear') ?>">
+                <a class="nav-link" href="<?= Vista::url('admin/categorias') ?>">
                     <i class="bi bi-tag"></i> Nueva Categoría
                 </a>
             </li>
