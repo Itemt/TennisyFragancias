@@ -314,6 +314,45 @@ class AdminControlador extends Controlador {
     }
     
     /**
+     * Crear nueva categoría
+     */
+    public function categoria_crear() {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $datos = [
+                'nombre' => trim($_POST['nombre']),
+                'descripcion' => trim($_POST['descripcion']),
+                'imagen' => trim($_POST['imagen'] ?? '')
+            ];
+            
+            // Validaciones básicas
+            if (empty($datos['nombre'])) {
+                $_SESSION['mensaje'] = 'El nombre de la categoría es obligatorio';
+                $_SESSION['tipo_mensaje'] = 'error';
+            } else {
+                $categoriaModelo = $this->cargarModelo('Categoria');
+                
+                if ($categoriaModelo->crear($datos)) {
+                    $_SESSION['mensaje'] = 'Categoría creada correctamente';
+                    $_SESSION['tipo_mensaje'] = 'success';
+                    $this->redirigir('admin/categorias');
+                    return;
+                } else {
+                    $_SESSION['mensaje'] = 'Error al crear la categoría';
+                    $_SESSION['tipo_mensaje'] = 'error';
+                }
+            }
+        }
+        
+        $datos = [
+            'titulo' => 'Nueva Categoría - ' . NOMBRE_SITIO
+        ];
+        
+        $this->cargarVista('admin/categorias/crear', $datos);
+    }
+    
+    /**
      * Eliminar categoría
      */
     public function categoriaEliminar() {

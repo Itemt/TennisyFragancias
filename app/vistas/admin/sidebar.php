@@ -90,7 +90,7 @@ $currentSection = explode('/', $currentPage)[0] ?? '';
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= Vista::url('admin/categorias') ?>">
+                <a class="nav-link" href="<?= Vista::url('admin/categoria_crear') ?>">
                     <i class="bi bi-tag"></i> Nueva Categoría
                 </a>
             </li>
