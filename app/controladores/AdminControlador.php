@@ -123,9 +123,9 @@ class AdminControlador extends Controlador {
         }
         
         // Crear producto sin tallas (las tallas se agregan después en "Actualizar Stock")
-        $datosProducto['talla_id'] = 0; // Sin talla por defecto
+        $datosProducto['talla_id'] = null; // Sin talla por defecto
         $datosProducto['stock'] = 0; // Se maneja por tallas individuales
-        $datosProducto['codigo_sku'] = $productoModelo->generarCodigoSKU($datosProducto['categoria_id'], 0);
+        $datosProducto['codigo_sku'] = $productoModelo->generarCodigoSKU($datosProducto['categoria_id'], null);
         
         if ($productoModelo->crear($datosProducto)) {
             $_SESSION['exito'] = 'Producto creado exitosamente. Puedes agregar tallas en "Actualizar Stock"';
