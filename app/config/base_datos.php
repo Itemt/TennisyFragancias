@@ -183,6 +183,10 @@ class BaseDatos {
             error_log("DEBUG: Insertando carrito");
             $this->insertarCarrito();
             
+            // Insertar direcciones
+            error_log("DEBUG: Insertando direcciones");
+            $this->insertarDirecciones();
+            
             // Reactivar restricciones
             $this->conexion->exec("SET FOREIGN_KEY_CHECKS = 1");
             
@@ -298,21 +302,64 @@ class BaseDatos {
     }
 
     /**
-     * Inserta pedidos de ejemplo
+     * Inserta pedidos de ejemplo (6 meses de actividad)
      */
     private function insertarPedidos() {
-        $pedidos = [
-            ['PED-2024-001', 3, 2, 450000.00, 450000.00, 2, 5, 'online', '2024-01-15 10:30:00', '2024-01-16 14:00:00', '2024-01-18 16:30:00'],
-            ['PED-2024-002', 4, 2, 320000.00, 320000.00, 1, 5, 'presencial', '2024-01-16 15:45:00', NULL, '2024-01-16 15:45:00'],
-            ['PED-2024-003', 5, 2, 280000.00, 280000.00, 3, 4, 'online', '2024-01-17 09:20:00', '2024-01-18 10:00:00', NULL],
-            ['PED-2024-004', 6, 2, 180000.00, 180000.00, 2, 3, 'online', '2024-01-18 14:15:00', NULL, NULL],
-            ['PED-2024-005', 7, 2, 550000.00, 550000.00, 4, 5, 'online', '2024-01-19 11:30:00', '2024-01-20 09:00:00', '2024-01-22 14:20:00'],
-            ['PED-2024-006', 8, 2, 240000.00, 240000.00, 1, 5, 'presencial', '2024-01-20 16:00:00', NULL, '2024-01-20 16:00:00'],
-            ['PED-2024-007', 9, 2, 380000.00, 380000.00, 2, 4, 'online', '2024-01-21 08:45:00', '2024-01-22 11:30:00', NULL],
-            ['PED-2024-008', 10, 2, 160000.00, 160000.00, 3, 3, 'online', '2024-01-22 13:20:00', NULL, NULL],
-            ['PED-2024-009', 11, 2, 420000.00, 420000.00, 2, 5, 'online', '2024-01-23 10:15:00', '2024-01-24 15:00:00', '2024-01-26 10:30:00'],
-            ['PED-2024-010', 12, 2, 200000.00, 200000.00, 1, 5, 'presencial', '2024-01-24 14:30:00', NULL, '2024-01-24 14:30:00']
-        ];
+        $pedidos = [];
+        $fechaInicio = strtotime('2024-04-01'); // 6 meses atrás
+        $fechaFin = strtotime('2024-10-19'); // Hoy
+        $contadorPedido = 1;
+        
+        // Generar pedidos distribuidos en 6 meses
+        for ($i = 0; $i < 150; $i++) { // 150 pedidos en 6 meses
+            $fechaAleatoria = rand($fechaInicio, $fechaFin);
+            $fechaPedido = date('Y-m-d H:i:s', $fechaAleatoria);
+            
+            // Cliente aleatorio (IDs 3-17)
+            $clienteId = rand(3, 17);
+            
+            // Método de pago aleatorio
+            $metodoPago = rand(1, 5);
+            
+            // Estado aleatorio (más entregados que pendientes)
+            $estados = [5, 5, 5, 4, 4, 3, 2, 1]; // Más entregados
+            $estadoPedido = $estados[array_rand($estados)];
+            
+            // Tipo de pedido
+            $tipoPedido = rand(1, 10) <= 7 ? 'online' : 'presencial';
+            
+            // Total aleatorio entre 100k y 800k
+            $total = rand(100000, 800000);
+            
+            // Fechas de envío y entrega según estado
+            $fechaEnvio = null;
+            $fechaEntrega = null;
+            
+            if ($estadoPedido >= 4) {
+                $fechaEnvio = date('Y-m-d H:i:s', $fechaAleatoria + rand(86400, 259200)); // 1-3 días después
+            }
+            
+            if ($estadoPedido == 5) {
+                $fechaEntrega = date('Y-m-d H:i:s', $fechaAleatoria + rand(172800, 432000)); // 2-5 días después
+            }
+            
+            $numeroPedido = 'PED-2024-' . str_pad($contadorPedido, 3, '0', STR_PAD_LEFT);
+            $contadorPedido++;
+            
+            $pedidos[] = [
+                $numeroPedido, 
+                $clienteId, 
+                2, // empleado_id
+                $total, 
+                $total, 
+                $metodoPago, 
+                $estadoPedido, 
+                $tipoPedido, 
+                $fechaPedido, 
+                $fechaEnvio, 
+                $fechaEntrega
+            ];
+        }
 
         $stmt = $this->conexion->prepare("INSERT INTO pedidos (numero_pedido, usuario_id, empleado_id, total, subtotal, metodo_pago_id, estado_pedido_id, tipo_pedido, fecha_pedido, fecha_envio, fecha_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
@@ -326,30 +373,93 @@ class BaseDatos {
                 }
             }
         }
+        
+        // Insertar detalles de pedidos
+        $this->insertarDetallesPedidos();
     }
 
     /**
-     * Inserta facturas de ejemplo
+     * Inserta detalles de pedidos
+     */
+    private function insertarDetallesPedidos() {
+        // Obtener todos los pedidos insertados
+        $stmt = $this->conexion->query("SELECT id FROM pedidos ORDER BY id");
+        $pedidos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        // Obtener productos disponibles
+        $stmt = $this->conexion->query("SELECT id, precio FROM productos WHERE estado = 'activo'");
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $stmt = $this->conexion->prepare("INSERT INTO detalle_pedidos (pedido_id, producto_id, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)");
+        
+        foreach ($pedidos as $pedidoId) {
+            // 1-3 productos por pedido
+            $numProductos = rand(1, 3);
+            $productosSeleccionados = array_rand($productos, min($numProductos, count($productos)));
+            
+            if (!is_array($productosSeleccionados)) {
+                $productosSeleccionados = [$productosSeleccionados];
+            }
+            
+            foreach ($productosSeleccionados as $indice) {
+                $producto = $productos[$indice];
+                $cantidad = rand(1, 3);
+                $precioUnitario = $producto['precio'];
+                $subtotal = $precioUnitario * $cantidad;
+                
+                try {
+                    $stmt->execute([
+                        $pedidoId,
+                        $producto['id'],
+                        $cantidad,
+                        $precioUnitario,
+                        $subtotal
+                    ]);
+                } catch (PDOException $e) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    /**
+     * Inserta facturas de ejemplo (para todos los pedidos)
      */
     private function insertarFacturas() {
-        $facturas = [
-            ['FAC-2024-001', 1, 3, 2, 450000.00, '2024-01-15 10:30:00', '2024-01-22 10:30:00', 'pagada'],
-            ['FAC-2024-002', 2, 4, 2, 320000.00, '2024-01-16 15:45:00', '2024-01-16 15:45:00', 'pagada'],
-            ['FAC-2024-003', 3, 5, 2, 280000.00, '2024-01-17 09:20:00', '2024-01-24 09:20:00', 'pendiente'],
-            ['FAC-2024-004', 4, 6, 2, 180000.00, '2024-01-18 14:15:00', '2024-01-25 14:15:00', 'pendiente'],
-            ['FAC-2024-005', 5, 7, 2, 550000.00, '2024-01-19 11:30:00', '2024-01-26 11:30:00', 'pagada'],
-            ['FAC-2024-006', 6, 8, 2, 240000.00, '2024-01-20 16:00:00', '2024-01-20 16:00:00', 'pagada'],
-            ['FAC-2024-007', 7, 9, 2, 380000.00, '2024-01-21 08:45:00', '2024-01-28 08:45:00', 'pendiente'],
-            ['FAC-2024-008', 8, 10, 2, 160000.00, '2024-01-22 13:20:00', '2024-01-29 13:20:00', 'pendiente'],
-            ['FAC-2024-009', 9, 11, 2, 420000.00, '2024-01-23 10:15:00', '2024-01-30 10:15:00', 'pagada'],
-            ['FAC-2024-010', 10, 12, 2, 200000.00, '2024-01-24 14:30:00', '2024-01-24 14:30:00', 'pagada']
-        ];
-
+        // Obtener todos los pedidos
+        $stmt = $this->conexion->query("SELECT id, usuario_id, total, fecha_pedido FROM pedidos ORDER BY id");
+        $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
         $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, usuario_id, empleado_id, total, fecha_emision, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         
-        foreach ($facturas as $factura) {
+        $contadorFactura = 1;
+        
+        foreach ($pedidos as $pedido) {
+            $numeroFactura = 'FAC-2024-' . str_pad($contadorFactura, 3, '0', STR_PAD_LEFT);
+            $contadorFactura++;
+            
+            // Estado de factura (más pagadas que pendientes)
+            $estadosFactura = ['pagada', 'pagada', 'pagada', 'pagada', 'pagada', 'pendiente', 'pendiente', 'vencida'];
+            $estadoFactura = $estadosFactura[array_rand($estadosFactura)];
+            
+            // Fecha de emisión = fecha del pedido
+            $fechaEmision = $pedido['fecha_pedido'];
+            
+            // Fecha de vencimiento (7 días después para pagadas, 30 días para pendientes)
+            $diasVencimiento = $estadoFactura === 'pagada' ? 7 : 30;
+            $fechaVencimiento = date('Y-m-d H:i:s', strtotime($fechaEmision) + ($diasVencimiento * 86400));
+            
             try {
-                $stmt->execute($factura);
+                $stmt->execute([
+                    $numeroFactura,
+                    $pedido['id'],
+                    $pedido['usuario_id'],
+                    2, // empleado_id
+                    $pedido['total'],
+                    $fechaEmision,
+                    $fechaVencimiento,
+                    $estadoFactura
+                ]);
             } catch (PDOException $e) {
                 // Ignorar errores de duplicados
                 if (stripos($e->getMessage(), 'Duplicate entry') === false) {
@@ -360,48 +470,183 @@ class BaseDatos {
     }
 
     /**
-     * Inserta historial de stock
+     * Inserta historial de stock (6 meses de actividad)
      */
     private function insertarHistorialStock() {
-        // Obtener productos recién insertados
-        $stmt = $this->conexion->query("SELECT id FROM productos WHERE id > 5 ORDER BY id");
-        $productos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        // Obtener todos los productos
+        $stmt = $this->conexion->query("SELECT id, stock FROM productos WHERE estado = 'activo'");
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $stmt = $this->conexion->prepare("INSERT INTO historial_stock (producto_id, usuario_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo) VALUES (?, 1, 'entrada', ?, 0, ?, 'Stock inicial')");
+        $fechaInicio = strtotime('2024-04-01'); // 6 meses atrás
+        $fechaFin = strtotime('2024-10-19'); // Hoy
         
-        foreach ($productos as $productoId) {
+        $stmt = $this->conexion->prepare("INSERT INTO historial_stock (producto_id, usuario_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        
+        foreach ($productos as $producto) {
+            $productoId = $producto['id'];
+            $stockActual = $producto['stock'];
+            
+            // Insertar entrada inicial
             try {
-                // Obtener stock del producto
-                $stockStmt = $this->conexion->prepare("SELECT stock FROM productos WHERE id = ?");
-                $stockStmt->execute([$productoId]);
-                $stock = $stockStmt->fetchColumn();
-                
-                if ($stock > 0) {
-                    $stmt->execute([$productoId, $stock, $stock]);
-                }
+                $stmt->execute([
+                    $productoId, 
+                    1, // admin
+                    'entrada', 
+                    $stockActual, 
+                    0, 
+                    $stockActual, 
+                    'Stock inicial'
+                ]);
             } catch (PDOException $e) {
                 continue;
+            }
+            
+            // Generar movimientos de stock durante 6 meses
+            $stockTemporal = $stockActual;
+            
+            // Entradas de stock (reposiciones)
+            for ($i = 0; $i < rand(3, 8); $i++) {
+                $fechaAleatoria = rand($fechaInicio, $fechaFin);
+                $cantidadEntrada = rand(5, 25);
+                $stockAnterior = $stockTemporal;
+                $stockTemporal += $cantidadEntrada;
+                
+                try {
+                    $stmt->execute([
+                        $productoId,
+                        1, // admin
+                        'entrada',
+                        $cantidadEntrada,
+                        $stockAnterior,
+                        $stockTemporal,
+                        'Reposición de stock'
+                    ]);
+                } catch (PDOException $e) {
+                    continue;
+                }
+            }
+            
+            // Salidas de stock (ventas)
+            for ($i = 0; $i < rand(10, 30); $i++) {
+                $fechaAleatoria = rand($fechaInicio, $fechaFin);
+                $cantidadSalida = rand(1, 5);
+                
+                if ($stockTemporal >= $cantidadSalida) {
+                    $stockAnterior = $stockTemporal;
+                    $stockTemporal -= $cantidadSalida;
+                    
+                    try {
+                        $stmt->execute([
+                            $productoId,
+                            2, // empleado
+                            'salida',
+                            $cantidadSalida,
+                            $stockAnterior,
+                            $stockTemporal,
+                            'Venta de producto'
+                        ]);
+                    } catch (PDOException $e) {
+                        continue;
+                    }
+                }
+            }
+            
+            // Ajustes de stock
+            for ($i = 0; $i < rand(1, 3); $i++) {
+                $fechaAleatoria = rand($fechaInicio, $fechaFin);
+                $ajuste = rand(-3, 3);
+                
+                if ($ajuste != 0 && $stockTemporal + $ajuste >= 0) {
+                    $stockAnterior = $stockTemporal;
+                    $stockTemporal += $ajuste;
+                    
+                    try {
+                        $stmt->execute([
+                            $productoId,
+                            1, // admin
+                            'ajuste',
+                            abs($ajuste),
+                            $stockAnterior,
+                            $stockTemporal,
+                            $ajuste > 0 ? 'Ajuste positivo' : 'Ajuste por pérdida'
+                        ]);
+                    } catch (PDOException $e) {
+                        continue;
+                    }
+                }
             }
         }
     }
 
     /**
-     * Inserta productos en carrito
+     * Inserta productos en carrito (actividad actual)
      */
     private function insertarCarrito() {
-        $carrito = [
-            [3, 1, 1, 329000.00],
-            [4, 2, 1, 180000.00],
-            [5, 3, 2, 120000.00],
-            [6, 4, 1, 150000.00],
-            [7, 5, 1, 200000.00]
-        ];
-
+        // Obtener productos disponibles
+        $stmt = $this->conexion->query("SELECT id, precio FROM productos WHERE estado = 'activo'");
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
         $stmt = $this->conexion->prepare("INSERT INTO carrito (usuario_id, producto_id, cantidad, precio) VALUES (?, ?, ?, ?)");
         
-        foreach ($carrito as $item) {
+        // Insertar productos en carrito para diferentes clientes
+        for ($i = 0; $i < 25; $i++) {
+            $clienteId = rand(3, 17); // Clientes aleatorios
+            $producto = $productos[array_rand($productos)];
+            $cantidad = rand(1, 3);
+            
             try {
-                $stmt->execute($item);
+                $stmt->execute([
+                    $clienteId,
+                    $producto['id'],
+                    $cantidad,
+                    $producto['precio']
+                ]);
+            } catch (PDOException $e) {
+                // Ignorar errores de duplicados
+                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    /**
+     * Inserta direcciones para todos los clientes
+     */
+    private function insertarDirecciones() {
+        $ciudades = [
+            ['Bogotá', 'Cundinamarca', '110111'],
+            ['Medellín', 'Antioquia', '050001'],
+            ['Cali', 'Valle del Cauca', '760001'],
+            ['Cartagena', 'Bolívar', '130001'],
+            ['Bucaramanga', 'Santander', '680001'],
+            ['Pereira', 'Risaralda', '660001'],
+            ['Manizales', 'Caldas', '170001'],
+            ['Ibagué', 'Tolima', '730001'],
+            ['Santa Marta', 'Magdalena', '470001'],
+            ['Pasto', 'Nariño', '520001'],
+            ['Armenia', 'Quindío', '630001'],
+            ['Villavicencio', 'Meta', '500001'],
+            ['Neiva', 'Huila', '410001'],
+            ['Montería', 'Córdoba', '230001'],
+            ['Barrancabermeja', 'Santander', '687031']
+        ];
+
+        $stmt = $this->conexion->prepare("INSERT INTO direcciones (usuario_id, direccion, ciudad, departamento, codigo_postal, pais, es_principal) VALUES (?, ?, ?, ?, ?, 'Colombia', 1)");
+        
+        // Insertar direcciones para clientes (IDs 3-17)
+        for ($i = 3; $i <= 17; $i++) {
+            $ciudad = $ciudades[array_rand($ciudades)];
+            $direccion = 'Calle ' . rand(1, 200) . ' #' . rand(1, 100) . '-' . rand(10, 99) . ' Casa ' . rand(1, 5);
+            
+            try {
+                $stmt->execute([
+                    $i,
+                    $direccion,
+                    $ciudad[0],
+                    $ciudad[1],
+                    $ciudad[2]
+                ]);
             } catch (PDOException $e) {
                 // Ignorar errores de duplicados
                 if (stripos($e->getMessage(), 'Duplicate entry') === false) {
