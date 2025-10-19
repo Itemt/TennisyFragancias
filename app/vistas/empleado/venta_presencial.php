@@ -148,7 +148,7 @@
                                     <p class="card-text">
                                         <small class="text-muted">
                                             <?= Vista::escapar($producto['marca_nombre']) ?> - 
-                                            Talla <?= Vista::escapar($producto['talla_nombre']) ?>
+                                            Talla: <?= Vista::escapar($producto['talla_nombre']) ?>
                                         </small>
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center">

@@ -182,7 +182,7 @@ function mostrarVariantes(variantes, nombreProducto) {
         option.value = variante.id;
         option.setAttribute('data-stock', variante.stock);
         option.setAttribute('data-sku', variante.codigo_sku);
-        option.textContent = `${variante.talla_nombre || 'Sin talla'} - Stock: ${variante.stock}`;
+        option.textContent = `${variante.talla_nombre || 'Sin talla'}: ${variante.stock}`;
         selectTalla.appendChild(option);
     });
     
@@ -198,7 +198,7 @@ function mostrarVariantes(variantes, nombreProducto) {
             <td><code>${variante.codigo_sku}</code></td>
             <td class="text-end">
                 <span class="badge ${variante.stock > 0 ? 'bg-success' : 'bg-danger'}">
-                    ${variante.stock}
+                    ${variante.talla_nombre || 'Sin talla'}: ${variante.stock}
                 </span>
             </td>
         `;

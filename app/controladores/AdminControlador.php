@@ -97,7 +97,7 @@ class AdminControlador extends Controlador {
             'precio' => (float)$_POST['precio'],
             'precio_oferta' => !empty($_POST['precio_oferta']) ? (float)$_POST['precio_oferta'] : null,
             'categoria_id' => (int)$_POST['categoria_id'],
-            'stock' => (int)$_POST['stock'],
+            'stock' => 0, // Se maneja por tallas individuales
             'stock_minimo' => (int)($_POST['stock_minimo'] ?? 5),
             'marca_id' => !empty($_POST['marca_id']) ? (int)$_POST['marca_id'] : null,
             'talla_id' => !empty($_POST['talla_id']) ? (int)$_POST['talla_id'] : null,
@@ -186,7 +186,7 @@ class AdminControlador extends Controlador {
                 'precio' => (float)$_POST['precio'],
                 'precio_oferta' => !empty($_POST['precio_oferta']) ? (float)$_POST['precio_oferta'] : null,
                 'categoria_id' => (int)$_POST['categoria_id'],
-                'stock' => (int)$_POST['stock'],
+                'stock' => isset($_POST['stock']) ? (int)$_POST['stock'] : $producto['stock'],
                 'stock_minimo' => (int)($_POST['stock_minimo'] ?? 5),
                 'marca_id' => !empty($_POST['marca_id']) ? (int)$_POST['marca_id'] : null,
                 'talla_id' => !empty($_POST['talla_id']) ? (int)$_POST['talla_id'] : null,
