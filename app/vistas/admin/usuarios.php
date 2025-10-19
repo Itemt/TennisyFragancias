@@ -274,6 +274,8 @@
     </div>
 </div>
 
+<?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
+
 <script>
 function aplicarFiltros() {
     const rol = document.getElementById('filtro-rol').value;
@@ -507,5 +509,3 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
     });
 });
 </script>
-
-<?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
