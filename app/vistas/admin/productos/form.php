@@ -60,19 +60,7 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Stock *</label>
-                                <input type="number" class="form-control" name="stock" 
-                                       value="<?= isset($producto) ? $producto['stock'] : 0 ?>" required>
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Stock Mínimo</label>
-                                <input type="number" class="form-control" name="stock_minimo" 
-                                       value="<?= isset($producto) ? $producto['stock_minimo'] : 5 ?>">
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Estado</label>
                                 <select class="form-select" name="estado">
                                     <option value="activo" <?= (isset($producto) && $producto['estado'] == 'activo') ? 'selected' : '' ?>>Activo</option>
@@ -80,24 +68,22 @@
                                     <option value="agotado" <?= (isset($producto) && $producto['estado'] == 'agotado') ? 'selected' : '' ?>>Agotado</option>
                                 </select>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
+                            
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Marca</label>
                                 <select class="form-select" name="marca_id">
                                     <option value="">Seleccionar marca...</option>
-                                    <?php if (isset($marcas)): ?>
-                                        <?php foreach ($marcas as $marca): ?>
-                                            <option value="<?= $marca['id'] ?>" 
-                                                    <?= (isset($producto) && $producto['marca_id'] == $marca['id']) ? 'selected' : '' ?>>
-                                                <?= Vista::escapar($marca['nombre']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
+                                    <?php foreach ($marcas as $marca): ?>
+                                        <option value="<?= $marca['id'] ?>" 
+                                                <?= (isset($producto) && $producto['marca_id'] == $marca['id']) ? 'selected' : '' ?>>
+                                            <?= Vista::escapar($marca['nombre']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
-                            
+                        </div>
+                        
+                        <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Color</label>
                                 <select class="form-select" name="color_id">

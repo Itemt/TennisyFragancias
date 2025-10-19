@@ -62,9 +62,26 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="text-center">
-                                        <span class="badge bg-info"><?= $producto['total_variantes'] ?> tallas</span>
-                                        <br><small class="text-muted">Variantes</small>
+                                    <div class="stock-por-tallas">
+                                        <?php 
+                                        // Obtener las variantes del producto con sus tallas y cantidades
+                                        $productoModelo = $this->cargarModelo('Producto');
+                                        $variantes = $productoModelo->obtenerVariantesPorProducto($producto['id']);
+                                        ?>
+                                        <?php if (!empty($variantes)): ?>
+                                            <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                                <?php foreach ($variantes as $variante): ?>
+                                                    <span class="badge bg-secondary" title="Talla: <?= Vista::escapar($variante['talla_nombre']) ?>, SKU: <?= Vista::escapar($variante['codigo_sku']) ?>">
+                                                        <?= Vista::escapar($variante['talla_nombre']) ?>: <strong><?= $variante['stock'] ?></strong>
+                                                    </span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <small class="text-muted d-block text-center mt-1">
+                                                <?= count($variantes) ?> variantes
+                                            </small>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning">Sin tallas</span>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>
