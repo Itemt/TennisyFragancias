@@ -73,7 +73,7 @@
                                 <td>
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                onclick="verDetallesProducto(<?= $producto['id'] ?>, <?= json_encode($producto['nombre']) ?>)"
+                                                onclick="verDetallesProducto(<?= $producto['id'] ?>, <?= htmlspecialchars(json_encode($producto['nombre'])) ?>)"
                                                 title="Ver detalles">
                                             <i class="bi bi-eye"></i>
                                         </button>
@@ -82,7 +82,7 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-danger" 
-                                                onclick="eliminarProducto(<?= $producto['id'] ?>, <?= json_encode($producto['nombre']) ?>)"
+                                                onclick="eliminarProducto(<?= $producto['id'] ?>, <?= htmlspecialchars(json_encode($producto['nombre'])) ?>)"
                                                 title="Eliminar">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -277,3 +277,4 @@ document.getElementById('btn-editar-producto').addEventListener('click', functio
 </script>
 
 <?php require_once VIEWS_PATH . '/layout/footer.php'; ?>
+

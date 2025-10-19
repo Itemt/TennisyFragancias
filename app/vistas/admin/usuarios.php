@@ -10,9 +10,11 @@
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Gestión de Usuarios</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario">
-                        <i class="bi bi-person-plus"></i> Crear Usuario
-                    </button>
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario">
+                            <i class="bi bi-person-plus"></i> Crear Usuario
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -99,7 +101,7 @@
                                     <td>
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-sm btn-outline-primary" 
-                                                    onclick="cambiarPassword(<?= $usuario['id'] ?>, <?= json_encode($usuario['nombre'] . ' ' . $usuario['apellido']) ?>)">
+                                                    onclick="cambiarPassword(<?= $usuario['id'] ?>, <?= htmlspecialchars(json_encode($usuario['nombre'] . ' ' . $usuario['apellido'])) ?>)">
                                                 <i class="bi bi-key"></i> Cambiar Contraseña
                                             </button>
                                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
@@ -122,7 +124,7 @@
                                                 </li>
                                                 <li>
                                                     <a class="dropdown-item text-danger" href="#" 
-                                                       onclick="eliminarUsuario(<?= $usuario['id'] ?>, <?= json_encode($usuario['nombre'] . ' ' . $usuario['apellido']) ?>)">
+                                                       onclick="eliminarUsuario(<?= $usuario['id'] ?>, <?= htmlspecialchars(json_encode($usuario['nombre'] . ' ' . $usuario['apellido'])) ?>)">
                                                         <i class="bi bi-trash"></i> Eliminar
                                                     </a>
                                                 </li>
