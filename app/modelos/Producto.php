@@ -127,7 +127,7 @@ class Producto extends Modelo {
         foreach ($variantes as $variante) {
             if ($variante['talla_id'] && $variante['stock'] > 0) {
                 $producto['tallas_disponibles'][] = [
-                    'id' => $variante['talla_id'],
+                    'talla_id' => $variante['talla_id'],
                     'nombre' => $variante['talla_nombre'],
                     'stock' => $variante['stock'],
                     'producto_id' => $variante['id']

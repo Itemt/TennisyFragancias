@@ -132,7 +132,7 @@
         <!-- Pedidos Recientes -->
         <div class="col-md-8 mb-4">
             <div class="card">
-                <div class="card-header bg-primario text-white">
+                <div class="card-header bg-warning">
                     <h5 class="mb-0"><i class="bi bi-clock-history"></i> Pedidos Recientes</h5>
                 </div>
                 <div class="card-body">
@@ -167,7 +167,7 @@
         <div class="col-md-4">
             <!-- Productos Más Vendidos -->
             <div class="card mb-4">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-warning">
                     <h5 class="mb-0"><i class="bi bi-trophy"></i> Más Vendidos</h5>
                 </div>
                 <div class="card-body">
