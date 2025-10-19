@@ -119,7 +119,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <input type="text" class="form-control" id="filtro-buscar" placeholder="Buscar producto...">
+                    <input type="text" class="form-control" id="filtro-buscar" placeholder="Buscar producto..." style="color: #333 !important;">
                 </div>
             </div>
 
@@ -131,7 +131,9 @@
                              data-categoria="<?= $producto['categoria_id'] ?>"
                              data-marca="<?= $producto['marca_id'] ?>"
                              data-talla="<?= $producto['talla_id'] ?>"
-                             data-nombre="<?= strtolower(Vista::escapar($producto['nombre'])) ?>">
+                             data-nombre="<?= strtolower(Vista::escapar($producto['nombre'])) ?>"
+                             data-sku="<?= strtolower(Vista::escapar($producto['codigo_sku'] ?? '')) ?>"
+                             data-descripcion="<?= strtolower(Vista::escapar($producto['descripcion'] ?? '')) ?>">
                             <div class="card h-100">
                                 <?php if ($producto['imagen_principal']): ?>
                                     <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
@@ -236,12 +238,47 @@ function aplicarFiltros() {
             mostrar = false;
         }
         
-        if (buscar && !producto.dataset.nombre.includes(buscar)) {
-            mostrar = false;
+        if (buscar) {
+            const terminoBusqueda = buscar.toLowerCase();
+            const coincideNombre = producto.dataset.nombre.includes(terminoBusqueda);
+            const coincideSKU = producto.dataset.sku.includes(terminoBusqueda);
+            const coincideDescripcion = producto.dataset.descripcion.includes(terminoBusqueda);
+            
+            if (!coincideNombre && !coincideSKU && !coincideDescripcion) {
+                mostrar = false;
+            }
         }
         
         producto.style.display = mostrar ? 'block' : 'none';
     });
+    
+    // Mostrar mensaje si no hay resultados
+    mostrarMensajeSinResultados();
+}
+
+// Mostrar mensaje cuando no hay resultados de búsqueda
+function mostrarMensajeSinResultados() {
+    const productos = document.querySelectorAll('.producto-card');
+    const productosVisibles = Array.from(productos).filter(p => p.style.display !== 'none');
+    
+    // Buscar o crear mensaje de "sin resultados"
+    let mensajeSinResultados = document.getElementById('mensaje-sin-resultados');
+    
+    if (productosVisibles.length === 0 && productos.length > 0) {
+        if (!mensajeSinResultados) {
+            mensajeSinResultados = document.createElement('div');
+            mensajeSinResultados.id = 'mensaje-sin-resultados';
+            mensajeSinResultados.className = 'col-12 text-center py-5';
+            mensajeSinResultados.innerHTML = `
+                <i class="bi bi-search fs-1 text-muted"></i>
+                <h5 class="text-muted mt-3">No se encontraron productos</h5>
+                <p class="text-muted">Intenta con otros términos de búsqueda</p>
+            `;
+            document.getElementById('productosContainer').appendChild(mensajeSinResultados);
+        }
+    } else if (mensajeSinResultados) {
+        mensajeSinResultados.remove();
+    }
 }
 
 // Cambiar cantidad

@@ -57,7 +57,7 @@ class Factura extends Modelo {
                 u.email as cliente_email, u.telefono as cliente_telefono,
                 u.direccion as cliente_direccion,
                 e.nombre as empleado_nombre, e.apellido as empleado_apellido,
-                p.numero_pedido
+                p.id as pedido_id
                 FROM {$this->tabla} f
                 INNER JOIN usuarios u ON f.usuario_id = u.id
                 LEFT JOIN usuarios e ON f.empleado_id = e.id
@@ -101,7 +101,7 @@ class Factura extends Modelo {
     public function obtenerTodas($limite = null) {
         $sql = "SELECT f.*, 
                 u.nombre as cliente_nombre, u.apellido as cliente_apellido,
-                p.numero_pedido
+                p.id as pedido_id
                 FROM {$this->tabla} f
                 INNER JOIN usuarios u ON f.usuario_id = u.id
                 INNER JOIN pedidos p ON f.pedido_id = p.id
@@ -128,7 +128,7 @@ class Factura extends Modelo {
         $sql = "SELECT f.*, 
                 u.nombre as cliente_nombre, u.apellido as cliente_apellido,
                 u.email as cliente_email, u.telefono as cliente_telefono,
-                p.numero_pedido
+                p.id as pedido_id
                 FROM {$this->tabla} f
                 INNER JOIN usuarios u ON f.usuario_id = u.id
                 INNER JOIN pedidos p ON f.pedido_id = p.id

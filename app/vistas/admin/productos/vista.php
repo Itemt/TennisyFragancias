@@ -154,11 +154,15 @@
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">
                                 <i class="bi bi-boxes"></i> Stock Detallado por Tallas
                                 <span class="badge bg-primary ms-2"><?= count($producto['variantes']) ?> variantes</span>
                             </h5>
+                            <a href="<?= Vista::url('admin/producto-agregar-variante/' . $producto['id']) ?>" 
+                               class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i> Agregar Talla
+                            </a>
                         </div>
                         <div class="card-body">
                             <?php if (!empty($producto['variantes'])): ?>
@@ -213,7 +217,7 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="<?= Vista::url('admin/producto-editar/' . $variante['id']) ?>" 
+                                                        <a href="<?= Vista::url('admin/producto_editar/' . $variante['id']) ?>" 
                                                            class="btn btn-warning btn-sm" title="Editar Variante">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
@@ -399,7 +403,7 @@
                                                     <a href="<?= Vista::url('admin/producto-vista/' . $productoRelacionado['id']) ?>" class="btn btn-outline-primary btn-sm">
                                                         <i class="bi bi-eye"></i> Vista Completa
                                                     </a>
-                                                    <a href="<?= Vista::url('admin/producto-editar/' . $productoRelacionado['id']) ?>" class="btn btn-warning btn-sm">
+                                                    <a href="<?= Vista::url('admin/producto_editar/' . $productoRelacionado['id']) ?>" class="btn btn-warning btn-sm">
                                                         <i class="bi bi-pencil"></i> Editar
                                                     </a>
                                                 </div>

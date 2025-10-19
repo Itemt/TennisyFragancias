@@ -1056,12 +1056,21 @@ class AdminControlador extends Controlador {
         
         $productoModelo = $this->cargarModelo('Producto');
         
-        // Obtener historial de movimientos
-        $historial = $this->obtenerHistorialStock();
+        // Obtener filtros de la URL
+        $filtros = [
+            'tipo' => $_GET['tipo'] ?? '',
+            'fecha_desde' => $_GET['fecha_desde'] ?? '',
+            'fecha_hasta' => $_GET['fecha_hasta'] ?? '',
+            'buscar' => $_GET['buscar'] ?? ''
+        ];
+        
+        // Obtener historial de movimientos con filtros
+        $historial = $this->obtenerHistorialStock($filtros);
         
         $datos = [
             'titulo' => 'Historial de Stock - ' . NOMBRE_SITIO,
-            'historial' => $historial
+            'historial' => $historial,
+            'filtros' => $filtros
         ];
         
         $this->cargarVista('admin/stock/historial', $datos);
@@ -1096,9 +1105,9 @@ class AdminControlador extends Controlador {
     /**
      * Obtener historial de stock
      */
-    private function obtenerHistorialStock() {
+    private function obtenerHistorialStock($filtros = []) {
         $historialModelo = $this->cargarModelo('HistorialStock');
-        return $historialModelo->obtenerHistorial(100);
+        return $historialModelo->obtenerHistorial(100, $filtros);
     }
     
     /**
@@ -1171,5 +1180,66 @@ class AdminControlador extends Controlador {
      */
     public function producto_eliminar_alias() {
         $this->producto_eliminar(func_get_arg(0));
+    }
+    
+    /**
+     * Agregar nueva variante (talla) a un producto existente
+     */
+    public function producto_agregar_variante($productoId) {
+        $this->verificarRol(ROL_ADMINISTRADOR);
+        
+        $productoModelo = $this->cargarModelo('Producto');
+        $producto = $productoModelo->obtenerPorId($productoId);
+        
+        if (!$producto) {
+            $this->redirigir('admin/productos');
+            return;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $datos = [
+                'nombre' => $producto['nombre'], // Mismo nombre que el producto original
+                'descripcion' => $producto['descripcion'],
+                'precio' => (float)($_POST['precio'] ?? $producto['precio']),
+                'precio_oferta' => !empty($_POST['precio_oferta']) ? (float)$_POST['precio_oferta'] : null,
+                'categoria_id' => $producto['categoria_id'],
+                'marca_id' => $producto['marca_id'],
+                'talla_id' => (int)($_POST['talla_id'] ?? 0),
+                'color_id' => !empty($_POST['color_id']) ? (int)$_POST['color_id'] : null,
+                'genero_id' => $producto['genero_id'],
+                'stock' => (int)($_POST['stock'] ?? 0),
+                'stock_minimo' => (int)($_POST['stock_minimo'] ?? $producto['stock_minimo']),
+                'codigo_sku' => $this->limpiarDatos($_POST['codigo_sku'] ?? ''),
+                'estado' => 'activo',
+                'destacado' => 0,
+                'imagen_principal' => $producto['imagen_principal'] // Misma imagen
+            ];
+            
+            if ($productoModelo->crear($datos)) {
+                $_SESSION['exito'] = 'Nueva variante agregada correctamente';
+                $this->redirigir('admin/producto-vista/' . $productoId);
+            } else {
+                $_SESSION['error'] = 'Error al agregar la nueva variante';
+            }
+        }
+        
+        // Cargar datos para los dropdowns
+        $categoriaModelo = $this->cargarModelo('Categoria');
+        $marcaModelo = $this->cargarModelo('Marca');
+        $tallaModelo = $this->cargarModelo('Talla');
+        $colorModelo = $this->cargarModelo('Color');
+        $generoModelo = $this->cargarModelo('Genero');
+        
+        $datos = [
+            'titulo' => 'Agregar Nueva Variante - ' . NOMBRE_SITIO,
+            'producto' => $producto,
+            'categorias' => $categoriaModelo->obtenerActivas(),
+            'marcas' => $marcaModelo->obtenerTodos(),
+            'tallas' => $tallaModelo->obtenerTodos(),
+            'colores' => $colorModelo->obtenerTodos(),
+            'generos' => $generoModelo->obtenerTodos()
+        ];
+        
+        $this->cargarVista('admin/productos/agregar-variante', $datos);
     }
 }

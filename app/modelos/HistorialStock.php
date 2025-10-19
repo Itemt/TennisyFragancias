@@ -40,18 +40,51 @@ class HistorialStock extends Modelo {
     }
     
     /**
-     * Obtener historial general
+     * Obtener historial general con filtros
      */
-    public function obtenerHistorial($limite = 100) {
+    public function obtenerHistorial($limite = 100, $filtros = []) {
         $sql = "SELECT h.*, p.nombre as producto_nombre, p.codigo_sku,
                 u.nombre as usuario_nombre, u.apellido as usuario_apellido
                 FROM {$this->tabla} h
                 INNER JOIN productos p ON h.producto_id = p.id
                 LEFT JOIN usuarios u ON h.usuario_id = u.id
-                ORDER BY h.fecha_movimiento DESC
-                LIMIT :limite";
+                WHERE 1=1";
+        
+        $params = [];
+        
+        // Filtro por tipo de movimiento
+        if (!empty($filtros['tipo'])) {
+            $sql .= " AND h.tipo = :tipo";
+            $params[':tipo'] = $filtros['tipo'];
+        }
+        
+        // Filtro por fecha desde
+        if (!empty($filtros['fecha_desde'])) {
+            $sql .= " AND DATE(h.fecha_movimiento) >= :fecha_desde";
+            $params[':fecha_desde'] = $filtros['fecha_desde'];
+        }
+        
+        // Filtro por fecha hasta
+        if (!empty($filtros['fecha_hasta'])) {
+            $sql .= " AND DATE(h.fecha_movimiento) <= :fecha_hasta";
+            $params[':fecha_hasta'] = $filtros['fecha_hasta'];
+        }
+        
+        // Filtro por búsqueda de producto
+        if (!empty($filtros['buscar'])) {
+            $sql .= " AND (p.nombre LIKE :buscar OR p.codigo_sku LIKE :buscar)";
+            $params[':buscar'] = '%' . $filtros['buscar'] . '%';
+        }
+        
+        $sql .= " ORDER BY h.fecha_movimiento DESC LIMIT :limite";
+        
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':limite', $limite, PDO::PARAM_INT);
+        
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
         $stmt->execute();
         return $stmt->fetchAll();
     }

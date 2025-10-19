@@ -61,8 +61,8 @@
         <div class="col-md-4">
             <!-- Carrito de Venta -->
             <div class="card sticky-top" style="top: 20px;">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-cart"></i> Venta Actual</h5>
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0 text-dark"><i class="bi bi-cart"></i> Venta Actual</h5>
                 </div>
                 <div class="card-body">
                     <div id="items-venta" class="mb-3">

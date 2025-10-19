@@ -24,21 +24,21 @@
                             <label class="form-label">Tipo de Movimiento</label>
                             <select class="form-select" id="filtro-tipo">
                                 <option value="">Todos</option>
-                                <option value="entrada">Entradas</option>
-                                <option value="salida">Salidas</option>
+                                <option value="entrada" <?= ($filtros['tipo'] ?? '') === 'entrada' ? 'selected' : '' ?>>Entradas</option>
+                                <option value="salida" <?= ($filtros['tipo'] ?? '') === 'salida' ? 'selected' : '' ?>>Salidas</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Fecha Desde</label>
-                            <input type="date" class="form-control" id="fecha-desde">
+                            <input type="date" class="form-control" id="fecha-desde" value="<?= $filtros['fecha_desde'] ?? '' ?>">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Fecha Hasta</label>
-                            <input type="date" class="form-control" id="fecha-hasta">
+                            <input type="date" class="form-control" id="fecha-hasta" value="<?= $filtros['fecha_hasta'] ?? '' ?>">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Buscar Producto</label>
-                            <input type="text" class="form-control" id="buscar-producto" placeholder="Nombre o SKU...">
+                            <input type="text" class="form-control" id="buscar-producto" placeholder="Nombre o SKU..." value="<?= $filtros['buscar'] ?? '' ?>">
                         </div>
                     </div>
                     <div class="row mt-3">
