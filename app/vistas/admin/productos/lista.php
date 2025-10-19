@@ -163,29 +163,53 @@
 let productoActualId = null;
 
 function verDetallesProducto(productoId, nombreProducto) {
+    console.log('verDetallesProducto llamado:', productoId, nombreProducto);
     productoActualId = productoId;
-    document.getElementById('nombre-producto-modal').textContent = nombreProducto;
+    
+    const nombreModal = document.getElementById('nombre-producto-modal');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const modalContent = document.getElementById('modal-content');
+    
+    if (!nombreModal || !loadingIndicator || !modalContent) {
+        console.error('No se encontraron los elementos del modal');
+        alert('Error: No se pudo cargar el modal');
+        return;
+    }
+    
+    nombreModal.textContent = nombreProducto;
     
     // Mostrar indicador de carga
-    document.getElementById('loading-indicator').style.display = 'block';
-    document.getElementById('modal-content').style.display = 'none';
+    loadingIndicator.style.display = 'block';
+    modalContent.style.display = 'none';
     
     // Mostrar modal inmediatamente
-    const modal = new bootstrap.Modal(document.getElementById('modalDetallesProducto'));
+    const modalElement = document.getElementById('modalDetallesProducto');
+    if (!modalElement) {
+        console.error('No se encontró el elemento modalDetallesProducto');
+        alert('Error: No se encontró el modal');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(modalElement);
     modal.show();
     
     // Cargar variantes del producto por nombre
-    fetch('<?= Vista::url("admin/obtener-variantes-producto") ?>?nombre=' + encodeURIComponent(nombreProducto))
+    const url = '<?= Vista::url("admin/obtener-variantes-producto") ?>?nombre=' + encodeURIComponent(nombreProducto);
+    console.log('Fetching:', url);
+    
+    fetch(url)
         .then(response => {
+            console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error('Error de red: ' + response.status);
             }
             return response.json();
         })
         .then(data => {
+            console.log('Data recibida:', data);
             // Ocultar indicador de carga
-            document.getElementById('loading-indicator').style.display = 'none';
-            document.getElementById('modal-content').style.display = 'block';
+            loadingIndicator.style.display = 'none';
+            modalContent.style.display = 'block';
             
             if (data.exito && data.variantes) {
                 mostrarDetallesProducto(data.variantes);
@@ -196,8 +220,8 @@ function verDetallesProducto(productoId, nombreProducto) {
         })
         .catch(error => {
             // Ocultar indicador de carga
-            document.getElementById('loading-indicator').style.display = 'none';
-            document.getElementById('modal-content').style.display = 'block';
+            loadingIndicator.style.display = 'none';
+            modalContent.style.display = 'block';
             
             console.error('Error en fetch:', error);
             alert('Error al cargar los detalles: ' + error.message);

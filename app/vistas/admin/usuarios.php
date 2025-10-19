@@ -184,7 +184,7 @@
                 <h5 class="modal-title">Cambiar Contraseña</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formCambiarPassword" action="<?= Vista::url('admin/cambiar-password') ?>" method="POST">
+            <form id="formCambiarPassword" method="POST">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="usuario_id" class="form-label">Usuario</label>
@@ -341,9 +341,11 @@ function cambiarEstado(usuarioId, nuevoEstado) {
 // Manejar envío del formulario de cambio de contraseña
 document.getElementById('formCambiarPassword').addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log('Formulario de cambio de contraseña enviado');
     
     const formData = new FormData(this);
     const data = Object.fromEntries(formData);
+    console.log('Datos del formulario:', data);
     
     if (data.nueva_password !== data.confirmar_password) {
         alert('Las contraseñas no coinciden');
@@ -361,7 +363,10 @@ document.getElementById('formCambiarPassword').addEventListener('submit', functi
     submitBtn.disabled = true;
     submitBtn.textContent = 'Cambiando...';
     
-    fetch('<?= Vista::url("admin/cambiar-password") ?>', {
+    const url = '<?= Vista::url("admin/cambiar-password") ?>';
+    console.log('Enviando a:', url);
+    
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -369,15 +374,20 @@ document.getElementById('formCambiarPassword').addEventListener('submit', functi
         body: JSON.stringify(data)
     })
     .then(response => {
+        console.log('Response status:', response.status);
         if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
+            throw new Error('Error en la respuesta del servidor: ' + response.status);
         }
         return response.json();
     })
     .then(data => {
+        console.log('Respuesta recibida:', data);
         if (data.exito) {
             alert(data.mensaje);
-            bootstrap.Modal.getInstance(document.getElementById('modalCambiarPassword')).hide();
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalCambiarPassword'));
+            if (modalInstance) {
+                modalInstance.hide();
+            }
             location.reload();
         } else {
             alert('Error: ' + data.mensaje);
@@ -428,9 +438,11 @@ function eliminarUsuario(usuarioId, nombreUsuario) {
 // Manejar envío del formulario de crear usuario
 document.getElementById('formCrearUsuario').addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log('Formulario de crear usuario enviado');
     
     const formData = new FormData(this);
     const data = Object.fromEntries(formData);
+    console.log('Datos del formulario:', data);
     
     // Validar contraseñas
     if (data.password !== data.confirmar_password) {
@@ -456,7 +468,10 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
     submitBtn.disabled = true;
     submitBtn.textContent = 'Creando...';
     
-    fetch('<?= Vista::url("admin/crear-usuario") ?>', {
+    const url = '<?= Vista::url("admin/crear-usuario") ?>';
+    console.log('Enviando a:', url);
+    
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -464,15 +479,20 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function(
         body: JSON.stringify(data)
     })
     .then(response => {
+        console.log('Response status:', response.status);
         if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
+            throw new Error('Error en la respuesta del servidor: ' + response.status);
         }
         return response.json();
     })
     .then(data => {
+        console.log('Respuesta recibida:', data);
         if (data.exito) {
             alert(data.mensaje);
-            bootstrap.Modal.getInstance(document.getElementById('modalCrearUsuario')).hide();
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalCrearUsuario'));
+            if (modalInstance) {
+                modalInstance.hide();
+            }
             location.reload();
         } else {
             alert('Error: ' + data.mensaje);
