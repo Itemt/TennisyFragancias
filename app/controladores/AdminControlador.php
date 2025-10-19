@@ -911,23 +911,33 @@ class AdminControlador extends Controlador {
             return;
         }
         
-        $productoId = (int)($_GET['producto_id'] ?? 0);
-        
-        if ($productoId <= 0) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'ID de producto inválido']);
-            return;
-        }
-        
         $productoModelo = $this->cargarModelo('Producto');
-        $producto = $productoModelo->obtenerPorId($productoId);
         
-        if (!$producto) {
-            $this->enviarJson(['exito' => false, 'mensaje' => 'Producto no encontrado']);
+        // Verificar si se pasa nombre o producto_id
+        if (isset($_GET['nombre']) && !empty($_GET['nombre'])) {
+            // Buscar por nombre
+            $nombre = trim($_GET['nombre']);
+            $variantes = $productoModelo->obtenerVariantesPorNombre($nombre);
+            
+            if (empty($variantes)) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'No se encontraron variantes para el producto: ' . $nombre]);
+                return;
+            }
+        } elseif (isset($_GET['producto_id']) && is_numeric($_GET['producto_id'])) {
+            // Buscar por ID (método original)
+            $productoId = (int)$_GET['producto_id'];
+            $producto = $productoModelo->obtenerPorId($productoId);
+            
+            if (!$producto) {
+                $this->enviarJson(['exito' => false, 'mensaje' => 'Producto no encontrado']);
+                return;
+            }
+            
+            $variantes = $productoModelo->obtenerVariantesPorNombre($producto['nombre']);
+        } else {
+            $this->enviarJson(['exito' => false, 'mensaje' => 'Parámetro inválido. Se requiere "nombre" o "producto_id"']);
             return;
         }
-        
-        // Obtener todas las variantes del producto
-        $variantes = $productoModelo->obtenerVariantesPorNombre($producto['nombre']);
         
         $this->enviarJson(['exito' => true, 'variantes' => $variantes]);
     }

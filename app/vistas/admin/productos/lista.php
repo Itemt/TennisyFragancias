@@ -110,32 +110,43 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>Stock Total:</strong>
-                        <span id="stock-total-modal" class="badge bg-primary fs-6 ms-2">-</span>
+                <!-- Indicador de carga -->
+                <div id="loading-indicator" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
                     </div>
-                    <div class="col-md-6">
-                        <strong>Total de Tallas:</strong>
-                        <span id="total-tallas-modal" class="badge bg-info ms-2">-</span>
-                    </div>
+                    <p class="mt-2">Cargando detalles del producto...</p>
                 </div>
                 
-                <h6>Detalle por Tallas:</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Talla</th>
-                                <th>SKU</th>
-                                <th class="text-end">Stock</th>
-                                <th class="text-end">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-tallas-modal">
-                            <!-- Se llenará dinámicamente -->
-                        </tbody>
-                    </table>
+                <!-- Contenido del modal -->
+                <div id="modal-content">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Stock Total:</strong>
+                            <span id="stock-total-modal" class="badge bg-primary fs-6 ms-2">-</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Total de Tallas:</strong>
+                            <span id="total-tallas-modal" class="badge bg-info ms-2">-</span>
+                        </div>
+                    </div>
+                    
+                    <h6>Detalle por Tallas:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Talla</th>
+                                    <th>SKU</th>
+                                    <th class="text-end">Stock</th>
+                                    <th class="text-end">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-tallas-modal">
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -155,21 +166,41 @@ function verDetallesProducto(productoId, nombreProducto) {
     productoActualId = productoId;
     document.getElementById('nombre-producto-modal').textContent = nombreProducto;
     
-    // Cargar variantes del producto
-    fetch('<?= Vista::url("admin/obtener-variantes-producto") ?>?producto_id=' + productoId)
-        .then(response => response.json())
+    // Mostrar indicador de carga
+    document.getElementById('loading-indicator').style.display = 'block';
+    document.getElementById('modal-content').style.display = 'none';
+    
+    // Mostrar modal inmediatamente
+    const modal = new bootstrap.Modal(document.getElementById('modalDetallesProducto'));
+    modal.show();
+    
+    // Cargar variantes del producto por nombre
+    fetch('<?= Vista::url("admin/obtener-variantes-producto") ?>?nombre=' + encodeURIComponent(nombreProducto))
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error de red: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
+            // Ocultar indicador de carga
+            document.getElementById('loading-indicator').style.display = 'none';
+            document.getElementById('modal-content').style.display = 'block';
+            
             if (data.exito && data.variantes) {
                 mostrarDetallesProducto(data.variantes);
-                const modal = new bootstrap.Modal(document.getElementById('modalDetallesProducto'));
-                modal.show();
             } else {
-                alert('Error al cargar los detalles del producto');
+                console.error('Error en respuesta:', data);
+                alert('Error al cargar los detalles del producto: ' + (data.mensaje || 'Error desconocido'));
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error al cargar los detalles');
+            // Ocultar indicador de carga
+            document.getElementById('loading-indicator').style.display = 'none';
+            document.getElementById('modal-content').style.display = 'block';
+            
+            console.error('Error en fetch:', error);
+            alert('Error al cargar los detalles: ' + error.message);
         });
 }
 
