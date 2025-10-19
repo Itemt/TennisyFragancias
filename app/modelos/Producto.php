@@ -185,23 +185,43 @@ class Producto extends Modelo {
     }
     
     /**
-     * Obtener productos activos para el catálogo
+     * Obtener productos activos para el catálogo (agrupados por nombre)
      */
     public function obtenerCatalogo($limite = null, $offset = 0) {
-        $sql = "SELECT p.*, 
-                       c.nombre as categoria_nombre,
-                       m.nombre as marca_nombre,
-                       t.nombre as talla_nombre,
-                       co.nombre as color_nombre,
-                       g.nombre as genero_nombre
-                FROM {$this->tabla} p 
-                INNER JOIN categorias c ON p.categoria_id = c.id 
-                LEFT JOIN marcas m ON p.marca_id = m.id
-                LEFT JOIN tallas t ON p.talla_id = t.id
-                LEFT JOIN colores co ON p.color_id = co.id
-                LEFT JOIN generos g ON p.genero_id = g.id
-                WHERE p.estado = 'activo'
-                ORDER BY p.destacado DESC, p.fecha_creacion DESC";
+        $sql = "SELECT 
+                    p_agrupado.id,
+                    p_agrupado.nombre,
+                    p_agrupado.codigo_sku,
+                    p_agrupado.imagen_principal,
+                    p_agrupado.precio,
+                    p_agrupado.precio_oferta,
+                    p_agrupado.categoria_nombre,
+                    p_agrupado.marca_nombre,
+                    p_agrupado.total_variantes,
+                    p_agrupado.stock_total,
+                    p_agrupado.destacado,
+                    p_agrupado.fecha_creacion
+                FROM (
+                    SELECT 
+                        MIN(p.id) as id,
+                        p.nombre,
+                        MIN(p.codigo_sku) as codigo_sku,
+                        MIN(p.imagen_principal) as imagen_principal,
+                        MIN(p.precio) as precio,
+                        MIN(p.precio_oferta) as precio_oferta,
+                        MIN(c.nombre) as categoria_nombre,
+                        MIN(m.nombre) as marca_nombre,
+                        COUNT(DISTINCT p.id) as total_variantes,
+                        SUM(p.stock) as stock_total,
+                        MAX(p.destacado) as destacado,
+                        MIN(p.fecha_creacion) as fecha_creacion
+                    FROM {$this->tabla} p 
+                    INNER JOIN categorias c ON p.categoria_id = c.id 
+                    LEFT JOIN marcas m ON p.marca_id = m.id
+                    WHERE p.estado = 'activo'
+                    GROUP BY p.nombre
+                ) as p_agrupado
+                ORDER BY p_agrupado.destacado DESC, p_agrupado.fecha_creacion DESC";
         
         if ($limite) {
             $sql .= " LIMIT :limite OFFSET :offset";
@@ -219,25 +239,41 @@ class Producto extends Modelo {
     }
     
     /**
-     * Buscar productos
+     * Buscar productos (agrupados por nombre)
      */
     public function buscar($termino, $limite = null) {
         $termino = "%{$termino}%";
-        $sql = "SELECT p.*, 
-                       c.nombre as categoria_nombre,
-                       m.nombre as marca_nombre,
-                       t.nombre as talla_nombre,
-                       co.nombre as color_nombre,
-                       g.nombre as genero_nombre
-                FROM {$this->tabla} p 
-                INNER JOIN categorias c ON p.categoria_id = c.id 
-                LEFT JOIN marcas m ON p.marca_id = m.id
-                LEFT JOIN tallas t ON p.talla_id = t.id
-                LEFT JOIN colores co ON p.color_id = co.id
-                LEFT JOIN generos g ON p.genero_id = g.id
-                WHERE p.estado = 'activo' 
-                AND (p.nombre LIKE :termino OR p.descripcion LIKE :termino OR m.nombre LIKE :termino)
-                ORDER BY p.nombre ASC";
+        $sql = "SELECT 
+                    p_agrupado.id,
+                    p_agrupado.nombre,
+                    p_agrupado.codigo_sku,
+                    p_agrupado.imagen_principal,
+                    p_agrupado.precio,
+                    p_agrupado.precio_oferta,
+                    p_agrupado.categoria_nombre,
+                    p_agrupado.marca_nombre,
+                    p_agrupado.total_variantes,
+                    p_agrupado.stock_total
+                FROM (
+                    SELECT 
+                        MIN(p.id) as id,
+                        p.nombre,
+                        MIN(p.codigo_sku) as codigo_sku,
+                        MIN(p.imagen_principal) as imagen_principal,
+                        MIN(p.precio) as precio,
+                        MIN(p.precio_oferta) as precio_oferta,
+                        MIN(c.nombre) as categoria_nombre,
+                        MIN(m.nombre) as marca_nombre,
+                        COUNT(DISTINCT p.id) as total_variantes,
+                        SUM(p.stock) as stock_total
+                    FROM {$this->tabla} p 
+                    INNER JOIN categorias c ON p.categoria_id = c.id 
+                    LEFT JOIN marcas m ON p.marca_id = m.id
+                    WHERE p.estado = 'activo' 
+                    AND (p.nombre LIKE :termino OR p.descripcion LIKE :termino OR m.nombre LIKE :termino)
+                    GROUP BY p.nombre
+                ) as p_agrupado
+                ORDER BY p_agrupado.nombre ASC";
         
         if ($limite) {
             $sql .= " LIMIT :limite";
@@ -336,22 +372,38 @@ class Producto extends Modelo {
     }
     
     /**
-     * Obtener productos destacados
+     * Obtener productos destacados (agrupados por nombre)
      */
     public function obtenerDestacados($limite = 8) {
-        $sql = "SELECT p.*, 
-                       c.nombre as categoria_nombre,
-                       m.nombre as marca_nombre,
-                       t.nombre as talla_nombre,
-                       co.nombre as color_nombre,
-                       g.nombre as genero_nombre
-                FROM {$this->tabla} p 
-                INNER JOIN categorias c ON p.categoria_id = c.id 
-                LEFT JOIN marcas m ON p.marca_id = m.id
-                LEFT JOIN tallas t ON p.talla_id = t.id
-                LEFT JOIN colores co ON p.color_id = co.id
-                LEFT JOIN generos g ON p.genero_id = g.id
-                WHERE p.estado = 'activo' AND p.destacado = 1
+        $sql = "SELECT 
+                    p_agrupado.id,
+                    p_agrupado.nombre,
+                    p_agrupado.codigo_sku,
+                    p_agrupado.imagen_principal,
+                    p_agrupado.precio,
+                    p_agrupado.precio_oferta,
+                    p_agrupado.categoria_nombre,
+                    p_agrupado.marca_nombre,
+                    p_agrupado.total_variantes,
+                    p_agrupado.stock_total
+                FROM (
+                    SELECT 
+                        MIN(p.id) as id,
+                        p.nombre,
+                        MIN(p.codigo_sku) as codigo_sku,
+                        MIN(p.imagen_principal) as imagen_principal,
+                        MIN(p.precio) as precio,
+                        MIN(p.precio_oferta) as precio_oferta,
+                        MIN(c.nombre) as categoria_nombre,
+                        MIN(m.nombre) as marca_nombre,
+                        COUNT(DISTINCT p.id) as total_variantes,
+                        SUM(p.stock) as stock_total
+                    FROM {$this->tabla} p 
+                    INNER JOIN categorias c ON p.categoria_id = c.id 
+                    LEFT JOIN marcas m ON p.marca_id = m.id
+                    WHERE p.estado = 'activo' AND p.destacado = 1
+                    GROUP BY p.nombre
+                ) as p_agrupado
                 ORDER BY RAND()
                 LIMIT :limite";
         $stmt = $this->db->prepare($sql);
@@ -361,23 +413,39 @@ class Producto extends Modelo {
     }
     
     /**
-     * Obtener productos por categoría
+     * Obtener productos por categoría (agrupados por nombre)
      */
     public function obtenerPorCategoria($categoriaId, $limite = null) {
-        $sql = "SELECT p.*, 
-                       c.nombre as categoria_nombre,
-                       m.nombre as marca_nombre,
-                       t.nombre as talla_nombre,
-                       co.nombre as color_nombre,
-                       g.nombre as genero_nombre
-                FROM {$this->tabla} p 
-                INNER JOIN categorias c ON p.categoria_id = c.id 
-                LEFT JOIN marcas m ON p.marca_id = m.id
-                LEFT JOIN tallas t ON p.talla_id = t.id
-                LEFT JOIN colores co ON p.color_id = co.id
-                LEFT JOIN generos g ON p.genero_id = g.id
-                WHERE p.categoria_id = :categoria_id AND p.estado = 'activo'
-                ORDER BY p.fecha_creacion DESC";
+        $sql = "SELECT 
+                    p_agrupado.id,
+                    p_agrupado.nombre,
+                    p_agrupado.codigo_sku,
+                    p_agrupado.imagen_principal,
+                    p_agrupado.precio,
+                    p_agrupado.precio_oferta,
+                    p_agrupado.categoria_nombre,
+                    p_agrupado.marca_nombre,
+                    p_agrupado.total_variantes,
+                    p_agrupado.stock_total
+                FROM (
+                    SELECT 
+                        MIN(p.id) as id,
+                        p.nombre,
+                        MIN(p.codigo_sku) as codigo_sku,
+                        MIN(p.imagen_principal) as imagen_principal,
+                        MIN(p.precio) as precio,
+                        MIN(p.precio_oferta) as precio_oferta,
+                        MIN(c.nombre) as categoria_nombre,
+                        MIN(m.nombre) as marca_nombre,
+                        COUNT(DISTINCT p.id) as total_variantes,
+                        SUM(p.stock) as stock_total
+                    FROM {$this->tabla} p 
+                    INNER JOIN categorias c ON p.categoria_id = c.id 
+                    LEFT JOIN marcas m ON p.marca_id = m.id
+                    WHERE p.categoria_id = :categoria_id AND p.estado = 'activo'
+                    GROUP BY p.nombre
+                ) as p_agrupado
+                ORDER BY p_agrupado.fecha_creacion DESC";
         
         if ($limite) {
             $sql .= " LIMIT :limite";

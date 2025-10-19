@@ -101,10 +101,6 @@
             
             <!-- Botones de acción -->
             <div class="d-grid gap-2 mb-3">
-                <a href="<?= Vista::url('productos/vista/' . $producto['id']) ?>" class="btn btn-outline-primary btn-lg">
-                    <i class="bi bi-eye"></i> Ver Vista Completa
-                </a>
-                
                 <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_rol'] === ROL_CLIENTE): ?>
                     <?php if ($producto['stock_total'] > 0): ?>
                         <button type="button" class="btn btn-primario btn-lg" onclick="mostrarSeleccionTallas()">
