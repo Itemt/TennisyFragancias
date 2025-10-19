@@ -122,46 +122,16 @@ class AdminControlador extends Controlador {
             }
         }
         
-        // Procesar tallas seleccionadas
-        $tallasSeleccionadas = $_POST['tallas_seleccionadas'] ?? [];
-        $productosCreados = 0;
-        $errores = [];
+        // Crear producto sin tallas (las tallas se agregan después en "Actualizar Stock")
+        $datosProducto['talla_id'] = 0; // Sin talla por defecto
+        $datosProducto['stock'] = 0; // Se maneja por tallas individuales
+        $datosProducto['codigo_sku'] = $productoModelo->generarCodigoSKU($datosProducto['categoria_id'], 0);
         
-        if (empty($tallasSeleccionadas)) {
-            $_SESSION['error'] = 'Debe seleccionar al menos una talla';
-            $this->redirigir('admin/producto_nuevo');
-            return;
-        }
-        
-        foreach ($tallasSeleccionadas as $tallaId) {
-            $cantidad = (int)($_POST['cantidad_talla_' . $tallaId] ?? 0);
-            
-            if ($cantidad <= 0) {
-                $errores[] = "La cantidad para la talla seleccionada debe ser mayor a 0";
-                continue;
-            }
-            
-            // Crear datos del producto para esta talla
-            $datosTalla = $datosProducto;
-            $datosTalla['talla_id'] = (int)$tallaId;
-            $datosTalla['stock'] = $cantidad;
-            $datosTalla['codigo_sku'] = $productoModelo->generarCodigoSKU($datosProducto['categoria_id'], $tallaId);
-            
-            if ($productoModelo->crear($datosTalla)) {
-                $productosCreados++;
-            } else {
-                $errores[] = "Error al crear el producto para la talla seleccionada";
-            }
-        }
-        
-        if ($productosCreados > 0) {
-            $_SESSION['exito'] = "Se crearon {$productosCreados} variantes del producto correctamente";
-            if (!empty($errores)) {
-                $_SESSION['error'] = implode(', ', $errores);
-            }
+        if ($productoModelo->crear($datosProducto)) {
+            $_SESSION['exito'] = 'Producto creado exitosamente. Puedes agregar tallas en "Actualizar Stock"';
             $this->redirigir('admin/productos');
         } else {
-            $_SESSION['error'] = 'Error al crear los productos: ' . implode(', ', $errores);
+            $_SESSION['error'] = 'Error al crear el producto';
             $this->redirigir('admin/producto_nuevo');
         }
     }
