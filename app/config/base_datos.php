@@ -249,7 +249,7 @@ class BaseDatos {
 
         // Preparar statement con manejo de errores mejorado
         try {
-            $stmt = $this->conexion->prepare("INSERT INTO usuarios (nombre, apellido, email, password, telefono, rol, estado) VALUES (?, ?, ?, ?, ?, 'cliente', 'activo')");
+            $stmt = $this->conexion->prepare("INSERT INTO usuarios (nombre, apellido, email, password_hash, telefono, rol, estado) VALUES (?, ?, ?, ?, ?, 'cliente', 'activo')");
             error_log("DEBUG: Statement preparado exitosamente");
         } catch (PDOException $e) {
             error_log("ERROR preparando statement: " . $e->getMessage());
@@ -592,8 +592,9 @@ class BaseDatos {
                     }
                 }
             } else {
-                error_log("DEBUG: Columna usuario_id NO encontrada en facturas, usando inserción simplificada");
-                $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, empleado_id, total, fecha_emision, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                error_log("DEBUG: Columna usuario_id NO encontrada en facturas, usando inserción ultra-simplificada");
+                // Solo usar las columnas que realmente existen: id, pedido_id, numero_factura, fecha_emision, total
+                $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, fecha_emision, total) VALUES (?, ?, ?, ?)");
                 
                 $contadorFactura = 1;
                 
@@ -601,29 +602,19 @@ class BaseDatos {
                     $numeroFactura = 'FAC-2024-' . str_pad($contadorFactura, 3, '0', STR_PAD_LEFT);
                     $contadorFactura++;
                     
-                    // Estado de factura (más pagadas que pendientes)
-                    $estadosFactura = ['pagada', 'pagada', 'pagada', 'pagada', 'pagada', 'pendiente', 'pendiente', 'vencida'];
-                    $estadoFactura = $estadosFactura[array_rand($estadosFactura)];
-                    
                     // Fecha de emisión = fecha del pedido
                     $fechaEmision = $pedido['fecha_pedido'];
-                    
-                    // Fecha de vencimiento (7 días después para pagadas, 30 días para pendientes)
-                    $diasVencimiento = $estadoFactura === 'pagada' ? 7 : 30;
-                    $fechaVencimiento = date('Y-m-d H:i:s', strtotime($fechaEmision) + ($diasVencimiento * 86400));
                     
                     try {
                         $stmt->execute([
                             $numeroFactura,
                             $pedido['id'],
-                            2, // empleado_id
-                            $pedido['total'],
                             $fechaEmision,
-                            $fechaVencimiento,
-                            $estadoFactura
+                            $pedido['total']
                         ]);
+                        error_log("DEBUG: Factura insertada: $numeroFactura");
                     } catch (PDOException $e) {
-                        error_log("ERROR insertando factura simplificada: " . $e->getMessage());
+                        error_log("ERROR insertando factura ultra-simplificada: " . $e->getMessage());
                         if (stripos($e->getMessage(), 'Duplicate entry') === false) {
                             continue;
                         }
@@ -753,7 +744,22 @@ class BaseDatos {
         $stmt = $this->conexion->query("SELECT id, precio FROM productos WHERE estado = 'activo'");
         $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $stmt = $this->conexion->prepare("INSERT INTO carrito (usuario_id, producto_id, cantidad, precio) VALUES (?, ?, ?, ?)");
+        // Verificar estructura de tabla carrito
+        try {
+            $stmt = $this->conexion->query("DESCRIBE carrito");
+            $columnas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $nombresColumnas = array_column($columnas, 'Field');
+            error_log("DEBUG: Columnas disponibles en carrito: " . implode(', ', $nombresColumnas));
+            
+            if (in_array('precio', $nombresColumnas)) {
+                $stmt = $this->conexion->prepare("INSERT INTO carrito (usuario_id, producto_id, cantidad, precio) VALUES (?, ?, ?, ?)");
+            } else {
+                $stmt = $this->conexion->prepare("INSERT INTO carrito (usuario_id, producto_id, cantidad) VALUES (?, ?, ?)");
+            }
+        } catch (PDOException $e) {
+            error_log("ERROR: No se puede describir tabla carrito: " . $e->getMessage());
+            return;
+        }
         
         // Obtener clientes disponibles
         $stmt = $this->conexion->query("SELECT id FROM usuarios WHERE rol = 'cliente' ORDER BY id");
@@ -766,13 +772,23 @@ class BaseDatos {
             $cantidad = rand(1, 3);
             
             try {
-                $stmt->execute([
-                    $clienteId,
-                    $producto['id'],
-                    $cantidad,
-                    $producto['precio']
-                ]);
+                if (in_array('precio', $nombresColumnas)) {
+                    $stmt->execute([
+                        $clienteId,
+                        $producto['id'],
+                        $cantidad,
+                        $producto['precio']
+                    ]);
+                } else {
+                    $stmt->execute([
+                        $clienteId,
+                        $producto['id'],
+                        $cantidad
+                    ]);
+                }
+                error_log("DEBUG: Producto agregado al carrito del cliente $clienteId");
             } catch (PDOException $e) {
+                error_log("ERROR insertando en carrito: " . $e->getMessage());
                 // Ignorar errores de duplicados
                 if (stripos($e->getMessage(), 'Duplicate entry') === false) {
                     continue;
