@@ -640,21 +640,29 @@ class BaseDatos {
         
         $stmt = $this->conexion->prepare("INSERT INTO historial_stock (producto_id, usuario_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo) VALUES (?, ?, ?, ?, ?, ?, ?)");
         
+        $totalRegistros = 0;
+        $maximoRegistros = 200; // Límite máximo de registros
+        
         foreach ($productos as $producto) {
+            if ($totalRegistros >= $maximoRegistros) {
+                error_log("DEBUG: Límite de registros de historial alcanzado ($maximoRegistros)");
+                break;
+            }
             $productoId = $producto['id'];
             $stockActual = $producto['stock'];
             
             // Insertar entrada inicial
             try {
                 $stmt->execute([
-                    $productoId, 
+                    $productoId,
                     1, // admin
-                    'entrada', 
-                    $stockActual, 
-                    0, 
-                    $stockActual, 
+                    'entrada',
+                    $stockActual,
+                    0,
+                    $stockActual,
                     'Stock inicial'
                 ]);
+                $totalRegistros++;
             } catch (PDOException $e) {
                 continue;
             }
@@ -663,7 +671,7 @@ class BaseDatos {
             $stockTemporal = $stockActual;
             
             // Entradas de stock (reposiciones)
-            for ($i = 0; $i < rand(2, 4); $i++) {
+            for ($i = 0; $i < rand(1, 2); $i++) {
                 $fechaAleatoria = rand($fechaInicio, $fechaFin);
                 $cantidadEntrada = rand(5, 25);
                 $stockAnterior = $stockTemporal;
@@ -679,13 +687,14 @@ class BaseDatos {
                         $stockTemporal,
                         'Reposición de stock'
                     ]);
+                    $totalRegistros++;
                 } catch (PDOException $e) {
                     continue;
                 }
             }
             
             // Salidas de stock (ventas)
-            for ($i = 0; $i < rand(5, 15); $i++) {
+            for ($i = 0; $i < rand(2, 5); $i++) {
                 $fechaAleatoria = rand($fechaInicio, $fechaFin);
                 $cantidadSalida = rand(1, 5);
                 
@@ -703,14 +712,15 @@ class BaseDatos {
                             $stockTemporal,
                             'Venta de producto'
                         ]);
+                        $totalRegistros++;
                     } catch (PDOException $e) {
                         continue;
                     }
                 }
             }
             
-            // Ajustes de stock
-            for ($i = 0; $i < rand(1, 2); $i++) {
+            // Ajustes de stock (muy pocos)
+            for ($i = 0; $i < rand(0, 1); $i++) {
                 $fechaAleatoria = rand($fechaInicio, $fechaFin);
                 $ajuste = rand(-3, 3);
                 
@@ -728,12 +738,15 @@ class BaseDatos {
                             $stockTemporal,
                             $ajuste > 0 ? 'Ajuste positivo' : 'Ajuste por pérdida'
                         ]);
+                        $totalRegistros++;
                     } catch (PDOException $e) {
                         continue;
                     }
                 }
             }
         }
+        
+        error_log("DEBUG: Total registros de historial de stock generados: $totalRegistros");
     }
 
     /**
