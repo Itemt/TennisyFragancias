@@ -152,6 +152,12 @@ class BaseDatos {
                 $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
                 $clientesDespues = $stmt->fetch()['total'];
                 error_log("DEBUG: Clientes después del llenado: $clientesDespues");
+                
+                // Si aún hay pocos clientes, intentar insertar solo clientes
+                if ($clientesDespues < 10) {
+                    error_log("DEBUG: Aún hay pocos clientes, intentando inserción directa");
+                    $this->insertarClientes();
+                }
             } else {
                 error_log("DEBUG: Ya hay suficientes clientes, no se llenan datos");
             }
@@ -213,6 +219,16 @@ class BaseDatos {
      * Inserta clientes de prueba
      */
     private function insertarClientes() {
+        // Verificar si ya hay suficientes clientes
+        $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
+        $clientesExistentes = $stmt->fetch()['total'];
+        error_log("DEBUG: Clientes existentes antes de insertar: $clientesExistentes");
+        
+        if ($clientesExistentes >= 15) {
+            error_log("DEBUG: Ya hay suficientes clientes, no se insertan más");
+            return;
+        }
+        
         $clientes = [
             ['María', 'González Rodríguez', 'maria.gonzalez@email.com', '+57 310 123 4567'],
             ['Carlos', 'Martínez López', 'carlos.martinez@email.com', '+57 311 234 5678'],
@@ -231,31 +247,47 @@ class BaseDatos {
             ['Gabriela', 'Ortega Ramos', 'gabriela.ortega@email.com', '+57 324 567 8901']
         ];
 
-        $stmt = $this->conexion->prepare("INSERT INTO usuarios (nombre, apellido, email, password, telefono, rol, estado) VALUES (?, ?, ?, ?, ?, 'cliente', 'activo')");
+        // Preparar statement con manejo de errores mejorado
+        try {
+            $stmt = $this->conexion->prepare("INSERT INTO usuarios (nombre, apellido, email, password, telefono, rol, estado) VALUES (?, ?, ?, ?, ?, 'cliente', 'activo')");
+            error_log("DEBUG: Statement preparado exitosamente");
+        } catch (PDOException $e) {
+            error_log("ERROR preparando statement: " . $e->getMessage());
+            return;
+        }
         
         $clientesInsertados = 0;
         
-        foreach ($clientes as $cliente) {
+        foreach ($clientes as $index => $cliente) {
             try {
-                $stmt->execute([
+                $resultado = $stmt->execute([
                     $cliente[0], 
                     $cliente[1], 
                     $cliente[2], 
                     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password hash
                     $cliente[3]
                 ]);
-                $clientesInsertados++;
-                error_log("DEBUG: Cliente insertado: " . $cliente[0] . " " . $cliente[1]);
-            } catch (PDOException $e) {
-                error_log("ERROR insertando cliente " . $cliente[0] . ": " . $e->getMessage());
-                // Ignorar errores de duplicados
-                if (stripos($e->getMessage(), 'Duplicate entry') === false) {
-                    continue;
+                
+                if ($resultado) {
+                    $clientesInsertados++;
+                    error_log("DEBUG: Cliente " . ($index + 1) . " insertado: " . $cliente[0] . " " . $cliente[1]);
+                } else {
+                    error_log("ERROR: Falló la inserción del cliente " . ($index + 1) . ": " . $cliente[0]);
                 }
+                
+            } catch (PDOException $e) {
+                error_log("ERROR insertando cliente " . ($index + 1) . " (" . $cliente[0] . "): " . $e->getMessage());
+                // Continuar con el siguiente cliente
+                continue;
             }
         }
         
         error_log("DEBUG: Total clientes insertados: $clientesInsertados");
+        
+        // Verificar cuántos clientes hay después
+        $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
+        $clientesDespues = $stmt->fetch()['total'];
+        error_log("DEBUG: Total clientes después de inserción: $clientesDespues");
     }
 
     /**
