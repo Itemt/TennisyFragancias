@@ -125,6 +125,50 @@ class BaseDatos {
     }
 
     /**
+     * Limpia todos los datos existentes para empezar de cero
+     */
+    public function limpiarDatosExistentes() {
+        try {
+            error_log("DEBUG: Iniciando limpieza de datos existentes");
+            
+            // Deshabilitar verificación de claves foráneas temporalmente
+            $this->conexion->exec("SET FOREIGN_KEY_CHECKS = 0");
+            
+            // Limpiar tablas en orden correcto (respetando foreign keys)
+            $tablas = [
+                'detalle_pedidos',
+                'carrito', 
+                'historial_stock',
+                'facturas',
+                'pedidos'
+            ];
+            
+            foreach ($tablas as $tabla) {
+                $stmt = $this->conexion->prepare("DELETE FROM $tabla");
+                $stmt->execute();
+                $eliminados = $stmt->rowCount();
+                error_log("DEBUG: Eliminados $eliminados registros de $tabla");
+            }
+            
+            // Solo eliminar clientes, mantener admin y empleado
+            $stmt = $this->conexion->prepare("DELETE FROM usuarios WHERE rol = 'cliente'");
+            $stmt->execute();
+            $eliminados = $stmt->rowCount();
+            error_log("DEBUG: Eliminados $eliminados clientes");
+            
+            // Rehabilitar verificación de claves foráneas
+            $this->conexion->exec("SET FOREIGN_KEY_CHECKS = 1");
+            
+            error_log("DEBUG: Limpieza completada exitosamente");
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("ERROR en limpiarDatosExistentes: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Verifica si hay datos iniciales y los inserta si es necesario
      */
     private function verificarYDatosIniciales() {
