@@ -245,6 +245,12 @@ class EmpleadoControlador extends Controlador {
         $facturaModelo = $this->cargarModelo('Factura');
         $facturas = $facturaModelo->obtenerPorEmpleado($_SESSION['usuario_id']);
         
+        // Debug: Log para verificar qué se está obteniendo
+        error_log("DEBUG: Facturas obtenidas para empleado " . $_SESSION['usuario_id'] . ": " . count($facturas));
+        if (!empty($facturas)) {
+            error_log("DEBUG: Primera factura: " . json_encode($facturas[0]));
+        }
+        
         $datos = [
             'titulo' => 'Facturas - ' . NOMBRE_SITIO,
             'facturas' => $facturas

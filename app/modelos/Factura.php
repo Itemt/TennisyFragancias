@@ -52,21 +52,40 @@ class Factura extends Modelo {
      * Obtener factura por número
      */
     public function obtenerPorNumero($numeroFactura) {
-        $sql = "SELECT f.*, 
-                u.nombre as cliente_nombre, u.apellido as cliente_apellido,
-                u.email as cliente_email, u.telefono as cliente_telefono,
-                u.direccion as cliente_direccion,
-                e.nombre as empleado_nombre, e.apellido as empleado_apellido,
-                p.id as pedido_id
-                FROM {$this->tabla} f
-                INNER JOIN usuarios u ON f.usuario_id = u.id
-                LEFT JOIN usuarios e ON f.empleado_id = e.id
-                INNER JOIN pedidos p ON f.pedido_id = p.id
-                WHERE f.numero_factura = :numero";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':numero', $numeroFactura);
-        $stmt->execute();
-        return $stmt->fetch();
+        try {
+            // Verificar estructura de la tabla
+            $stmt = $this->db->query("DESCRIBE {$this->tabla}");
+            $columnas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $nombresColumnas = array_column($columnas, 'Field');
+            
+            if (in_array('usuario_id', $nombresColumnas)) {
+                // Consulta completa con usuario_id
+                $sql = "SELECT f.*, 
+                        u.nombre as cliente_nombre, u.apellido as cliente_apellido,
+                        u.email as cliente_email, u.telefono as cliente_telefono,
+                        p.id as pedido_id
+                        FROM {$this->tabla} f
+                        INNER JOIN usuarios u ON f.usuario_id = u.id
+                        INNER JOIN pedidos p ON f.pedido_id = p.id
+                        WHERE f.numero_factura = :numero";
+            } else {
+                // Consulta simplificada sin usuario_id
+                $sql = "SELECT f.*, 
+                        p.id as pedido_id
+                        FROM {$this->tabla} f
+                        INNER JOIN pedidos p ON f.pedido_id = p.id
+                        WHERE f.numero_factura = :numero";
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':numero', $numeroFactura);
+            $stmt->execute();
+            return $stmt->fetch();
+            
+        } catch (PDOException $e) {
+            error_log("ERROR en obtenerPorNumero: " . $e->getMessage());
+            return false;
+        }
     }
     
     /**
@@ -125,19 +144,46 @@ class Factura extends Modelo {
      * Obtener facturas por empleado
      */
     public function obtenerPorEmpleado($empleadoId) {
-        $sql = "SELECT f.*, 
-                u.nombre as cliente_nombre, u.apellido as cliente_apellido,
-                u.email as cliente_email, u.telefono as cliente_telefono,
-                p.id as pedido_id
-                FROM {$this->tabla} f
-                INNER JOIN usuarios u ON f.usuario_id = u.id
-                INNER JOIN pedidos p ON f.pedido_id = p.id
-                WHERE f.empleado_id = :empleado_id
-                ORDER BY f.fecha_emision DESC";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':empleado_id', $empleadoId);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        // Verificar si la columna empleado_id existe
+        try {
+            $stmt = $this->db->query("DESCRIBE {$this->tabla}");
+            $columnas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $nombresColumnas = array_column($columnas, 'Field');
+            
+            if (in_array('empleado_id', $nombresColumnas)) {
+                // Si existe empleado_id, usar la consulta completa
+                $sql = "SELECT f.*, 
+                        u.nombre as cliente_nombre, u.apellido as cliente_apellido,
+                        u.email as cliente_email, u.telefono as cliente_telefono,
+                        p.id as pedido_id
+                        FROM {$this->tabla} f
+                        INNER JOIN usuarios u ON f.usuario_id = u.id
+                        INNER JOIN pedidos p ON f.pedido_id = p.id
+                        WHERE f.empleado_id = :empleado_id
+                        ORDER BY f.fecha_emision DESC";
+            } else {
+                // Si no existe empleado_id, obtener todas las facturas
+                $sql = "SELECT f.*, 
+                        u.nombre as cliente_nombre, u.apellido as cliente_apellido,
+                        u.email as cliente_email, u.telefono as cliente_telefono,
+                        p.id as pedido_id
+                        FROM {$this->tabla} f
+                        INNER JOIN usuarios u ON f.usuario_id = u.id
+                        INNER JOIN pedidos p ON f.pedido_id = p.id
+                        ORDER BY f.fecha_emision DESC";
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            if (in_array('empleado_id', $nombresColumnas)) {
+                $stmt->bindParam(':empleado_id', $empleadoId);
+            }
+            $stmt->execute();
+            return $stmt->fetchAll();
+            
+        } catch (PDOException $e) {
+            error_log("ERROR en obtenerPorEmpleado: " . $e->getMessage());
+            return [];
+        }
     }
 }
 ?>

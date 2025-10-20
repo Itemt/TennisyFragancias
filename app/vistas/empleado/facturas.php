@@ -98,7 +98,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <?= date('d/m/Y H:i', strtotime($factura['fecha_factura'])) ?>
+                                        <?= date('d/m/Y H:i', strtotime($factura['fecha_emision'] ?? $factura['fecha_factura'] ?? 'now')) ?>
                                     </td>
                                     <td>
                                         <span class="badge bg-<?= $factura['estado'] === 'entregado' ? 'success' : ($factura['estado'] === 'cancelado' ? 'danger' : 'warning') ?>">
