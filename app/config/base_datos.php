@@ -626,17 +626,26 @@ class BaseDatos {
                     $clientesDisponibles = $stmtClientes->fetchAll(PDO::FETCH_COLUMN);
                     $clienteAleatorio = $clientesDisponibles[array_rand($clientesDisponibles)];
                     
+                    // Obtener empleado aleatorio para esta factura específica
+                    $stmtEmpleados = $this->conexion->query("SELECT id FROM usuarios WHERE rol = 'empleado' ORDER BY id");
+                    $empleadosDisponibles = $stmtEmpleados->fetchAll(PDO::FETCH_COLUMN);
+                    if (empty($empleadosDisponibles)) {
+                        $empleadosDisponibles = [1]; // Fallback al admin si no hay empleados
+                    }
+                    $empleadoAleatorio = $empleadosDisponibles[array_rand($empleadosDisponibles)];
+                    
                     try {
                         $stmt->execute([
                             $numeroFactura,
                             $pedido['id'],
                             $clienteAleatorio, // usuario_id aleatorio de clientes disponibles
-                            2, // empleado_id
+                            $empleadoAleatorio, // empleado_id aleatorio para cada factura
                             $pedido['total'],
                             $fechaEmision,
                             $fechaVencimiento,
                             $estadoFactura
                         ]);
+                        error_log("DEBUG: Factura $numeroFactura insertada para pedido " . $pedido['id'] . " asignada a empleado ID: $empleadoAleatorio");
                     } catch (PDOException $e) {
                         error_log("ERROR insertando factura: " . $e->getMessage());
                         if (stripos($e->getMessage(), 'Duplicate entry') === false) {
