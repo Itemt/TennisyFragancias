@@ -136,11 +136,22 @@ class BaseDatos {
             // Log para debug
             error_log("DEBUG: Clientes encontrados: $clientes");
             
+            // Verificar estructura de tabla usuarios
+            $stmt = $this->conexion->query("DESCRIBE usuarios");
+            $columnas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $nombresColumnas = array_column($columnas, 'Field');
+            error_log("DEBUG: Columnas disponibles en usuarios: " . implode(', ', $nombresColumnas));
+            
             // Si hay menos de 10 clientes, llenar con datos de producción
             if ($clientes < 10) {
                 error_log("DEBUG: Iniciando llenado de datos de producción");
                 $this->llenarDatosProduccion();
                 error_log("DEBUG: Llenado de datos completado");
+                
+                // Verificar cuántos clientes hay después
+                $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
+                $clientesDespues = $stmt->fetch()['total'];
+                error_log("DEBUG: Clientes después del llenado: $clientesDespues");
             } else {
                 error_log("DEBUG: Ya hay suficientes clientes, no se llenan datos");
             }
@@ -327,9 +338,17 @@ class BaseDatos {
         $clientesDisponibles = $stmt->fetchAll(PDO::FETCH_COLUMN);
         error_log("DEBUG: IDs de clientes disponibles: " . implode(', ', $clientesDisponibles));
         
-        // Generar pedidos distribuidos en 6 meses
-        for ($i = 0; $i < 150; $i++) { // 150 pedidos en 6 meses
-            $fechaAleatoria = rand($fechaInicio, $fechaFin);
+        // Generar pedidos distribuidos en 6 meses (más realista)
+        for ($i = 0; $i < 80; $i++) { // 80 pedidos en 6 meses (más realista)
+            // Distribución más realista: más pedidos en meses recientes
+            $mesActual = date('n'); // Mes actual (1-12)
+            $mesesAtras = rand(1, 6); // 1-6 meses atrás
+            $mesPedido = max(1, $mesActual - $mesesAtras);
+            
+            // Generar fecha aleatoria en el mes específico
+            $primerDiaMes = mktime(0, 0, 0, $mesPedido, 1, date('Y'));
+            $ultimoDiaMes = mktime(23, 59, 59, $mesPedido, date('t', $primerDiaMes), date('Y'));
+            $fechaAleatoria = rand($primerDiaMes, $ultimoDiaMes);
             $fechaPedido = date('Y-m-d H:i:s', $fechaAleatoria);
             
             // Cliente aleatorio de los disponibles
@@ -621,7 +640,7 @@ class BaseDatos {
             $stockTemporal = $stockActual;
             
             // Entradas de stock (reposiciones)
-            for ($i = 0; $i < rand(3, 8); $i++) {
+            for ($i = 0; $i < rand(2, 4); $i++) {
                 $fechaAleatoria = rand($fechaInicio, $fechaFin);
                 $cantidadEntrada = rand(5, 25);
                 $stockAnterior = $stockTemporal;
@@ -643,7 +662,7 @@ class BaseDatos {
             }
             
             // Salidas de stock (ventas)
-            for ($i = 0; $i < rand(10, 30); $i++) {
+            for ($i = 0; $i < rand(5, 15); $i++) {
                 $fechaAleatoria = rand($fechaInicio, $fechaFin);
                 $cantidadSalida = rand(1, 5);
                 
@@ -668,7 +687,7 @@ class BaseDatos {
             }
             
             // Ajustes de stock
-            for ($i = 0; $i < rand(1, 3); $i++) {
+            for ($i = 0; $i < rand(1, 2); $i++) {
                 $fechaAleatoria = rand($fechaInicio, $fechaFin);
                 $ajuste = rand(-3, 3);
                 
@@ -709,7 +728,7 @@ class BaseDatos {
         $clientesDisponibles = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
         // Insertar productos en carrito para diferentes clientes
-        for ($i = 0; $i < 25; $i++) {
+        for ($i = 0; $i < 15; $i++) { // 15 productos en carrito (más realista)
             $clienteId = $clientesDisponibles[array_rand($clientesDisponibles)]; // Cliente aleatorio de los disponibles
             $producto = $productos[array_rand($productos)];
             $cantidad = rand(1, 3);
