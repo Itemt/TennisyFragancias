@@ -213,7 +213,21 @@ class Pedido extends Modelo {
         }
         
         $stmt->execute();
-        return $stmt->fetch();
+        $resultado = $stmt->fetch();
+        
+        // Formatear datos para las gráficas
+        $resultado['estados_pedidos'] = [
+            'completados' => (int)($resultado['entregados'] ?? 0),
+            'pendientes' => (int)($resultado['pendientes'] ?? 0),
+            'cancelados' => (int)($resultado['cancelados'] ?? 0)
+        ];
+        
+        // Asegurar que los valores numéricos sean correctos
+        $resultado['total_ventas'] = (float)($resultado['total_ventas'] ?? 0);
+        $resultado['total_pedidos'] = (int)($resultado['total_pedidos'] ?? 0);
+        $resultado['ticket_promedio'] = (float)($resultado['ticket_promedio'] ?? 0);
+        
+        return $resultado;
     }
     
     /**
@@ -235,7 +249,17 @@ class Pedido extends Modelo {
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':anio', $anio);
         $stmt->execute();
-        return $stmt->fetchAll();
+        $resultados = $stmt->fetchAll();
+        
+        // Crear array con valores para cada mes (1-12)
+        $ventasPorMes = array_fill(0, 12, 0);
+        
+        foreach ($resultados as $resultado) {
+            $mes = (int)$resultado['mes'] - 1; // Convertir a índice 0-based
+            $ventasPorMes[$mes] = (float)$resultado['total_ventas'];
+        }
+        
+        return $ventasPorMes;
     }
     
     /**
