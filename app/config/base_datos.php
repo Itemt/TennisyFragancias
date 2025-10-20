@@ -599,12 +599,14 @@ class BaseDatos {
             // Obtener todos los pedidos
             $stmt = $this->conexion->query("SELECT id, total, fecha_pedido FROM pedidos ORDER BY id");
             $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("DEBUG: " . count($pedidos) . " pedidos encontrados para generar facturas");
             
             if (in_array('usuario_id', $nombresColumnas)) {
                 error_log("DEBUG: Columna usuario_id encontrada en facturas, usando inserción completa");
                 $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, usuario_id, empleado_id, total, fecha_emision, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 
                 $contadorFactura = 1;
+                $facturasInsertadas = 0;
                 
                 foreach ($pedidos as $pedido) {
                     $numeroFactura = 'FAC-2024-' . str_pad($contadorFactura, 3, '0', STR_PAD_LEFT);
@@ -645,6 +647,7 @@ class BaseDatos {
                             $fechaVencimiento,
                             $estadoFactura
                         ]);
+                        $facturasInsertadas++;
                         error_log("DEBUG: Factura $numeroFactura insertada para pedido " . $pedido['id'] . " asignada a empleado ID: $empleadoAleatorio");
                     } catch (PDOException $e) {
                         error_log("ERROR insertando factura: " . $e->getMessage());
@@ -653,12 +656,14 @@ class BaseDatos {
                         }
                     }
                 }
+                error_log("DEBUG: Total facturas insertadas (completa): $facturasInsertadas");
             } else {
                 error_log("DEBUG: Columna usuario_id NO encontrada en facturas, usando inserción ultra-simplificada");
                 // Solo usar las columnas que realmente existen: id, pedido_id, numero_factura, fecha_emision, total
                 $stmt = $this->conexion->prepare("INSERT INTO facturas (numero_factura, pedido_id, fecha_emision, total) VALUES (?, ?, ?, ?)");
                 
                 $contadorFactura = 1;
+                $facturasInsertadas = 0;
                 
                 foreach ($pedidos as $pedido) {
                     $numeroFactura = 'FAC-2024-' . str_pad($contadorFactura, 3, '0', STR_PAD_LEFT);
@@ -674,7 +679,8 @@ class BaseDatos {
                             $fechaEmision,
                             $pedido['total']
                         ]);
-                        error_log("DEBUG: Factura insertada: $numeroFactura");
+                        $facturasInsertadas++;
+                        error_log("DEBUG: Factura insertada: $numeroFactura para pedido " . $pedido['id']);
                     } catch (PDOException $e) {
                         error_log("ERROR insertando factura ultra-simplificada: " . $e->getMessage());
                         if (stripos($e->getMessage(), 'Duplicate entry') === false) {
@@ -682,6 +688,7 @@ class BaseDatos {
                         }
                     }
                 }
+                error_log("DEBUG: Total facturas insertadas (ultra-simplificada): $facturasInsertadas");
             }
         } catch (PDOException $e) {
             error_log("ERROR: No se puede describir tabla facturas: " . $e->getMessage());
