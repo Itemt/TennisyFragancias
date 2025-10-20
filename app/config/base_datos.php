@@ -222,6 +222,8 @@ class BaseDatos {
 
         $stmt = $this->conexion->prepare("INSERT INTO usuarios (nombre, apellido, email, password, telefono, rol, estado) VALUES (?, ?, ?, ?, ?, 'cliente', 'activo')");
         
+        $clientesInsertados = 0;
+        
         foreach ($clientes as $cliente) {
             try {
                 $stmt->execute([
@@ -231,13 +233,18 @@ class BaseDatos {
                     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password hash
                     $cliente[3]
                 ]);
+                $clientesInsertados++;
+                error_log("DEBUG: Cliente insertado: " . $cliente[0] . " " . $cliente[1]);
             } catch (PDOException $e) {
+                error_log("ERROR insertando cliente " . $cliente[0] . ": " . $e->getMessage());
                 // Ignorar errores de duplicados
                 if (stripos($e->getMessage(), 'Duplicate entry') === false) {
                     continue;
                 }
             }
         }
+        
+        error_log("DEBUG: Total clientes insertados: $clientesInsertados");
     }
 
     /**
@@ -310,13 +317,23 @@ class BaseDatos {
         $fechaFin = strtotime('2024-10-19'); // Hoy
         $contadorPedido = 1;
         
+        // Verificar cuántos clientes hay realmente
+        $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
+        $totalClientes = $stmt->fetch()['total'];
+        error_log("DEBUG: Total clientes en BD: $totalClientes");
+        
+        // Obtener IDs de clientes disponibles
+        $stmt = $this->conexion->query("SELECT id FROM usuarios WHERE rol = 'cliente' ORDER BY id");
+        $clientesDisponibles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        error_log("DEBUG: IDs de clientes disponibles: " . implode(', ', $clientesDisponibles));
+        
         // Generar pedidos distribuidos en 6 meses
         for ($i = 0; $i < 150; $i++) { // 150 pedidos en 6 meses
             $fechaAleatoria = rand($fechaInicio, $fechaFin);
             $fechaPedido = date('Y-m-d H:i:s', $fechaAleatoria);
             
-            // Cliente aleatorio (IDs 3-17)
-            $clienteId = rand(3, 17);
+            // Cliente aleatorio de los disponibles
+            $clienteId = $clientesDisponibles[array_rand($clientesDisponibles)];
             
             // Método de pago aleatorio
             $metodoPago = rand(1, 5);
@@ -500,11 +517,16 @@ class BaseDatos {
                     $diasVencimiento = $estadoFactura === 'pagada' ? 7 : 30;
                     $fechaVencimiento = date('Y-m-d H:i:s', strtotime($fechaEmision) + ($diasVencimiento * 86400));
                     
+                    // Obtener cliente aleatorio de los disponibles
+                    $stmtClientes = $this->conexion->query("SELECT id FROM usuarios WHERE rol = 'cliente' ORDER BY id");
+                    $clientesDisponibles = $stmtClientes->fetchAll(PDO::FETCH_COLUMN);
+                    $clienteAleatorio = $clientesDisponibles[array_rand($clientesDisponibles)];
+                    
                     try {
                         $stmt->execute([
                             $numeroFactura,
                             $pedido['id'],
-                            rand(3, 17), // usuario_id aleatorio
+                            $clienteAleatorio, // usuario_id aleatorio de clientes disponibles
                             2, // empleado_id
                             $pedido['total'],
                             $fechaEmision,
@@ -682,9 +704,13 @@ class BaseDatos {
         
         $stmt = $this->conexion->prepare("INSERT INTO carrito (usuario_id, producto_id, cantidad, precio) VALUES (?, ?, ?, ?)");
         
+        // Obtener clientes disponibles
+        $stmt = $this->conexion->query("SELECT id FROM usuarios WHERE rol = 'cliente' ORDER BY id");
+        $clientesDisponibles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
         // Insertar productos en carrito para diferentes clientes
         for ($i = 0; $i < 25; $i++) {
-            $clienteId = rand(3, 17); // Clientes aleatorios
+            $clienteId = $clientesDisponibles[array_rand($clientesDisponibles)]; // Cliente aleatorio de los disponibles
             $producto = $productos[array_rand($productos)];
             $cantidad = rand(1, 3);
             
