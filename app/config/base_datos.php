@@ -129,6 +129,15 @@ class BaseDatos {
      */
     private function verificarYDatosIniciales() {
         try {
+            // Verificar si ya se ejecutó el llenado de datos
+            $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM pedidos");
+            $pedidosExistentes = $stmt->fetch()['total'];
+            
+            if ($pedidosExistentes > 100) {
+                error_log("DEBUG: Ya hay suficientes datos ($pedidosExistentes pedidos), no se ejecuta llenado");
+                return;
+            }
+            
             // Verificar si hay clientes (excluyendo admin y empleado)
             $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
             $clientes = $stmt->fetch()['total'];
@@ -371,7 +380,7 @@ class BaseDatos {
         error_log("DEBUG: IDs de clientes disponibles: " . implode(', ', $clientesDisponibles));
         
         // Generar pedidos distribuidos en 6 meses (más realista)
-        for ($i = 0; $i < 80; $i++) { // 80 pedidos en 6 meses (más realista)
+        for ($i = 0; $i < 25; $i++) { // Solo 25 pedidos (más realista) en 6 meses (más realista)
             // Distribución más realista: más pedidos en meses recientes
             $mesActual = date('n'); // Mes actual (1-12)
             $mesesAtras = rand(1, 6); // 1-6 meses atrás
@@ -779,7 +788,7 @@ class BaseDatos {
         $clientesDisponibles = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
         // Insertar productos en carrito para diferentes clientes
-        for ($i = 0; $i < 15; $i++) { // 15 productos en carrito (más realista)
+        for ($i = 0; $i < 8; $i++) { // Solo 8 productos en carrito (más realista)
             $clienteId = $clientesDisponibles[array_rand($clientesDisponibles)]; // Cliente aleatorio de los disponibles
             $producto = $productos[array_rand($productos)];
             $cantidad = rand(1, 3);
