@@ -128,12 +128,14 @@
                 <?php if (!empty($productos)): ?>
                     <?php foreach ($productos as $producto): ?>
                         <div class="col-md-4 col-lg-3 mb-4 producto-card" 
+                             data-producto-id="<?= $producto['id'] ?>"
                              data-categoria="<?= $producto['categoria_id'] ?>"
                              data-marca="<?= $producto['marca_id'] ?>"
                              data-talla="<?= $producto['talla_id'] ?>"
                              data-nombre="<?= strtolower(Vista::escapar($producto['nombre'])) ?>"
                              data-sku="<?= strtolower(Vista::escapar($producto['codigo_sku'] ?? '')) ?>"
-                             data-descripcion="<?= strtolower(Vista::escapar($producto['descripcion'] ?? '')) ?>">
+                             data-descripcion="<?= strtolower(Vista::escapar($producto['descripcion'] ?? '')) ?>"
+                             data-precio="<?= $producto['precio_oferta'] && $producto['precio_oferta'] < $producto['precio'] ? $producto['precio_oferta'] : $producto['precio'] ?>">
                             <div class="card h-100">
                                 <?php if ($producto['imagen_principal']): ?>
                                     <img src="<?= Vista::urlPublica('imagenes/productos/' . $producto['imagen_principal']) ?>" 
