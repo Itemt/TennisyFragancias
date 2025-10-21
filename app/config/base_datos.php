@@ -173,6 +173,9 @@ class BaseDatos {
      */
     private function verificarYDatosIniciales() {
         try {
+            // Verificar y actualizar estructura de tabla carrito
+            $this->verificarEstructuraCarrito();
+            
             // Verificar si ya se ejecutó el llenado de datos
             $stmt = $this->conexion->query("SELECT COUNT(*) as total FROM pedidos");
             $pedidosExistentes = $stmt->fetch()['total'];
@@ -216,6 +219,33 @@ class BaseDatos {
             }
         } catch (Throwable $t) {
             error_log("ERROR en verificarYDatosIniciales: " . $t->getMessage());
+        }
+    }
+
+    /**
+     * Verifica y actualiza la estructura de la tabla carrito
+     */
+    private function verificarEstructuraCarrito() {
+        try {
+            // Verificar si la columna talla_id existe en la tabla carrito
+            $stmt = $this->conexion->query("SHOW COLUMNS FROM carrito LIKE 'talla_id'");
+            $columnaExiste = $stmt->fetch();
+            
+            if (!$columnaExiste) {
+                error_log("DEBUG: Columna talla_id no existe en carrito, agregándola...");
+                
+                // Agregar la columna talla_id
+                $this->conexion->exec("ALTER TABLE carrito ADD COLUMN talla_id int(11) DEFAULT NULL AFTER producto_id");
+                
+                // Agregar índice para la nueva columna
+                $this->conexion->exec("ALTER TABLE carrito ADD KEY idx_talla (talla_id)");
+                
+                error_log("DEBUG: Columna talla_id agregada exitosamente a la tabla carrito");
+            } else {
+                error_log("DEBUG: Columna talla_id ya existe en la tabla carrito");
+            }
+        } catch (Exception $e) {
+            error_log("ERROR al verificar estructura de carrito: " . $e->getMessage());
         }
     }
 

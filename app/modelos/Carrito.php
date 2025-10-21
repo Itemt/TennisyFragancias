@@ -57,7 +57,7 @@ class Carrito extends Modelo {
                 'usuario_id' => $usuarioId,
                 'producto_id' => $productoId,
                 'cantidad' => $cantidad,
-                'precio_unitario' => $precioUnitario,
+                'precio' => $precioUnitario,
                 'talla_id' => $tallaId
             ];
             return $this->crear($datos);
