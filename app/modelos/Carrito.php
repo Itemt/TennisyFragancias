@@ -9,14 +9,42 @@ class Carrito extends Modelo {
      * Obtener items del carrito de un usuario
      */
     public function obtenerItemsUsuario($usuarioId) {
-        $sql = "SELECT c.*, p.nombre, p.imagen_principal, p.stock, p.estado, cat.nombre as categoria_nombre,
-                       t.nombre as talla_nombre
-                FROM {$this->tabla} c
-                INNER JOIN productos p ON c.producto_id = p.id
-                INNER JOIN categorias cat ON p.categoria_id = cat.id
-                LEFT JOIN tallas t ON c.talla_id = t.id
-                WHERE c.usuario_id = :usuario_id
-                ORDER BY c.fecha_agregado DESC";
+        // Primero verificar si la columna talla_id existe
+        try {
+            $stmt = $this->db->query("SHOW COLUMNS FROM {$this->tabla} LIKE 'talla_id'");
+            $tallaIdExists = $stmt->fetch();
+            
+            if ($tallaIdExists) {
+                // Si la columna existe, usar la consulta completa
+                $sql = "SELECT c.*, p.nombre, p.imagen_principal, p.stock, p.estado, cat.nombre as categoria_nombre,
+                               t.nombre as talla_nombre
+                        FROM {$this->tabla} c
+                        INNER JOIN productos p ON c.producto_id = p.id
+                        INNER JOIN categorias cat ON p.categoria_id = cat.id
+                        LEFT JOIN tallas t ON c.talla_id = t.id
+                        WHERE c.usuario_id = :usuario_id
+                        ORDER BY c.fecha_agregado DESC";
+            } else {
+                // Si la columna no existe, usar consulta sin talla
+                $sql = "SELECT c.*, p.nombre, p.imagen_principal, p.stock, p.estado, cat.nombre as categoria_nombre,
+                               NULL as talla_nombre
+                        FROM {$this->tabla} c
+                        INNER JOIN productos p ON c.producto_id = p.id
+                        INNER JOIN categorias cat ON p.categoria_id = cat.id
+                        WHERE c.usuario_id = :usuario_id
+                        ORDER BY c.fecha_agregado DESC";
+            }
+        } catch (Exception $e) {
+            // En caso de error, usar consulta sin talla
+            $sql = "SELECT c.*, p.nombre, p.imagen_principal, p.stock, p.estado, cat.nombre as categoria_nombre,
+                           NULL as talla_nombre
+                    FROM {$this->tabla} c
+                    INNER JOIN productos p ON c.producto_id = p.id
+                    INNER JOIN categorias cat ON p.categoria_id = cat.id
+                    WHERE c.usuario_id = :usuario_id
+                    ORDER BY c.fecha_agregado DESC";
+        }
+        
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':usuario_id', $usuarioId);
         $stmt->execute();
@@ -27,20 +55,36 @@ class Carrito extends Modelo {
      * Agregar producto al carrito
      */
     public function agregarProducto($usuarioId, $productoId, $cantidad, $precioUnitario, $tallaId = null) {
-        // Verificar si el producto ya está en el carrito con la misma talla
-        $sql = "SELECT * FROM {$this->tabla} WHERE usuario_id = :usuario_id AND producto_id = :producto_id";
-        if ($tallaId) {
-            $sql .= " AND talla_id = :talla_id";
-        } else {
-            $sql .= " AND talla_id IS NULL";
+        // Verificar si la columna talla_id existe
+        try {
+            $stmt = $this->db->query("SHOW COLUMNS FROM {$this->tabla} LIKE 'talla_id'");
+            $tallaIdExists = $stmt->fetch();
+        } catch (Exception $e) {
+            $tallaIdExists = false;
         }
         
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':usuario_id', $usuarioId);
-        $stmt->bindParam(':producto_id', $productoId);
-        if ($tallaId) {
+        // Verificar si el producto ya está en el carrito
+        if ($tallaIdExists && $tallaId) {
+            // Si la columna existe y hay talla, verificar por talla
+            $sql = "SELECT * FROM {$this->tabla} WHERE usuario_id = :usuario_id AND producto_id = :producto_id AND talla_id = :talla_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':usuario_id', $usuarioId);
+            $stmt->bindParam(':producto_id', $productoId);
             $stmt->bindParam(':talla_id', $tallaId);
+        } else if ($tallaIdExists) {
+            // Si la columna existe pero no hay talla
+            $sql = "SELECT * FROM {$this->tabla} WHERE usuario_id = :usuario_id AND producto_id = :producto_id AND talla_id IS NULL";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':usuario_id', $usuarioId);
+            $stmt->bindParam(':producto_id', $productoId);
+        } else {
+            // Si la columna no existe, solo verificar por producto
+            $sql = "SELECT * FROM {$this->tabla} WHERE usuario_id = :usuario_id AND producto_id = :producto_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':usuario_id', $usuarioId);
+            $stmt->bindParam(':producto_id', $productoId);
         }
+        
         $stmt->execute();
         $item = $stmt->fetch();
         
@@ -57,9 +101,14 @@ class Carrito extends Modelo {
                 'usuario_id' => $usuarioId,
                 'producto_id' => $productoId,
                 'cantidad' => $cantidad,
-                'precio' => $precioUnitario,
-                'talla_id' => $tallaId
+                'precio' => $precioUnitario
             ];
+            
+            // Solo agregar talla_id si la columna existe
+            if ($tallaIdExists) {
+                $datos['talla_id'] = $tallaId;
+            }
+            
             return $this->crear($datos);
         }
     }
