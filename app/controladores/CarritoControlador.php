@@ -61,14 +61,28 @@ class CarritoControlador extends Controlador {
         $productoVarianteId = $variante['id']; // ID de la variante específica
         
         $carritoModelo = $this->cargarModelo('Carrito');
-        if ($carritoModelo->agregarProducto($_SESSION['usuario_id'], $productoVarianteId, $cantidad, $precio, $tallaId)) {
+        
+        // Debug: Log de los parámetros
+        error_log("DEBUG CARRITO: Usuario ID: " . $_SESSION['usuario_id']);
+        error_log("DEBUG CARRITO: Producto Variante ID: " . $productoVarianteId);
+        error_log("DEBUG CARRITO: Cantidad: " . $cantidad);
+        error_log("DEBUG CARRITO: Precio: " . $precio);
+        error_log("DEBUG CARRITO: Talla ID: " . $tallaId);
+        
+        $resultado = $carritoModelo->agregarProducto($_SESSION['usuario_id'], $productoVarianteId, $cantidad, $precio, $tallaId);
+        
+        error_log("DEBUG CARRITO: Resultado agregarProducto: " . ($resultado ? 'true' : 'false'));
+        
+        if ($resultado) {
             $totalItems = $carritoModelo->contarItems($_SESSION['usuario_id']);
+            error_log("DEBUG CARRITO: Total items: " . $totalItems);
             $this->enviarJson([
                 'exito' => true, 
                 'mensaje' => 'Producto agregado al carrito',
                 'total_items' => $totalItems
             ]);
         } else {
+            error_log("DEBUG CARRITO: Error al agregar producto al carrito");
             $this->enviarJson(['exito' => false, 'mensaje' => 'Error al agregar producto']);
         }
     }

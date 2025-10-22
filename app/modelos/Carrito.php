@@ -90,13 +90,17 @@ class Carrito extends Modelo {
         
         if ($item) {
             // Actualizar cantidad
+            error_log("DEBUG CARRITO MODELO: Actualizando cantidad existente. Item ID: " . $item['id']);
             $sql = "UPDATE {$this->tabla} SET cantidad = cantidad + :cantidad WHERE id = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':cantidad', $cantidad);
             $stmt->bindParam(':id', $item['id']);
-            return $stmt->execute();
+            $resultado = $stmt->execute();
+            error_log("DEBUG CARRITO MODELO: Resultado actualización: " . ($resultado ? 'true' : 'false'));
+            return $resultado;
         } else {
             // Insertar nuevo item
+            error_log("DEBUG CARRITO MODELO: Insertando nuevo item");
             $datos = [
                 'usuario_id' => $usuarioId,
                 'producto_id' => $productoId,
@@ -107,9 +111,15 @@ class Carrito extends Modelo {
             // Solo agregar talla_id si la columna existe
             if ($tallaIdExists) {
                 $datos['talla_id'] = $tallaId;
+                error_log("DEBUG CARRITO MODELO: Agregando talla_id: " . $tallaId);
+            } else {
+                error_log("DEBUG CARRITO MODELO: No se agrega talla_id (columna no existe)");
             }
             
-            return $this->crear($datos);
+            error_log("DEBUG CARRITO MODELO: Datos a insertar: " . json_encode($datos));
+            $resultado = $this->crear($datos);
+            error_log("DEBUG CARRITO MODELO: Resultado crear: " . ($resultado ? 'true' : 'false'));
+            return $resultado;
         }
     }
     
