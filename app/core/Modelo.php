@@ -35,18 +35,39 @@ class Modelo {
      * Crear nuevo registro
      */
     public function crear($datos) {
+        error_log("DEBUG MODELO CREAR: Iniciando método crear()");
+        error_log("DEBUG MODELO CREAR: Tabla: " . $this->tabla);
+        error_log("DEBUG MODELO CREAR: Datos recibidos: " . json_encode($datos));
+        
         $campos = array_keys($datos);
         $valores = ':' . implode(', :', $campos);
         $campos = implode(', ', $campos);
         
         $sql = "INSERT INTO {$this->tabla} ({$campos}) VALUES ({$valores})";
-        $stmt = $this->db->prepare($sql);
+        error_log("DEBUG MODELO CREAR: SQL generado: " . $sql);
         
-        foreach ($datos as $campo => &$valor) {
-            $stmt->bindParam(':' . $campo, $valor);
+        try {
+            $stmt = $this->db->prepare($sql);
+            error_log("DEBUG MODELO CREAR: Statement preparado exitosamente");
+            
+            foreach ($datos as $campo => &$valor) {
+                $stmt->bindParam(':' . $campo, $valor);
+                error_log("DEBUG MODELO CREAR: Bind param {$campo} = " . $valor);
+            }
+            
+            $resultado = $stmt->execute();
+            error_log("DEBUG MODELO CREAR: Resultado execute: " . ($resultado ? 'true' : 'false'));
+            
+            if (!$resultado) {
+                $errorInfo = $stmt->errorInfo();
+                error_log("DEBUG MODELO CREAR: Error en execute: " . json_encode($errorInfo));
+            }
+            
+            return $resultado;
+        } catch (Exception $e) {
+            error_log("DEBUG MODELO CREAR: Excepción capturada: " . $e->getMessage());
+            return false;
         }
-        
-        return $stmt->execute();
     }
     
     /**
