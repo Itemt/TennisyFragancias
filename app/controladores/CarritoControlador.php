@@ -21,6 +21,12 @@ class CarritoControlador extends Controlador {
     }
     
     public function agregar() {
+        // Debug: Verificar estado de la sesión
+        error_log("DEBUG CARRITO CONTROLADOR: Iniciando método agregar()");
+        error_log("DEBUG CARRITO CONTROLADOR: Session ID: " . session_id());
+        error_log("DEBUG CARRITO CONTROLADOR: Usuario ID en sesión: " . ($_SESSION['usuario_id'] ?? 'NO DEFINIDO'));
+        error_log("DEBUG CARRITO CONTROLADOR: Método de solicitud: " . $_SERVER['REQUEST_METHOD']);
+        
         $this->verificarAutenticacion();
         
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

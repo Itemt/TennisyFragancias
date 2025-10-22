@@ -41,8 +41,14 @@ class Controlador {
      * Verificar si el usuario está autenticado
      */
     protected function verificarAutenticacion() {
+        error_log("DEBUG AUTENTICACION: Verificando autenticación");
+        error_log("DEBUG AUTENTICACION: Usuario ID en sesión: " . ($_SESSION['usuario_id'] ?? 'NO DEFINIDO'));
+        
         if (!isset($_SESSION['usuario_id'])) {
+            error_log("DEBUG AUTENTICACION: Usuario NO autenticado, redirigiendo a login");
             $this->redirigir('auth/login');
+        } else {
+            error_log("DEBUG AUTENTICACION: Usuario autenticado correctamente");
         }
     }
     
